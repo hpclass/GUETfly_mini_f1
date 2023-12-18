@@ -7,13 +7,13 @@
 #include "delay.h"
 #include "timer.h"
 
-
+#if defined(SERVO)
 void initializeServo();
 long map(long x, long in_min, long in_max, long out_min, long out_max)
 {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
-
+#endif
 
 /**************************************************************************************/
 /***************                  Motor Pin order                  ********************/
@@ -160,16 +160,16 @@ void writeServos() {
 //    TIM4->CCR2=servo[6];//PD14
 //    TIM4->CCR1=servo[7];//PD15
     //    //PC6、7、8、9
-//    TIM8->CCR4=servo[0];//PC9
-//    TIM8->CCR3=servo[1];//PC8
-//    TIM8->CCR2=servo[3];//PC7
-//    TIM8->CCR1=servo[4];//PC6
+    TIM8->CCR4=servo[0];//PC9
+    TIM8->CCR3=servo[1];//PC8
+    TIM8->CCR2=servo[3];//PC7
+    TIM8->CCR1=servo[4];//PC6
     //PD12,13,14,15
 
-    TIM4->CCR1=servo[5];//PD12
-    TIM4->CCR2=servo[6];//PD13
-    TIM4->CCR3=servo[3];//PD14
-    TIM4->CCR4=servo[4];//PD15
+    TIM4->CCR4=servo[2];//PD12
+    TIM4->CCR3=servo[5];//PD13
+    TIM4->CCR2=servo[6];//PD14
+    TIM4->CCR1=servo[7];//PD15
 }
 
 /**************************************************************************************/
@@ -202,7 +202,7 @@ void initOutput() {
     uint8_t axis=0;
     for(axis=0; axis<RC_CHANS; axis++)
         rcData[axis]=1500;
-    // TIM8_PWM_Init(19999,72-1);//高级定时器 PC6、7、8、9 400Hz,如果需要50Hz修改72为720-1
+    TIM8_PWM_Init(19999,72-1);//高级定时器 PC6、7、8、9 400Hz,如果需要50Hz修改72为720-1
     //TIM2_PWM_Init(1999,720);//PA0,1,2,3
     TIM3_PWM_Init(1999,72); //400Hz (0-2000) PA6,7,PB0,1
     TIM4_PWM_Init(19999,72-1);//PD12,13,14,15
@@ -260,7 +260,7 @@ void initializeServo() {
 /**************************************************************************************/
 /********** Mixes the Computed stabilize values to the Motors & Servos  ***************/
 /**************************************************************************************/
-//extern int16_t rcData[RC_CHANS];//stm32 add
+extern int16_t rcData[RC_CHANS];//stm32 add
 // get servo middle point from Config or from RC-Data
 int16_t get_middle(uint8_t nr) {
     if(ABS(conf.servoConf[nr].middle) < RC_CHANS)
@@ -271,7 +271,7 @@ int16_t get_middle(uint8_t nr) {
 }
 
 // int8_t servodir(uint8_t n, uint8_t b) { return ((conf.servoConf[n].rate & b) ? -1 : 1) ; }
-int test[2] ;
+
 void mixTable() {
     int16_t maxMotor;
     uint8_t i;
@@ -383,67 +383,15 @@ void mixTable() {
     }
     motor[0] = servo[7];
     if (f.PASSTHRU_MODE) {    // do not use sensors for correction, simple 2 channel mixing
-        servo[3] = (SERVODIR(3,1) * rcCommand[PITCH]) + (SERVODIR(3,2) * -rcCommand[ROLL]);
-        servo[4] = (SERVODIR(4,1) * -rcCommand[PITCH]) + (SERVODIR(4,2) * -rcCommand[ROLL]);
+        servo[3] = (SERVODIR(3,1) * rcCommand[PITCH]) + (SERVODIR(3,2) * rcCommand[ROLL]);
+        servo[4] = (SERVODIR(4,1) * rcCommand[PITCH]) + (SERVODIR(4,2) * rcCommand[ROLL]);
     } else {                  // use sensors to correct (gyro only or gyro+acc according to aux1/aux2 configuration
-        servo[3] = (SERVODIR(3,1) * axisPID[PITCH])   + (SERVODIR(3,2) * -axisPID[ROLL]);
-        servo[4] = (SERVODIR(4,1) * -axisPID[PITCH])   + (SERVODIR(4,2) * -axisPID[ROLL]);
+        servo[3] = (SERVODIR(3,1) * axisPID[PITCH])   + (SERVODIR(3,2) * axisPID[ROLL]);
+        servo[4] = (SERVODIR(4,1) * axisPID[PITCH])   + (SERVODIR(4,2) * axisPID[ROLL]);
     }
     servo[3] += get_middle(3);
     servo[4] += get_middle(4);
     servo[5] = get_middle(5)-axisPID[YAW];
-#elif defined( FLYING_WING_J10 )
-    /*****************************             FLYING WING                **************************************/
-    if (!f.ARMED) {
-        servo[7] = MINCOMMAND;  // Kill throttle when disarmed
-    } else {
-        servo[7] = constrain(rcCommand[THROTTLE], conf.minthrottle, MAXTHROTTLE);
-    }
-    motor[0] = servo[7];
-    if (f.PASSTHRU_MODE) {    // do not use sensors for correction, simple 2 channel mixing
-        servo[3] = (SERVODIR(3,1) * rcCommand[PITCH]) + (SERVODIR(3,2) * rcCommand[ROLL]);
-        servo[4] = (SERVODIR(4,1) * rcCommand[PITCH]) + (SERVODIR(4,2) * rcCommand[ROLL]);
-			
-				servo[5] = (SERVODIR(5,1)	* -rcCommand[YAW]);
-			
-    } else {                  // use sensors to correct (gyro only or gyro+acc according to aux1/aux2 configuration
-        servo[3] = (SERVODIR(3,1) * axisPID[PITCH])   + (SERVODIR(3,2) * axisPID[ROLL]);
-        servo[4] = (SERVODIR(4,1) * axisPID[PITCH])   + (SERVODIR(4,2) * axisPID[ROLL]);
-				servo[5] = (SERVODIR(5,1)	* -axisPID[YAW]);
-    }
-		int add_out_of_c[2]={0,0};
-		
-		if(servo[3]>500)//超出范围
-		{
-			add_out_of_c[0]=servo[3]-500;
-		}else if(servo[3]<-500)//超出范围
-		{
-			add_out_of_c[0]=servo[3]+500;
-		}
-		
-		
-		if(servo[4]>500)//超出范围
-		{
-			add_out_of_c[1]=servo[4]-500;
-		}else if(servo[4]<-500)//超出范围
-		{
-			add_out_of_c[1]=servo[4]+500;
-		}
-		if(add_out_of_c[0]!=0)
-		{
-			servo[4]+=SERVODIR(3,1)*SERVODIR(4,1)*-1*add_out_of_c[0];
-		}
-		if(add_out_of_c[1]!=0)
-		{
-			servo[3]+=SERVODIR(3,1)*SERVODIR(4,1)*-1*add_out_of_c[1];
-		}
-		test[0] =servo[3];
-		test[1] =servo[4];
-		
-    servo[3] += get_middle(3);
-    servo[4] += get_middle(4);
-		servo[5] += get_middle(5);
-		
 #elif defined( FLYING_WING_D )
     /*****************************             FLYING WING                **************************************/
     if (!f.ARMED) {
@@ -453,60 +401,59 @@ void mixTable() {
     }
 
     motor[0] = servo[7]+constrain(axisPID[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_);
-    motor[1] = servo[7]-constrain(axisPID[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_);
-    int temp_thr_l=0;
-    int temp_thr_r=0;
-    int temp_thr__r=0;
-    if(rcCommand[YAW]) {
-        temp_thr_l=servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_);//获取油门差动补偿
-        temp_thr_r=servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_);
-        if(MINTHROTTLE>temp_thr_l)
-        {
-            //左发动机小于最小油门
-            motor[0] = constrain(servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
-            motor[1] = constrain((MINTHROTTLE-temp_thr_l)+servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
-        } else if(MAXTHROTTLE<temp_thr_l)
-        {
-            //左发动机大于最大油门
-            motor[0] = constrain(servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
-            motor[1] = constrain(servo[7]-(temp_thr_l-MAXTHROTTLE)-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
-        } else if(MINTHROTTLE>temp_thr_r)
-        {
-            //右发动机小于最小油门
-            motor[0] = constrain(MINTHROTTLE-temp_thr_r+servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
-            motor[1] = constrain(servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
-
-        } else if(MAXTHROTTLE<temp_thr_r)
-        {
-            //右发动机大于最大油门
-            motor[0] = constrain(servo[7]-(temp_thr_r-MAXTHROTTLE)+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
-            motor[1] = constrain(servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
-
-
-        } else {
-            motor[0] = constrain(servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
-            motor[1] = constrain(servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
-
-        }
-    } else {
-        motor[0] = constrain(servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
-        motor[1] = constrain(servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
-
-
-    }
+		motor[1] = servo[7]-constrain(axisPID[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_);
+		int temp_thr_l=0;
+		int temp_thr_r=0;
+		int temp_thr__r=0;
+		if(rcCommand[YAW]){
+			temp_thr_l=servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_);//获取油门差动补偿
+			temp_thr_r=servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_);
+			if(MINTHROTTLE>temp_thr_l)
+			{
+				//左发动机小于最小油门
+				motor[0] = constrain(servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
+				motor[1] = constrain((MINTHROTTLE-temp_thr_l)+servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
+			}else if(MAXTHROTTLE<temp_thr_l)
+			{
+				//左发动机大于最大油门
+				motor[0] = constrain(servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
+				motor[1] = constrain(servo[7]-(temp_thr_l-MAXTHROTTLE)-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
+			}else if(MINTHROTTLE>temp_thr_r)
+			{
+				//右发动机小于最小油门
+				motor[0] = constrain(MINTHROTTLE-temp_thr_r+servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
+				motor[1] = constrain(servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
+		
+			}else if(MAXTHROTTLE<temp_thr_r)
+			{
+				//右发动机大于最大油门
+				motor[0] = constrain(servo[7]-(temp_thr_r-MAXTHROTTLE)+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
+				motor[1] = constrain(servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
+			
+				
+			}else{
+				motor[0] = constrain(servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
+				motor[1] = constrain(servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
+			
+			}
+		}else{
+						motor[0] = constrain(servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
+						motor[1] = constrain(servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
+			
+			
+		}
 //    motor[0] = constrain(servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),1000,2000);
 //    motor[1] = constrain(servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),1000,2000);
     if (f.PASSTHRU_MODE) {    // do not use sensors for correction, simple 2 channel mixing
         servo[3] = (SERVODIR(3,1) * rcCommand[PITCH]) + (SERVODIR(3,2) * rcCommand[ROLL]);
         servo[4] = (SERVODIR(4,1) * rcCommand[PITCH]) + (SERVODIR(4,2) * rcCommand[ROLL]);
-				servo[5] = get_middle(5)-rcCommand[YAW];
     } else {                  // use sensors to correct (gyro only or gyro+acc according to aux1/aux2 configuration
         servo[3] = (SERVODIR(3,1) * axisPID[PITCH])   + (SERVODIR(3,2) * axisPID[ROLL]);
         servo[4] = (SERVODIR(4,1) * axisPID[PITCH])   + (SERVODIR(4,2) * axisPID[ROLL]);
-			servo[5] = get_middle(5)-axisPID[YAW];
     }
     servo[3] += get_middle(3);
     servo[4] += get_middle(4);
+    servo[5] = get_middle(5)-axisPID[YAW];
 #elif defined( AIRPLANE )
     /*****************************               AIRPLANE                **************************************/
     // servo[7] is programmed with safty features to avoid motorstarts when ardu reset..
@@ -568,13 +515,13 @@ void mixTable() {
         servo[3] = rcCommand[ROLL] + flapperons[0];     //   Wing 1
         servo[4] = rcCommand[ROLL] + flapperons[1];     //   Wing 2
         servo[5] = rcCommand[YAW];                      //   Rudder
-        servo[6] = -rcCommand[PITCH];                    //   Elevator
+        servo[6] = rcCommand[PITCH];                    //   Elevator
     } else {
         // Assisted modes (gyro only or gyro+acc according to AUX configuration in Gui
         servo[3] = axisPID[ROLL] + flapperons[0];   //   Wing 1
         servo[4] = axisPID[ROLL] + flapperons[1];   //   Wing 2
         servo[5] = axisPID[YAW];                    //   Rudder
-        servo[6] = -axisPID[PITCH];                  //   Elevator
+        servo[6] = axisPID[PITCH];                  //   Elevator
     }
     for(i=3; i<7; i++) {
         servo[i]  = ((int32_t)conf.servoConf[i].rate * servo[i])/100L;  // servo rates

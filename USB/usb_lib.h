@@ -48,7 +48,7 @@ typedef unsigned char       u8;
 
 typedef enum
 {
-  FALSE = 0, TRUE  = !FALSE
+    FALSE = 0, TRUE  = !FALSE
 }
 bool;
 
@@ -62,22 +62,22 @@ bool;
 #define change_byte(a) do{u8 lb=a;a=(lb<<8)+(a>>8);}while(0)
 typedef enum _CONTROL_STATE
 {
-  WAIT_SETUP,       /* 0 */
-  SETTING_UP,       /* 1 */
-  IN_DATA,          /* 2 */
-  OUT_DATA,         /* 3 */
-  LAST_IN_DATA,     /* 4 */
-  LAST_OUT_DATA,    /* 5 */
-  WAIT_STATUS_IN,   /* 7 */
-  WAIT_STATUS_OUT,  /* 8 */
-  STALLED,          /* 9 */
-  PAUSE             /* 10 */
+    WAIT_SETUP,       /* 0 */
+    SETTING_UP,       /* 1 */
+    IN_DATA,          /* 2 */
+    OUT_DATA,         /* 3 */
+    LAST_IN_DATA,     /* 4 */
+    LAST_OUT_DATA,    /* 5 */
+    WAIT_STATUS_IN,   /* 7 */
+    WAIT_STATUS_OUT,  /* 8 */
+    STALLED,          /* 9 */
+    PAUSE             /* 10 */
 } CONTROL_STATE;    /* The state machine states of a control pipe */
 
 typedef struct OneDescriptor
 {
-  u8 *Descriptor;
-  u16 Descriptor_Size;
+    u8 *Descriptor;
+    u16 Descriptor_Size;
 }
 ONE_DESCRIPTOR, *PONE_DESCRIPTOR;
 /* All the request process routines return a value of this type
@@ -85,10 +85,10 @@ ONE_DESCRIPTOR, *PONE_DESCRIPTOR;
    the software will STALL the correspond endpoint */
 typedef enum _RESULT
 {
-  USB_SUCCESS = 0,    /* Process sucessfully */
-  USB_ERROR,
-  USB_UNSUPPORT,
-  USB_NOT_READY       /* The process has not been finished, endpoint will be
+    USB_SUCCESS = 0,    /* Process sucessfully */
+    USB_ERROR,
+    USB_UNSUPPORT,
+    USB_NOT_READY       /* The process has not been finished, endpoint will be
                          NAK to further rquest */
 } RESULT;
 
@@ -96,140 +96,140 @@ typedef enum _RESULT
 /*-*-*-*-*-*-*-*-*-*-* Definitions for endpoint level -*-*-*-*-*-*-*-*-*-*-*-*/
 typedef struct _ENDPOINT_INFO
 {
-  /* When send data out of the device,
-   CopyData() is used to get data buffer 'Length' bytes data
-   if Length is 0,
-    CopyData() returns the total length of the data
-    if the request is not supported, returns 0
-    (NEW Feature )
-     if CopyData() returns -1, the calling routine should not proceed
-     further and will resume the SETUP process by the class device
-   if Length is not 0,
-    CopyData() returns a pointer to indicate the data location
-   Usb_wLength is the data remain to be sent,
-   Usb_wOffset is the Offset of original data
-  When receive data from the host,
-   CopyData() is used to get user data buffer which is capable
-   of Length bytes data to copy data from the endpoint buffer.
-   if Length is 0,
-    CopyData() returns the available data length,
-   if Length is not 0,
-    CopyData() returns user buffer address
-   Usb_rLength is the data remain to be received,
-   Usb_rPointer is the Offset of data buffer
-  */
-  u16  Usb_wLength;
-  u16  Usb_wOffset;
-  u16  PacketSize;
-  u8   *(*CopyData)(u16 Length);
-}ENDPOINT_INFO;
+    /* When send data out of the device,
+     CopyData() is used to get data buffer 'Length' bytes data
+     if Length is 0,
+      CopyData() returns the total length of the data
+      if the request is not supported, returns 0
+      (NEW Feature )
+       if CopyData() returns -1, the calling routine should not proceed
+       further and will resume the SETUP process by the class device
+     if Length is not 0,
+      CopyData() returns a pointer to indicate the data location
+     Usb_wLength is the data remain to be sent,
+     Usb_wOffset is the Offset of original data
+    When receive data from the host,
+     CopyData() is used to get user data buffer which is capable
+     of Length bytes data to copy data from the endpoint buffer.
+     if Length is 0,
+      CopyData() returns the available data length,
+     if Length is not 0,
+      CopyData() returns user buffer address
+     Usb_rLength is the data remain to be received,
+     Usb_rPointer is the Offset of data buffer
+    */
+    u16  Usb_wLength;
+    u16  Usb_wOffset;
+    u16  PacketSize;
+    u8   *(*CopyData)(u16 Length);
+} ENDPOINT_INFO;
 
 /*-*-*-*-*-*-*-*-*-*-*-* Definitions for device level -*-*-*-*-*-*-*-*-*-*-*-*/
 
 typedef struct _DEVICE
 {
-  u8 Total_Endpoint;     /* Number of endpoints that are used */
-  u8 Total_Configuration;/* Number of configuration available */
+    u8 Total_Endpoint;     /* Number of endpoints that are used */
+    u8 Total_Configuration;/* Number of configuration available */
 }
 DEVICE;
 
 typedef union
 {
-  u16 w;
-  struct BW
-  {
-    u8 bb1;
-    u8 bb0;
-  }
-  bw;
+    u16 w;
+    struct BW
+    {
+        u8 bb1;
+        u8 bb0;
+    }
+    bw;
 } u16_u8;
 
 typedef struct _DEVICE_INFO
 {
-  u8 USBbmRequestType;       /* bmRequestType */
-  u8 USBbRequest;            /* bRequest */
-  u16_u8 USBwValues;         /* wValue */
-  u16_u8 USBwIndexs;         /* wIndex */
-  u16_u8 USBwLengths;        /* wLength */
+    u8 USBbmRequestType;       /* bmRequestType */
+    u8 USBbRequest;            /* bRequest */
+    u16_u8 USBwValues;         /* wValue */
+    u16_u8 USBwIndexs;         /* wIndex */
+    u16_u8 USBwLengths;        /* wLength */
 
-  u8 ControlState;           /* of type CONTROL_STATE */
-  u8 Current_Feature;
-  u8 Current_Configuration;   /* Selected configuration */
-  u8 Current_Interface;       /* Selected interface of current configuration */
-  u8 Current_AlternateSetting;/* Selected Alternate Setting of current
+    u8 ControlState;           /* of type CONTROL_STATE */
+    u8 Current_Feature;
+    u8 Current_Configuration;   /* Selected configuration */
+    u8 Current_Interface;       /* Selected interface of current configuration */
+    u8 Current_AlternateSetting;/* Selected Alternate Setting of current
                                      interface*/
 
-  ENDPOINT_INFO Ctrl_Info;
-}DEVICE_INFO;
+    ENDPOINT_INFO Ctrl_Info;
+} DEVICE_INFO;
 
 typedef struct _DEVICE_PROP
 {
-  void (*Init)(void);        /* Initialize the device */
-  void (*Reset)(void);       /* Reset routine of this device */
+    void (*Init)(void);        /* Initialize the device */
+    void (*Reset)(void);       /* Reset routine of this device */
 
-  /* Device dependent process after the status stage */
-  void (*Process_Status_IN)(void);
-  void (*Process_Status_OUT)(void);
+    /* Device dependent process after the status stage */
+    void (*Process_Status_IN)(void);
+    void (*Process_Status_OUT)(void);
 
-  /* Procedure of process on setup stage of a class specified request with data stage */
-  /* All class specified requests with data stage are processed in Class_Data_Setup
-   Class_Data_Setup()
-    responses to check all special requests and fills ENDPOINT_INFO
-    according to the request
-    If IN tokens are expected, then wLength & wOffset will be filled
-    with the total transferring bytes and the starting position
-    If OUT tokens are expected, then rLength & rOffset will be filled
-    with the total expected bytes and the starting position in the buffer
+    /* Procedure of process on setup stage of a class specified request with data stage */
+    /* All class specified requests with data stage are processed in Class_Data_Setup
+     Class_Data_Setup()
+      responses to check all special requests and fills ENDPOINT_INFO
+      according to the request
+      If IN tokens are expected, then wLength & wOffset will be filled
+      with the total transferring bytes and the starting position
+      If OUT tokens are expected, then rLength & rOffset will be filled
+      with the total expected bytes and the starting position in the buffer
 
-    If the request is valid, Class_Data_Setup returns SUCCESS, else UNSUPPORT
+      If the request is valid, Class_Data_Setup returns SUCCESS, else UNSUPPORT
 
-   CAUTION:
-    Since GET_CONFIGURATION & GET_INTERFACE are highly related to
-    the individual classes, they will be checked and processed here.
-  */
-  RESULT (*Class_Data_Setup)(u8 RequestNo);
+     CAUTION:
+      Since GET_CONFIGURATION & GET_INTERFACE are highly related to
+      the individual classes, they will be checked and processed here.
+    */
+    RESULT (*Class_Data_Setup)(u8 RequestNo);
 
-  /* Procedure of process on setup stage of a class specified request without data stage */
-  /* All class specified requests without data stage are processed in Class_NoData_Setup
-   Class_NoData_Setup
-    responses to check all special requests and perform the request
+    /* Procedure of process on setup stage of a class specified request without data stage */
+    /* All class specified requests without data stage are processed in Class_NoData_Setup
+     Class_NoData_Setup
+      responses to check all special requests and perform the request
 
-   CAUTION:
-    Since SET_CONFIGURATION & SET_INTERFACE are highly related to
-    the individual classes, they will be checked and processed here.
-  */
-  RESULT (*Class_NoData_Setup)(u8 RequestNo);
+     CAUTION:
+      Since SET_CONFIGURATION & SET_INTERFACE are highly related to
+      the individual classes, they will be checked and processed here.
+    */
+    RESULT (*Class_NoData_Setup)(u8 RequestNo);
 
-  /*Class_Get_Interface_Setting
-   This function is used by the file usb_core.c to test if the selected Interface
-   and Alternate Setting (u8 Interface, u8 AlternateSetting) are supported by
-   the application.
-   This function is writing by user. It should return "SUCCESS" if the Interface
-   and Alternate Setting are supported by the application or "UNSUPPORT" if they
-   are not supported. */
+    /*Class_Get_Interface_Setting
+     This function is used by the file usb_core.c to test if the selected Interface
+     and Alternate Setting (u8 Interface, u8 AlternateSetting) are supported by
+     the application.
+     This function is writing by user. It should return "SUCCESS" if the Interface
+     and Alternate Setting are supported by the application or "UNSUPPORT" if they
+     are not supported. */
 
-  RESULT  (*Class_Get_Interface_Setting)(u8 Interface, u8 AlternateSetting);
+    RESULT  (*Class_Get_Interface_Setting)(u8 Interface, u8 AlternateSetting);
 
-  u8* (*GetDeviceDescriptor)(u16 Length);
-  u8* (*GetConfigDescriptor)(u16 Length);
-  u8* (*GetStringDescriptor)(u16 Length);
+    u8* (*GetDeviceDescriptor)(u16 Length);
+    u8* (*GetConfigDescriptor)(u16 Length);
+    u8* (*GetStringDescriptor)(u16 Length);
 
-  u8* RxEP_buffer;
-  u8 MaxPacketSize;
+    u8* RxEP_buffer;
+    u8 MaxPacketSize;
 
-}DEVICE_PROP;
+} DEVICE_PROP;
 
 typedef struct _USER_STANDARD_REQUESTS
 {
-  void (*User_GetConfiguration)(void);       /* Get Configuration */
-  void (*User_SetConfiguration)(void);       /* Set Configuration */
-  void (*User_GetInterface)(void);           /* Get Interface */
-  void (*User_SetInterface)(void);           /* Set Interface */
-  void (*User_GetStatus)(void);              /* Get Status */
-  void (*User_ClearFeature)(void);           /* Clear Feature */
-  void (*User_SetEndPointFeature)(void);     /* Set Endpoint Feature */
-  void (*User_SetDeviceFeature)(void);       /* Set Device Feature */
-  void (*User_SetDeviceAddress)(void);       /* Set Device Address */
+    void (*User_GetConfiguration)(void);       /* Get Configuration */
+    void (*User_SetConfiguration)(void);       /* Set Configuration */
+    void (*User_GetInterface)(void);           /* Get Interface */
+    void (*User_SetInterface)(void);           /* Set Interface */
+    void (*User_GetStatus)(void);              /* Get Status */
+    void (*User_ClearFeature)(void);           /* Clear Feature */
+    void (*User_SetEndPointFeature)(void);     /* Set Endpoint Feature */
+    void (*User_SetDeviceFeature)(void);       /* Set Device Feature */
+    void (*User_SetDeviceAddress)(void);       /* Set Device Address */
 }
 USER_STANDARD_REQUESTS;
 
@@ -280,11 +280,11 @@ extern u16 SaveRState;
 extern u16 SaveTState;
 typedef struct
 {
-  u32 bitrate;
-  u8 format;
-  u8 paritytype;
-  u8 datatype;
-}LINE_CODING;
+    u32 bitrate;
+    u8 format;
+    u8 paritytype;
+    u8 datatype;
+} LINE_CODING;
 
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
@@ -371,24 +371,24 @@ void CTR_LP(void);
 void CTR_HP(void);
 typedef enum _RESUME_STATE
 {
-  RESUME_EXTERNAL,
-  RESUME_INTERNAL,
-  RESUME_LATER,
-  RESUME_WAIT,
-  RESUME_START,
-  RESUME_ON,
-  RESUME_OFF,
-  RESUME_ESOF
+    RESUME_EXTERNAL,
+    RESUME_INTERNAL,
+    RESUME_LATER,
+    RESUME_WAIT,
+    RESUME_START,
+    RESUME_ON,
+    RESUME_OFF,
+    RESUME_ESOF
 } RESUME_STATE;
 
 typedef enum _DEVICE_STATE
 {
-  UNCONNECTED,
-  ATTACHED,
-  POWERED,
-  SUSPENDED,
-  ADDRESSED,
-  CONFIGURED
+    UNCONNECTED,
+    ATTACHED,
+    POWERED,
+    SUSPENDED,
+    ADDRESSED,
+    CONFIGURED
 } DEVICE_STATE;
 
 /* Exported constants --------------------------------------------------------*/
@@ -408,18 +408,18 @@ void PMAToUserBufferCopy(u8 *pbUsrBuf, u16 wPMABufAddr, u16 wNBytes);
 
 typedef enum _EP_DBUF_DIR
 {
-  /* double buffered endpoint direction */
-  EP_DBUF_ERR,
-  EP_DBUF_OUT,
-  EP_DBUF_IN
-}EP_DBUF_DIR;
+    /* double buffered endpoint direction */
+    EP_DBUF_ERR,
+    EP_DBUF_OUT,
+    EP_DBUF_IN
+} EP_DBUF_DIR;
 
 /* endpoint buffer number */
 enum EP_BUF_NUM
 {
-  EP_NOBUF,
-  EP_BUF0,
-  EP_BUF1
+    EP_NOBUF,
+    EP_BUF0,
+    EP_BUF1
 };
 
 /* Exported constants --------------------------------------------------------*/
@@ -596,7 +596,7 @@ enum EP_BUF_NUM
 /*******************************************************************************
 * Macro Name     : SetEPType
 * Description    : sets the type in the endpoint register(bits EP_TYPE[1:0])
-* Input          : bEpNum: Endpoint Number. 
+* Input          : bEpNum: Endpoint Number.
 *                  wType
 * Output         : None.
 * Return         : None.
@@ -606,8 +606,8 @@ enum EP_BUF_NUM
 
 /*******************************************************************************
 * Macro Name     : GetEPType
-* Description    : gets the type in the endpoint register(bits EP_TYPE[1:0]) 
-* Input          : bEpNum: Endpoint Number. 
+* Description    : gets the type in the endpoint register(bits EP_TYPE[1:0])
+* Input          : bEpNum: Endpoint Number.
 * Output         : None.
 * Return         : Endpoint Type
 *******************************************************************************/
@@ -616,7 +616,7 @@ enum EP_BUF_NUM
 /*******************************************************************************
 * Macro Name     : SetEPTxStatus
 * Description    : sets the status for tx transfer (bits STAT_TX[1:0]).
-* Input          : bEpNum: Endpoint Number. 
+* Input          : bEpNum: Endpoint Number.
 *                  wState: new state
 * Output         : None.
 * Return         : None.
@@ -636,7 +636,7 @@ enum EP_BUF_NUM
 /*******************************************************************************
 * Macro Name     : SetEPRxStatus
 * Description    : sets the status for rx transfer (bits STAT_TX[1:0])
-* Input          : bEpNum: Endpoint Number. 
+* Input          : bEpNum: Endpoint Number.
 *                  wState: new state.
 * Output         : None.
 * Return         : None.
@@ -654,10 +654,10 @@ enum EP_BUF_NUM
     _SetENDPOINT(bEpNum, _wRegVal); \
   } /* _SetEPRxStatus */
 /*******************************************************************************
-* Macro Name     : GetEPTxStatus / GetEPRxStatus 
+* Macro Name     : GetEPTxStatus / GetEPRxStatus
 * Description    : gets the status for tx/rx transfer (bits STAT_TX[1:0]
 *                  /STAT_RX[1:0])
-* Input          : bEpNum: Endpoint Number. 
+* Input          : bEpNum: Endpoint Number.
 * Output         : None.
 * Return         : status .
 *******************************************************************************/
@@ -666,9 +666,9 @@ enum EP_BUF_NUM
 #define _GetEPRxStatus(bEpNum) ((u16)_GetENDPOINT(bEpNum) & EPRX_STAT)
 
 /*******************************************************************************
-* Macro Name     : SetEPTxValid / SetEPRxValid 
+* Macro Name     : SetEPTxValid / SetEPRxValid
 * Description    : sets directly the VALID tx/rx-status into the enpoint register
-* Input          : bEpNum: Endpoint Number. 
+* Input          : bEpNum: Endpoint Number.
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
@@ -679,7 +679,7 @@ enum EP_BUF_NUM
 /*******************************************************************************
 * Macro Name     : GetTxStallStatus / GetRxStallStatus.
 * Description    : checks stall condition in an endpoint.
-* Input          : bEpNum: Endpoint Number. 
+* Input          : bEpNum: Endpoint Number.
 * Output         : None.
 * Return         : TRUE = endpoint in stall condition.
 *******************************************************************************/
@@ -691,7 +691,7 @@ enum EP_BUF_NUM
 /*******************************************************************************
 * Macro Name     : SetEP_KIND / ClearEP_KIND.
 * Description    : set & clear EP_KIND bit.
-* Input          : bEpNum: Endpoint Number. 
+* Input          : bEpNum: Endpoint Number.
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
@@ -703,7 +703,7 @@ enum EP_BUF_NUM
 /*******************************************************************************
 * Macro Name     : Set_Status_Out / Clear_Status_Out.
 * Description    : Sets/clears directly STATUS_OUT bit in the endpoint register.
-* Input          : bEpNum: Endpoint Number. 
+* Input          : bEpNum: Endpoint Number.
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
@@ -713,7 +713,7 @@ enum EP_BUF_NUM
 /*******************************************************************************
 * Macro Name     : SetEPDoubleBuff / ClearEPDoubleBuff.
 * Description    : Sets/clears directly EP_KIND bit in the endpoint register.
-* Input          : bEpNum: Endpoint Number. 
+* Input          : bEpNum: Endpoint Number.
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
@@ -723,7 +723,7 @@ enum EP_BUF_NUM
 /*******************************************************************************
 * Macro Name     : ClearEP_CTR_RX / ClearEP_CTR_TX.
 * Description    : Clears bit CTR_RX / CTR_TX in the endpoint register.
-* Input          : bEpNum: Endpoint Number. 
+* Input          : bEpNum: Endpoint Number.
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
@@ -735,7 +735,7 @@ enum EP_BUF_NUM
 /*******************************************************************************
 * Macro Name     : ToggleDTOG_RX / ToggleDTOG_TX .
 * Description    : Toggles DTOG_RX / DTOG_TX bit in the endpoint register.
-* Input          : bEpNum: Endpoint Number. 
+* Input          : bEpNum: Endpoint Number.
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
@@ -747,7 +747,7 @@ enum EP_BUF_NUM
 /*******************************************************************************
 * Macro Name     : ClearDTOG_RX / ClearDTOG_TX.
 * Description    : Clears DTOG_RX / DTOG_TX bit in the endpoint register.
-* Input          : bEpNum: Endpoint Number. 
+* Input          : bEpNum: Endpoint Number.
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
@@ -759,7 +759,7 @@ enum EP_BUF_NUM
 * Macro Name     : SetEPAddress.
 * Description    : Sets address in an endpoint register.
 * Input          : bEpNum: Endpoint Number.
-*                  bAddr: Address. 
+*                  bAddr: Address.
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
@@ -897,9 +897,9 @@ enum EP_BUF_NUM
 * Macro Name     : SetEPDblBuffCount / SetEPDblBuf0Count / SetEPDblBuf1Count.
 * Description    : Gets buffer 0/1 address of a double buffer endpoint.
 * Input          : bEpNum: endpoint number.
-*                : bDir: endpoint dir  EP_DBUF_OUT = OUT 
-*                                      EP_DBUF_IN  = IN 
-*                : wCount: Counter value    
+*                : bDir: endpoint dir  EP_DBUF_OUT = OUT
+*                                      EP_DBUF_IN  = IN
+*                : wCount: Counter value
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
@@ -1034,35 +1034,35 @@ void USB_Istr(void);
 /* function prototypes Automatically built defining related macros */
 
 #ifdef CTR_CALLBACK
-  void CTR_Callback(void);
+void CTR_Callback(void);
 #endif
 
 #ifdef DOVR_CALLBACK
-  void DOVR_Callback(void);
+void DOVR_Callback(void);
 #endif
 
 #ifdef ERR_CALLBACK
-  void ERR_Callback(void);
+void ERR_Callback(void);
 #endif
 
 #ifdef WKUP_CALLBACK
-  void WKUP_Callback(void);
+void WKUP_Callback(void);
 #endif
 
 #ifdef SUSP_CALLBACK
-  void SUSP_Callback(void);
+void SUSP_Callback(void);
 #endif
 
 #ifdef RESET_CALLBACK
-  void RESET_Callback(void);
+void RESET_Callback(void);
 #endif
 
 #ifdef SOF_CALLBACK
-  void SOF_Callback(void);
+void SOF_Callback(void);
 #endif
 
 #ifdef ESOF_CALLBACK
-  void ESOF_Callback(void);
+void ESOF_Callback(void);
 #endif
 
 void EP1_IN_Callback(void);
@@ -1136,46 +1136,46 @@ extern const u8 Virtual_Com_Port_StringProduct[VIRTUAL_COM_PORT_SIZ_STRING_PRODU
 extern u8 Virtual_Com_Port_StringSerial[VIRTUAL_COM_PORT_SIZ_STRING_SERIAL];
 typedef enum _RECIPIENT_TYPE
 {
-  DEVICE_RECIPIENT,     /* Recipient device */
-  INTERFACE_RECIPIENT,  /* Recipient interface */
-  ENDPOINT_RECIPIENT,   /* Recipient endpoint */
-  OTHER_RECIPIENT
+    DEVICE_RECIPIENT,     /* Recipient device */
+    INTERFACE_RECIPIENT,  /* Recipient interface */
+    ENDPOINT_RECIPIENT,   /* Recipient endpoint */
+    OTHER_RECIPIENT
 } RECIPIENT_TYPE;
 
 
 typedef enum _STANDARD_REQUESTS
 {
-  GET_STATUS = 0,
-  CLEAR_FEATURE,
-  RESERVED1,
-  SET_FEATURE,
-  RESERVED2,
-  SET_ADDRESS,
-  GET_DESCRIPTOR,
-  SET_DESCRIPTOR,
-  GET_CONFIGURATION,
-  SET_CONFIGURATION,
-  GET_INTERFACE,
-  SET_INTERFACE,
-  TOTAL_sREQUEST,  /* Total number of Standard request */
-  SYNCH_FRAME = 12
+    GET_STATUS = 0,
+    CLEAR_FEATURE,
+    RESERVED1,
+    SET_FEATURE,
+    RESERVED2,
+    SET_ADDRESS,
+    GET_DESCRIPTOR,
+    SET_DESCRIPTOR,
+    GET_CONFIGURATION,
+    SET_CONFIGURATION,
+    GET_INTERFACE,
+    SET_INTERFACE,
+    TOTAL_sREQUEST,  /* Total number of Standard request */
+    SYNCH_FRAME = 12
 } STANDARD_REQUESTS;
 
 /* Definition of "USBwValue" */
 typedef enum _DESCRIPTOR_TYPE
 {
-  DEVICE_DESCRIPTOR = 1,
-  CONFIG_DESCRIPTOR,
-  STRING_DESCRIPTOR,
-  INTERFACE_DESCRIPTOR,
-  ENDPOINT_DESCRIPTOR
+    DEVICE_DESCRIPTOR = 1,
+    CONFIG_DESCRIPTOR,
+    STRING_DESCRIPTOR,
+    INTERFACE_DESCRIPTOR,
+    ENDPOINT_DESCRIPTOR
 } DESCRIPTOR_TYPE;
 
 /* Feature selector of a SET_FEATURE or CLEAR_FEATURE */
 typedef enum _FEATURE_SELECTOR
 {
-  ENDPOINT_STALL,
-  DEVICE_REMOTE_WAKEUP
+    ENDPOINT_STALL,
+    DEVICE_REMOTE_WAKEUP
 } FEATURE_SELECTOR;
 
 /* Exported constants --------------------------------------------------------*/

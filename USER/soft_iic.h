@@ -8,12 +8,12 @@
 typedef unsigned  short int   uint;
 
 /* Exported macro ------------------------------------------------------------*/
-	#define ADDR_24CXX        0x78
+#define ADDR_24CXX        0x78
 //#define ADDR_24CXX        0xD0
 
 //#define SCLH         GPIOB->BSRR = GPIO_Pin_6
 //#define SCLL         GPIOB->BRR  = GPIO_Pin_6
-//  
+//
 //#define SDAH         GPIOB->BSRR = GPIO_Pin_7
 //#define SDAL         GPIOB->BRR  = GPIO_Pin_7
 
@@ -26,7 +26,7 @@ typedef unsigned  short int   uint;
 
 #define SCLH         GPIOA->BSRR = GPIO_Pin_5
 #define SCLL         GPIOA->BRR  = GPIO_Pin_5
-  
+
 #define SDAH         GPIOA->BSRR = GPIO_Pin_4
 #define SDAL         GPIOA->BRR  = GPIO_Pin_4
 
@@ -34,14 +34,14 @@ typedef unsigned  short int   uint;
 #define SDAread      GPIOA->IDR  & GPIO_Pin_4
 
 //IO方向设置
- 
+
 #define SDA_IN()  {GPIOB->CRL&=0X0FFFFFFF;GPIOB->CRL|=(u32)8<<28;}
 #define SDA_OUT() {GPIOB->CRL&=0X0FFFFFFF;GPIOB->CRL|=(u32)3<<28;}
 
-//IO操作函数	 
+//IO操作函数
 //#define IIC_SCL    PBout(6) //SCL
-//#define IIC_SDA    PBout(7) //SDA	 
-//#define READ_SDA   PBin(7)  //输入SDA 
+//#define IIC_SDA    PBout(7) //SDA
+//#define READ_SDA   PBin(7)  //输入SDA
 
 #define IIC_SCL    PAout(5) //SCL
 #define IIC_SDA    PAout(4) //SDA	 
@@ -66,15 +66,15 @@ u8 IIC_RecvByte();
 
 enum ENUM_TWI_REPLY
 {
-TWI_NACK=0
-,TWI_ACK=1
+    TWI_NACK=0
+    ,TWI_ACK=1
 };
 
 enum ENUM_TWI_BUS_STATE
 {
-TWI_READY=0
-,TWI_BUS_BUSY=1
-,TWI_BUS_ERROR=2
+    TWI_READY=0
+    ,TWI_BUS_BUSY=1
+    ,TWI_BUS_ERROR=2
 };
 void IIC_EE_Init(void);
 uint8_t I2C_EE_BufferWrite(uint8_t *psrc_data,uint8_t adr,uint8_t nbyte);

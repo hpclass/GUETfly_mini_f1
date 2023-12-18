@@ -25,7 +25,7 @@ extern int16_t	OF_ACC_X2,OF_ACC_Y2,OF_ACC_Z2;
 extern float	OF_ATT_ROL,OF_ATT_PIT,OF_ATT_YAW;
 //四元数格式的姿态数据
 extern float	OF_ATT_S1,OF_ATT_S2,OF_ATT_S3,OF_ATT_S4;
-
+extern int8_t     OF_FLAG,OF_FLAG_ALT;
 
 //本函数是唯一一个需要外部调用的函数，因为光流模块是串口输出数据
 //所以本函数需要在串口接收中断中调用，每接收一字节数据，调用本函数一次

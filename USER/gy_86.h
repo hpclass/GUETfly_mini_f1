@@ -8,34 +8,44 @@
 #include "config.h"
 //IIC总线引脚配置
 #if defined(GUET_FLY_V1)
-#define SCL_H         GPIOB->BSRR |= GPIO_Pin_6
-#define SCL_L         GPIOB->BRR  |= GPIO_Pin_6
+#if defined(EXTERN_IIC1)//使用了外置IIC
 
-#define SDA_H         GPIOB->BSRR |= GPIO_Pin_7
-#define SDA_L         GPIOB->BRR  |= GPIO_Pin_7
+#define EX_SCL_H         GPIOB->BSRR |= GPIO_Pin_6
+#define EX_SCL_L         GPIOB->BRR  |= GPIO_Pin_6
 
-#define SCL_read      GPIOB->IDR  & GPIO_Pin_6
-#define SDA_read      GPIOB->IDR  & GPIO_Pin_7
+#define EX_SDA_H         GPIOB->BSRR |= GPIO_Pin_7
+#define EX_SDA_L         GPIOB->BRR  |= GPIO_Pin_7
 
-//#define SCL_H         GPIOB->BSRR = GPIO_Pin_13
-//#define SCL_L         GPIOB->BRR  = GPIO_Pin_13
+//#define EX_SCL_read      GPIOA->IDR  & GPIO_Pin_0
+//#define EX_SDA_read      GPIOA->IDR  & GPIO_Pin_1
+#define EX_SDA_read      PBin(7)
+#endif
 
-//#define SDA_H         GPIOB->BSRR = GPIO_Pin_15
-//#define SDA_L         GPIOB->BRR  = GPIO_Pin_15
 
-//#define SCL_read      GPIOB->IDR  & GPIO_Pin_13
-//#define SDA_read      GPIOB->IDR  & GPIO_Pin_15
+//#define SCL_H         GPIOA->BSRR |= GPIO_Pin_0
+//#define SCL_L         GPIOA->BRR  |= GPIO_Pin_0
 
+//#define SDA_H         GPIOA->BSRR |= GPIO_Pin_1
+//#define SDA_L         GPIOA->BRR  |= GPIO_Pin_1
+
+//#define SCL_read      GPIOA->IDR  & GPIO_Pin_0
+//#define SDA_read      GPIOA->IDR  & GPIO_Pin_1
+
+	#define SCL_H         GPIOB->BSRR |= GPIO_Pin_13
+	#define SCL_L         GPIOB->BRR  |= GPIO_Pin_13
+	#define SDA_H         GPIOB->BSRR |= GPIO_Pin_15
+	#define SDA_L         GPIOB->BRR  |= GPIO_Pin_15
+	#define SCL_read      GPIOB->IDR  & GPIO_Pin_13
+	#define SDA_read      GPIOB->IDR  & GPIO_Pin_15
 #else
+	#define SCL_H         GPIOA->BSRR |= GPIO_Pin_5
+	#define SCL_L         GPIOA->BRR  |= GPIO_Pin_5
 
-#define SCL_H         GPIOB->BSRR |= GPIO_Pin_15
-#define SCL_L         GPIOB->BRR  |= GPIO_Pin_15
+	#define SDA_H         GPIOA->BSRR |= GPIO_Pin_4
+	#define SDA_L         GPIOA->BRR  |= GPIO_Pin_4
 
-#define SDA_H         GPIOB->BSRR |= GPIO_Pin_14
-#define SDA_L         GPIOB->BRR  |= GPIO_Pin_14
-
-#define SCL_read      GPIOB->IDR  & GPIO_Pin_15
-#define SDA_read      GPIOB->IDR  & GPIO_Pin_14
+	#define SCL_read      GPIOA->IDR  & GPIO_Pin_5
+	#define SDA_read      GPIOA->IDR  & GPIO_Pin_4
 #endif
 //****************************************
 

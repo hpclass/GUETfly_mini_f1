@@ -1,52 +1,7 @@
 #ifndef DEF_H_
 #define DEF_H_
-#include "stm32f10x.h"
 #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt))) //定义自定程序
 //typedef enum {FALSE = 0, TRUE = !FALSE} bool;
-
-
-#if defined(AT24C01)||defined(AT24C02)||defined(AT24C04)||defined(AT24C08)||defined(AT24C16)||defined(AT24C16)||defined(AT24C32)||defined(AT24C64)||defined(AT24C128)||defined(AT24C256)||defined(AT24C512)
-#define USE_EX_EEPROM			//使用外置EEPROM
-#if defined(AT24C01)
-#define E2END 127 //定义字节数
-#define E2PAGESIZE 8 //一页大小
-#endif
-#if defined(AT24C02)
-#define E2END 255 //定义字节数
-#define E2PAGESIZE 8 //一页大小
-#endif
-#if defined(AT24C04)
-#define E2END 511 //定义字节数
-#define E2PAGESIZE 16 //一页大小
-#endif
-#if defined(AT24C08)
-#define E2END 1023 //定义字节数
-#define E2PAGESIZE 16 //一页大小
-#endif
-#if defined(AT24C16)
-#define E2END 2047 //定义字节数
-#define E2PAGESIZE 16 //一页大小
-#endif
-#if defined(AT24C32)
-#define E2END 4095 //定义字节数
-#define E2PAGESIZE 32 //一页大小
-#endif
-#if defined(AT24C64)
-#define E2END 8191 //定义字节数
-#define E2PAGESIZE 32 //一页大小
-#endif
-#if defined(AT24C128)
-#define E2END 16383 //定义字节数
-#define E2PAGESIZE 32 //一页大小
-#endif
-#if defined(AT24C256)
-#define E2END 32767 //定义字节数
-#define E2PAGESIZE 32 //一页大小
-#endif
-#else
-#define USE_FLASH_SIZE 20  //使用FLASH模拟允许使用10k
-#define E2END 1024*USE_FLASH_SIZE-1
-#endif
 /**************************************************************************************/
 /***************             test configurations                   ********************/
 /**************************************************************************************/
@@ -202,7 +157,7 @@
 /**************************************************************************************/
 #define SERVO_RATES      {30,30,100,100,100,100,100,100}
 
-#if defined (AIRPLANE) || defined(FLYING_WING)|| defined(FLYING_WING_J10)
+#if defined (AIRPLANE) || defined(FLYING_WING) || defined(FLYING_WING_D)
 #define FIXEDWING
 #endif
 
@@ -240,7 +195,7 @@
 #define PRI_SERVO_FROM   1 // use servo from 1 to 2
 #define PRI_SERVO_TO     2
 #elif defined(FLYING_WING)
-#define PRI_SERVO_FROM   4
+#define PRI_SERVO_FROM   4   //4
 #if defined (USE_THROTTLESERVO)
 #define NUMBER_MOTOR   0
 #define PRI_SERVO_TO   8 // use servo from 4,5 and 8
@@ -248,8 +203,8 @@
 #define NUMBER_MOTOR   1
 #define PRI_SERVO_TO   5 // use servo from 4 to 5
 #endif
-#elif defined(FLYING_WING_J10)
-#define PRI_SERVO_FROM   4
+#elif defined(FLYING_WING_D)
+#define PRI_SERVO_FROM   4   //4
 #if defined (USE_THROTTLESERVO)
 #define NUMBER_MOTOR   0
 #define PRI_SERVO_TO   8 // use servo from 4,5 and 8
@@ -330,12 +285,15 @@
 
 /**************************   atmega328P (Promini)  ************************************/
 #if defined(PROMINI)
-#if !defined(MONGOOSE1_0)
-#define LEDPIN_PINMODE             //pinMode (13, OUTPUT);
-#define LEDPIN_TOGGLE              PAout(0)=~PCin(0);     //switch LEDPIN state (digital PIN 13)
-#define LEDPIN_OFF                 PAout(0)=1;
-#define LEDPIN_ON                  PAout(0)=0;
+#if !defined(GUET_FLY_V1)
+#define LEDPIN_PINMODE             pinMode (13, OUTPUT);
+#define OVERRIDE_LEDPIN_TOGGLE 		 PDout(1)=~PDin(1);
+#define LEDPIN_OFF                 PCout(13)=1;
+#define LEDPIN_ON                  PCout(13)=0;
+#define LEDPIN_TOGGLE								PCout(13)=PCin(13);;
 #endif
+
+
 #if !defined(RCAUXPIN8)
 #if !defined(MONGOOSE1_0)
 #define BUZZERPIN_PINMODE          pinMode (8, OUTPUT);
@@ -379,7 +337,7 @@
 #define STABLEPIN_OFF              ;
 #endif
 #define PPM_PIN_INTERRUPT          attachInterrupt(0, rxInt, RISING); //PIN 0
-#define RX_SERIAL_PORT             0
+#define RX_SERIAL_PORT             3
 //RX PIN assignment inside the port //for PORTD
 #define THROTTLEPIN                2
 #define ROLLPIN                    4
@@ -612,8 +570,8 @@
 #if defined(MEGA)
 #define LEDPIN_PINMODE             pinMode (13, OUTPUT);pinMode (30, OUTPUT);
 #define LEDPIN_TOGGLE              PINB  |= (1<<7); PINC  |= (1<<7);
-#define LEDPIN_ON                  GPIOA->BSRR = GPIO_Pin_0
-#define LEDPIN_OFF                 GPIOA->BRR = GPIO_Pin_0
+#define LEDPIN_ON                  GPIOC->BSRR = GPIO_Pin_13
+#define LEDPIN_OFF                 GPIOC->BRR = GPIO_Pin_13
 #define BUZZERPIN_PINMODE          pinMode (32, OUTPUT);
 #if defined PILOTLAMP
 #define    PL_PIN_ON    PORTC |= 1<<5;
@@ -1354,9 +1312,6 @@
 #define ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  = -(X); imu.accADC[PITCH]  = -(Y); imu.accADC[YAW]  =  Z;}
 #define GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] =  Y; imu.gyroADC[PITCH] = -(X); imu.gyroADC[YAW] = -(Z);}
 #define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  X; imu.magADC[PITCH]  =  Y; imu.magADC[YAW]  = -(Z);}
-//#define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  Y; imu.magADC[PITCH]  =  X; imu.magADC[YAW]  = -Z;}
-
-
 #define MPU6050_I2C_AUX_MASTER // MAG connected to the AUX I2C bus of MPU6050
 #undef INTERNAL_I2C_PULLUPS
 #endif
@@ -1376,7 +1331,7 @@
 #define AK8963
 #define ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  = -Y; imu.accADC[PITCH]  = X; imu.accADC[YAW]  =  Z;}
 #define GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] =  -X; imu.gyroADC[PITCH] = -Y; imu.gyroADC[YAW] = -Z;}
-#define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  X; imu.magADC[PITCH]  =  Y; imu.magADC[YAW]  = -Z;}
+#define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  Z; imu.magADC[PITCH]  =  Y; imu.magADC[YAW]  = X;}
 //#define MPU6050_I2C_AUX_MASTER
 //#undef INTERNAL_I2C_PULLUPS
 #endif
@@ -1719,12 +1674,84 @@
 #endif
 
 #if defined(GUET_FLY_V1)
+
+#if defined(AT24C01)||defined(AT24C02)||defined(AT24C04)||defined(AT24C08)||defined(AT24C16)||defined(AT24C16)||defined(AT24C32)||defined(AT24C64)||defined(AT24C128)||defined(AT24C256)||defined(AT24C512)
+#define USE_EX_EEPROM			//使用外置EEPROM
+#if defined(AT24C01)
+#define E2END 127 //定义字节数
+#define E2PAGESIZE 8 //一页大小
+#endif
+#if defined(AT24C02)
+#define E2END 255 //定义字节数
+#define E2PAGESIZE 8 //一页大小
+#endif
+#if defined(AT24C04)
+#define E2END 511 //定义字节数
+#define E2PAGESIZE 16 //一页大小
+#endif
+#if defined(AT24C08)
+#define E2END 1023 //定义字节数
+#define E2PAGESIZE 16 //一页大小
+#endif
+#if defined(AT24C16)
+#define E2END 2047 //定义字节数
+#define E2PAGESIZE 16 //一页大小
+#endif
+#if defined(AT24C32)
+#define E2END 4095 //定义字节数
+#define E2PAGESIZE 32 //一页大小
+#endif
+#if defined(AT24C64)
+#define E2END 8191 //定义字节数
+#define E2PAGESIZE 32 //一页大小
+#endif
+#if defined(AT24C128)
+#define E2END 16383 //定义字节数
+#define E2PAGESIZE 32 //一页大小
+#endif
+#if defined(AT24C256)
+#define E2END 32767 //定义字节数
+#define E2PAGESIZE 32 //一页大小
+#endif
+#else
+#define USE_FLASH_SIZE 20  //使用FLASH模拟允许使用10k
+#define E2END 1024*USE_FLASH_SIZE-1
+#endif
+#define LED1_ON GPIOE->BRR = GPIO_Pin_1;
+#define LED2_ON GPIOE->BRR = GPIO_Pin_2;
+#define LED3_ON GPIOE->BRR = GPIO_Pin_3;
+#define LED4_ON GPIOE->BRR = GPIO_Pin_4;
+#define LED5_ON GPIOE->BRR = GPIO_Pin_5;
+
+#define LED1_OFF GPIOE->BSRR = GPIO_Pin_1;
+#define LED2_OFF GPIOE->BSRR = GPIO_Pin_2;
+#define LED3_OFF GPIOE->BSRR = GPIO_Pin_3;
+#define LED4_OFF GPIOE->BSRR = GPIO_Pin_4;
+#define LED5_OFF GPIOE->BSRR = GPIO_Pin_5;
+
+#define OVERRIDE_LEDPIN_TOGGLE PDout(1)=~PDin(1);
+#define LEDPIN_TOGGLE 	OVERRIDE_LEDPIN_TOGGLE
+
+#define GPS_TOGGLE PEout(5)=~PEin(5);
+#define GPS_LED_ON	LED5_ON
+#define GPS_LED_OFF	LED5_OFF
+
 #define MPU6050
-#define AK8963
-//#define GUET_FLY_V1 1
+
+#if defined(USE_EX_MAG)
+#define HMC5883 // mag ex
+#define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  Y; imu.magADC[PITCH]  =  X; imu.magADC[YAW]  = -Z;}
+#else
+#define AK8963  //板载磁力计
+#define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  X; imu.magADC[PITCH]  =  -Y; imu.magADC[YAW]  = Z;}
+#endif
+#if !defined(EX_BORA_SPL06)
+#define MS561101BA
+#endif
+	
 #define ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  = -Y; imu.accADC[PITCH]  = X; imu.accADC[YAW]  =  Z;}
 #define GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] =  -X; imu.gyroADC[PITCH] = -Y; imu.gyroADC[YAW] = -Z;}
-#define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  Z; imu.magADC[PITCH]  =  Y; imu.magADC[YAW]  = -X;}
+//#define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  X; imu.magADC[PITCH]  =  -Y; imu.magADC[YAW]  = Z;}
 //#define MPU6050_I2C_AUX_MASTER
 //#undef INTERNAL_I2C_PULLUPS
 #endif
@@ -1750,7 +1777,8 @@
 #define GYRO 0
 #endif
 
-#if defined(BMP085) || defined(MS561101BA) ||defined(SPL06_001)
+//#if defined(BMP085) || defined(MS561101BA) ||defined(OV7670_FLOW)
+#if defined(BMP085) || defined(MS561101BA) || defined(EX_BORA_SPL06)
 #define BARO 1
 #else
 #define BARO 0
@@ -1805,8 +1833,8 @@
 #elif defined(FLYING_WING)
 #define MULTITYPE 8
 #define SERVO_RATES      {30,30,100,0,1,100,100,100}
-#elif defined(FLYING_WING_J10)
-#define MULTITYPE 8
+#elif defined(FLYING_WING_D)
+#define MULTITYPE 50
 #define SERVO_RATES      {30,30,100,0,1,100,100,100}
 #elif defined(Y4)
 #define MULTITYPE 9

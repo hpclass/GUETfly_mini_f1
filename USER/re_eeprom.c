@@ -299,14 +299,14 @@ PA5 ->SCL
 *****************************************/
 
 #define EEPROM_ADDR
-#define EEPROM_SCL_H         GPIOB->BSRR |= GPIO_Pin_12
-#define EEPROM_SCL_L         GPIOB->BRR  |= GPIO_Pin_12
+#define EEPROM_SCL_H         GPIOA->BSRR |= GPIO_Pin_5
+#define EEPROM_SCL_L         GPIOA->BRR  |= GPIO_Pin_5
 
-#define EEPROM_SDA_H         GPIOB->BSRR |= GPIO_Pin_13
-#define EEPROM_SDA_L         GPIOB->BRR  |= GPIO_Pin_13
+#define EEPROM_SDA_H         GPIOA->BSRR |= GPIO_Pin_4
+#define EEPROM_SDA_L         GPIOA->BRR  |= GPIO_Pin_4
 
-#define EEPROM_SCL_read      GPIOB->IDR  & GPIO_Pin_12
-#define EEPROM_SDA_read      GPIOB->IDR  & GPIO_Pin_13
+#define EEPROM_SCL_read      GPIOA->IDR  & GPIO_Pin_5
+#define EEPROM_SDA_read      GPIOA->IDR  & GPIO_Pin_4
 //´óÐ¡¶¨Òå
 
 
@@ -314,18 +314,22 @@ PA5 ->SCL
 
 void EEPROM_I2C_GPIO_Config(void)
 {
-    GPIO_InitTypeDef  GPIO_InitStructure;
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-    // Configure I2C1 pins: SCL and SDA
-    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_13;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
+//    GPIO_InitTypeDef  GPIO_InitStructure;
+//    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+//    // Configure I2C1 pins: SCL and SDA
+//    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_4;
+//    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+//    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+//    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_12;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
+//    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_5;
+//    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+//    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+//    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    RCC->APB2ENR|=1<<1;     //Ê¹ÄÜPORTAÊ±ÖÓ
+    GPIOA->CRL&=0XFF00FFFF; //ÇåÁãÏàÓ¦Î»
+    GPIOA->CRL|=0X00370000; //
+    GPIOA->ODR= 0X000000C0;
 }
 ///////////IIC³õÊ¼»¯//////////////
 
@@ -724,9 +728,9 @@ void eeprom_Continuous_reading(u8 *buf,u16 addr, size_t n)//Á¬Ðø¶ÁÈ¡
 //u8 temp_wp[4096]=0;
 void eeprom_write_block (void *buf, void *addr, size_t n)
 {
-    
+    LED1_ON
     AT24CXX_write_Page((u8*)buf,(u16)addr,n);
-    
+    LED1_OFF
 
 //		uint16_t i;
 //	u8 *temp=(u8*)buf;
@@ -745,9 +749,9 @@ void eeprom_read_block (void *buf,void *addr, size_t n)//¶ÁÈ¡ÓÉÖ¸¶¨µØÖ·¿ªÊ¼µÄÖ¸¶
 
 
 
-    
+    LED2_ON
     eeprom_Continuous_reading((u8*)buf,(u16)addr,n);//Á¬Ðø¶ÁÈ¡
-    
+    LED2_OFF
 
 
 //		uint16_t i;

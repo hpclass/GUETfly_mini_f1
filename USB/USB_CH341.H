@@ -7,9 +7,9 @@
 //#include "stm32f10x_type.h"
 
 //migration part
-#define USB_DISCONNECT                  GPIOA  //use PD0 to control connect 1.5k pull up resistor
-#define USB_DISCONNECT_PIN              GPIO_Pin_12
-#define RCC_APB2Periph_GPIO_DISCONNECT  RCC_APB2Periph_GPIOA
+#define USB_DISCONNECT                  GPIOE  //use PD0 to control connect 1.5k pull up resistor
+#define USB_DISCONNECT_PIN              GPIO_Pin_0
+#define RCC_APB2Periph_GPIO_DISCONNECT  RCC_APB2Periph_GPIOE
 #define RCC_DISCONNECT_CLK_CMD          RCC_APB2PeriphClockCmd
 //migration end
 

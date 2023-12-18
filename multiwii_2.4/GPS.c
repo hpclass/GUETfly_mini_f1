@@ -1,7 +1,7 @@
-#include "stm32f10x.h"
 #include "config.h"
 #include "def.h"
 #include "types.h"
+#include "stm32f10x.h"
 #include "GPS.h"
 #include "Serial.h"
 #include "Sensors.h"
@@ -13,7 +13,10 @@
 #include <ctype.h>
 
 #if GPS
-
+static int16_t Current_Heading=0; // Store current bearing
+extern int16_t rcData[RC_CHANS];//stm32 add
+static int32_t  GPS_prev_R[2]; //过航点记录，用于计算半径
+user_mission_dorp_ user_mission_dorp;
 //Function prototypes for other GPS functions
 //These perhaps could go to the gps.h file, however these are local to the gps.cpp
 static void GPS_bearing(int32_t* lat1, int32_t* lon1, int32_t* lat2, int32_t* lon2, int32_t* bearing);
@@ -28,7 +31,18 @@ static bool check_missed_wp(void);
 void GPS_calc_longitude_scaling(int32_t lat);
 static void GPS_update_crosstrack(void);
 int32_t wrap_36000(int32_t ang);
-void check_takeoff_ok(void);
+
+//在此处添加固定翼程序
+void clearNav(void);
+#if defined(FIXEDWING)
+float NaverrorI,AlterrorI;
+static int16_t lastAltDiff,lastNavDiff,SpeedBoost;
+static int16_t AltHist[GPS_UPD_HZ]; // shift register
+static int16_t NavDif[GPS_UPD_HZ];  // shift register
+static uint16_t GPS_NAV_speed_set=0;//导航速度设定
+// This is the angle from the copter to the "next_WP" location
+// Reinseerted for FIXEDWING from V2.3
+int32_t nav_bearing;
 ////////////////////////////
 ////////////////////////////
 // Leadig filter - TODO: rewrite to normal C instead of C++
@@ -79,7 +93,7 @@ typedef struct PID_PARAM_ {
 PID_PARAM posholdPID_PARAM;
 PID_PARAM poshold_ratePID_PARAM;
 PID_PARAM navPID_PARAM;
-
+PID_PARAM altPID_PARAM;
 typedef struct PID_ {
     float   integrator; // integrator value
     int32_t last_input; // last input for derivative
@@ -133,19 +147,27 @@ void reset_PID(struct PID_* pid) {
 #define _X 1
 #define _Y 0
 
-#define RADX100                    0.000174532925
+#define RADX100                    0.000174532925f
 
 uint8_t land_detect;                 //Detect land (extern)
 static uint32_t land_settle_timer;
 uint8_t GPS_Frame;            // a valid GPS_Frame was detected, and data is ready for nav computation
 
 static float  dTnav;            // Delta Time in milliseconds for navigation computations, updated with every good GPS read
+int16_t gpsActualSpeed[2] = { 0, 0 };
 static int16_t actual_speed[2] = {0,0};
 static float GPS_scaleLonDown; // this is used to offset the shrinking longitude as we go towards the poles
 
 // The difference between the desired rate of travel and the actual rate of travel
 // updated after GPS read - 5-10hz
 static int16_t rate_error[2];
+
+int32_t gpsDistanceToHome[2];
+#ifdef INS_PH_NAV_ON
+int32_t positionToHold[2];
+#else
+int32_t gpsPositionError[2];
+#endif
 static int32_t error[2];  //经纬度之差并放入error[LON],error[LAT]
 
 static int32_t GPS_WP[2];   //Currently used WP
@@ -172,7 +194,7 @@ static int32_t GPS_degree[2];    //the lat lon degree without any decimals (lat/
 static uint16_t fraction3[2];
 
 static int16_t nav_takeoff_bearing;  // saves the bearing at takeof (1deg = 1) used to rotate to takeoff direction when arrives at home
-
+static uint8_t NAV_flag=0;
 
 
 //Main navigation processor and state engine
@@ -182,11 +204,23 @@ uint8_t GPS_Compute(void) {
     uint32_t dist;        //temp variable to store dist to copter
     int32_t  dir;         //temp variable to store dir to copter
     static uint32_t nav_loopTimer;
-    int16_t speed;
+    static uint32_t timeMax;
+    // Check for stalled GPS, if no frames seen for 1.2sec then consider it LOST
+    if(f.GPS_FIX)
+    {
+        //timeMax2=millis();
+        if(millis()-timeMax>5000)//5s超时GPS
+            f.GPS_FIX=0;//GPS超时
+    }
+//                    f.GPS_FIX = 0;
+//                    GPS_numSat = 0;
+//                    GPS_LED_OFF;
+//                }
     //check that we have a valid frame, if not then return immediatly
     if (GPS_Frame == 0) return 0;
     else GPS_Frame = 0;
-
+    NAV_flag=1;//数据帧更新标志
+    timeMax = millis();//更新数据
     //check home position and set it if it was not set
     if (f.GPS_FIX && GPS_numSat >= 5) {
 #if !defined(DONT_RESET_HOME_AT_ARM)
@@ -226,7 +260,7 @@ uint8_t GPS_Compute(void) {
         // prevent runup from bad GPS
         dTnav = MIN(dTnav, 1.0);
 
-        //calculate distance and bearings for gui and other stuff continously - From home to copter
+        //calculate distance and bearings for gui and other stuff continously - From copter to home
         GPS_bearing(&GPS_coord[LAT],&GPS_coord[LON],&GPS_home[LAT],&GPS_home[LON],&dir);
         GPS_distance_cm(&GPS_coord[LAT],&GPS_coord[LON],&GPS_home[LAT],&GPS_home[LON],&dist);
         GPS_distanceToHome = dist/100;
@@ -240,6 +274,7 @@ uint8_t GPS_Compute(void) {
         //Check fence setting and execute RTH if neccessary
         //TODO: autolanding
         if ((GPS_conf.fence > 0) && (GPS_conf.fence < GPS_distanceToHome) && (f.GPS_mode != GPS_MODE_RTH) ) {
+            rcOptions[BOXGPSHOME] = true; //应该加上
             init_RTH();
         }
 
@@ -250,31 +285,35 @@ uint8_t GPS_Compute(void) {
         if (f.GPS_mode != GPS_MODE_NONE) {   //ok we are navigating ###0002
             //do gps nav calculations here, these are common for nav and poshold
             GPS_bearing(&GPS_coord[LAT],&GPS_coord[LON],&GPS_WP[LAT],&GPS_WP[LON],&target_bearing);
-            //if (GPS_conf.lead_filter) {
-            if(0) {
+            if (GPS_conf.lead_filter) {
                 GPS_distance_cm(&GPS_coord_lead[LAT],&GPS_coord_lead[LON],&GPS_WP[LAT],&GPS_WP[LON],&wp_distance);
-                GPS_calc_location_error(&GPS_WP[LAT],&GPS_WP[LON],&GPS_coord_lead[LAT],&GPS_coord_lead[LON]);
+                //GPS_calc_location_error(&GPS_WP[LAT],&GPS_WP[LON],&GPS_coord_lead[LAT],&GPS_coord_lead[LON]);  //固定翼无需此句！！！
             } else {
                 GPS_distance_cm(&GPS_coord[LAT],&GPS_coord[LON],&GPS_WP[LAT],&GPS_WP[LON],&wp_distance);
-                GPS_calc_location_error(&GPS_WP[LAT],&GPS_WP[LON],&GPS_coord[LAT],&GPS_coord[LON]);         //分别计算经纬度之差并放入error[LON],error[LAT]
+                //GPS_calc_location_error(&GPS_WP[LAT],&GPS_WP[LON],&GPS_coord[LAT],&GPS_coord[LON]);  //固定翼无需此句！！！
             }
 
             // Adjust altitude
             // if we are holding position and reached target altitude, then ignore altitude nav, and let the user trim alt
             if ( !((NAV_state == NAV_STATE_HOLD_INFINIT) && (alt_change_flag == REACHED_ALT))) {
                 if (!f.LAND_IN_PROGRESS) {
-                    alt_to_hold = get_new_altitude();   //估算出本次应该处的高度
+                    alt_to_hold = get_new_altitude();   //==============================================================================================================
                     AltHold = alt_to_hold;
                 }
             }
 
-            speed = 0;                   //Desired navigation speed
-
+            int16_t speed = 0;                   //Desired navigation speed
+            uint16_t dyn_wp_radius = GPS_conf.wp_radius;
+#if defined(FIXEDWING) // Adjust radius based on speed
+            dyn_wp_radius = GPS_speed / GPS_UPD_HZ;
+            dyn_wp_radius = MAX( dyn_wp_radius, GPS_conf.wp_radius );
+#endif
             switch(NAV_state)                    //Navigation state machine
             {
             case NAV_STATE_NONE:               //Just for clarity, do nothing when nav_state is none
                 break;
-
+#if !defined (SLIM_WING)   // Save space for small proc. PatrikE
+            /***************************************************************/
             case NAV_STATE_LAND_START:
                 GPS_calc_poshold();              //Land in position hold
                 land_settle_timer = millis();
@@ -301,7 +340,7 @@ uint8_t GPS_Compute(void) {
                 GPS_calc_poshold();
                 check_land();  //Call land detector
                 if (f.LAND_COMPLETED) {
-                    nav_timer_stop = millis() + LAND_COMPLITE_DELAY_TIME;
+                    nav_timer_stop = millis() + 5000;
                     NAV_state = NAV_STATE_LANDED;
                 }
                 break;
@@ -320,95 +359,6 @@ uint8_t GPS_Compute(void) {
                     GPS_reset_nav();
                 }
                 break;
-/////////////////////////////自动起飞部分
-//										,
-//		,
-//    NAV_STATE_TAKEOFF_OK,
-//    ,
-//    NAV_STATE_TAKEOFF_START_DESCENT,
-//////////////////////////////
-            /*start auto takeoff */
-            case NAV_STATE_TAKEOFF_START:
-                debug[1]=100;
-                f.THROTTLE_IGNORED = 1;
-                //GPS_calc_poshold();              //起飞前准备工作
-                land_settle_timer = millis();//怠速5s
-                //rcCommand[THROTTLE]=TAKEOFF_Init_SPEED;//设置怠速值
-                NAV_state = NAV_STATE_TAKEOFF_SETTLE;
-                break;
-
-            case NAV_STATE_TAKEOFF_SETTLE://油门打开5s后开始执行起飞
-                GPS_calc_poshold();
-                //rcCommand[THROTTLE]=TAKEOFF_Init_SPEED;//设置怠速值
-                if (millis()-land_settle_timer > 5000)
-                {
-                    debug[1]=200;
-                    f.GPS_mode = GPS_MODE_HOLD;
-                    //f.GPS_BARO_MODE = true;
-                    f.GPS_BARO_MODE    = 1;            //Take control of BARO mode
-                    //	GPS_set_next_wp(&GPS_coord[LAT], &GPS_coord[LON],&GPS_coord[LAT], & GPS_coord[LON]);
-                    set_new_altitude(TAKEOFF_ALT);//设定起飞高度
-                    NAV_state = NAV_STATE_TAKEOFF_START_DESCENT;
-                }
-                break;
-
-            case NAV_STATE_TAKEOFF_START_DESCENT://根据上升速度执行起飞，并且检查高度是否达标
-                GPS_calc_poshold();
-                debug[1]=300;
-                f.THROTTLE_IGNORED = 1;
-                f.GPS_BARO_MODE    = 1;
-                // land_detect = 0;
-                f.TAKEOFF_COMPLETED = 0;  //自动起飞未完成
-                f.TAKEOFF_IN_PROGRESS = 1; //自动起飞执行中
-                NAV_state = NAV_STATE_TAKEOFF_IN_PROGRESS;
-
-                break;
-
-            case NAV_STATE_TAKEOFF_IN_PROGRESS:
-                debug[1]=400;
-                GPS_calc_poshold();
-                check_takeoff_ok();  //检查自动起飞是否到位
-                if (f.TAKEOFF_COMPLETED) {
-                    NAV_state = NAV_STATE_TAKEOFF_OK;
-                }
-                break;
-            case NAV_STATE_TAKEOFF_OK:
-                GPS_calc_poshold();
-                debug[1]=101;
-                // Disarm if THROTTLE stick is at minimum or 5sec past after land detected
-                if (f.TAKEOFF_COMPLETED) {
-                    //f.TAKEOFF_COMPLETED=0;
-                    //NAV_state = NAV_STATE_NONE;     //Disable position holding.... prevent flippover
-
-                    f.THROTTLE_IGNORED = 1;
-                    f.TAKEOFF_IN_PROGRESS = 0;
-                    land_settle_timer=0;
-                    set_new_altitude(TAKEOFF_ALT);//设定起飞高度
-                    NAV_state = NAV_STATE_HOLD_INFINIT;//起飞任务结束		,切换成定高定点模式
-                    debug[1]=100;
-                    /*
-                    自动起飞结束后依然保存着忽略油门
-                    */
-                }
-                break;
-            /*end auto take off*/
-            case NAV_STATE_HOLD_INFINIT:        //Constant position hold, no timer. Only an rcOption change can exit from this
-                GPS_calc_poshold();
-                debug[1]=666;
-                break;
-
-            case NAV_STATE_HOLD_TIMED:
-                if (nav_timer_stop == 0) {                         //We are start a timed poshold
-                    nav_timer_stop = millis() + 1000*nav_hold_time;  //Set when we will continue
-                } else if (nav_timer_stop <= millis()) {           //did we reach our time limit ?
-                    if (mission_step.flag != MISSION_FLAG_END) {
-                        NAV_state = NAV_STATE_PROCESS_NEXT;            //if yes then process next mission step
-                    }
-                    NAV_error = NAV_ERROR_TIMEWAIT;
-                }
-                GPS_calc_poshold();                                //BTW hold position till next command
-                break;
-
             case NAV_STATE_RTH_START:
                 if ((alt_change_flag == REACHED_ALT) || (!GPS_conf.wait_for_rth_alt)) {             //Wait until we reach RTH altitude
                     GPS_set_next_wp(&GPS_home[LAT],&GPS_home[LON], &GPS_coord[LAT], &GPS_coord[LON]); //If we reached then change mode and start RTH
@@ -420,11 +370,33 @@ uint8_t GPS_Compute(void) {
                 }
                 break;
 
-            case NAV_STATE_RTH_ENROUTE:                                                  //Doing RTH navigation
+#endif // End of Not for FixedWing
+            /***************************************************************/
+            case NAV_STATE_HOLD_INFINIT:        //Constant position hold, no timer. Only an rcOption change can exit from this
+                GPS_calc_poshold();
+                break; //初保持定点盘旋=================================================
+//#ifndef SLIM_WING
+//                GPS_calc_poshold();
+//                break;
+//#endif
+#if !defined (SLIM_WING)   // Save space for small proc. PatrikE
+            /***************************************************************/
+            case NAV_STATE_HOLD_TIMED:
+                if (nav_timer_stop == 0) {                         //We are start a timed poshold
+                    nav_timer_stop = millis() + 1000*nav_hold_time;  //Set when we will continue
+                } else if (nav_timer_stop <= millis()) {           //did we reach our time limit ?
+                    if (mission_step.flag != MISSION_FLAG_END) {
+                        NAV_state = NAV_STATE_PROCESS_NEXT;            //if yes then process next mission step
+                    }
+                    NAV_error = NAV_ERROR_TIMEWAIT;
+                }
+                GPS_calc_poshold();                                //BTW hold position till next command
+                break;
+            case NAV_STATE_RTH_ENROUTE:   //Doing RTH navigation  //=================================================
                 speed = GPS_calc_desired_speed(GPS_conf.nav_speed_max, GPS_conf.slow_nav);
                 GPS_calc_nav_rate(speed);
                 GPS_adjust_heading();
-                if ((wp_distance <= GPS_conf.wp_radius) || check_missed_wp()) {            //if yes switch to poshold mode
+                if ((wp_distance <= dyn_wp_radius) || check_missed_wp()) {            //if yes switch to poshold mode
                     if (mission_step.parameter1 == 0) NAV_state = NAV_STATE_HOLD_INFINIT;
                     else NAV_state = NAV_STATE_LAND_START;                                   // if parameter 1 in RTH step is non 0 then land at home
                     if (GPS_conf.nav_rth_takeoff_heading) {
@@ -432,32 +404,84 @@ uint8_t GPS_Compute(void) {
                     }
                 }
                 break;
-
-            case NAV_STATE_WP_ENROUTE:
+#endif
+            case NAV_STATE_WP_ENROUTE:  //导航至指定航点，后应该自动切到定点状态，（返航模式）
+#if !defined (SLIM_WING)
                 speed = GPS_calc_desired_speed(GPS_conf.nav_speed_max, GPS_conf.slow_nav);
                 GPS_calc_nav_rate(speed);
                 GPS_adjust_heading();
+#endif
+                //if ((wp_distance <= GPS_conf.wp_radius) || check_missed_wp()) {
 
-                if ((wp_distance <= GPS_conf.wp_radius) || check_missed_wp()) {               //This decides what happen when we reached the WP coordinates
-                    if (mission_step.action == MISSION_LAND) {                                  //Autoland
-                        NAV_state = NAV_STATE_LAND_START;                                         //Start landing
-                        set_new_altitude(alt.EstAlt);                                             //Stop any altitude changes
-                    } else if (mission_step.flag == MISSION_FLAG_END) {                         //If this was the last mission step (flag set by the mission planner), then switch to poshold
-                        NAV_state = NAV_STATE_HOLD_INFINIT;
-                        NAV_error = NAV_ERROR_FINISH;
-                    } else if (mission_step.action == MISSION_HOLD_UNLIM) {                     //If mission_step was POSHOLD_UNLIM and we reached the position then switch to poshold unlimited
-                        NAV_state = NAV_STATE_HOLD_INFINIT;
-                        NAV_error = NAV_ERROR_FINISH;
-                    } else if (mission_step.action == MISSION_HOLD_TIME) {                      //If mission_step was a timed poshold then initiate timed poshold
-                        nav_hold_time = mission_step.parameter1;
-                        nav_timer_stop = 0;                                                       //This indicates that we are starting a timed poshold
-                        NAV_state = NAV_STATE_HOLD_TIMED;
-                    } else {
-                        NAV_state = NAV_STATE_PROCESS_NEXT;                                       //Otherwise process next step
+                if(user_mission_dorp.drop_wp==mission_step.number) { //预测着弹点
+                    //h=1/2gt^2
+                    //SET_ALT_ROI 对地高度
+                    //InvSqrt 开方 返回浮点
+                    //G=10 25m 约2.25s GPS_speed
+                    //s=vt
+                    float dorp_time_=0;
+                    int dorp_distance=0;
+                    dorp_time_=sqrt(2*SET_ALT_ROI/Gravitational__/100)+DELAY_FOR_DORP;
+                    dorp_distance=dorp_time_*GPS_speed;
+                    if(wp_distance<dorp_distance)//预测投弹
+                    {
+                        user_mission_dorp.drop_status=3;
+                    }
+                }
+                if ((wp_distance <= dyn_wp_radius) || check_missed_wp()) {                    //This decides what happen when we reached the WP coordinates
+                    if(user_mission_dorp.drop_wp) {
+
+                        if(user_mission_dorp.drop_wp-1==mission_step.number)
+                        {
+                            //到达转弯航点
+                            user_mission_dorp.drop_status=2;
+                        } else if(user_mission_dorp.drop_wp==mission_step.number)
+                        {
+                            if(check_missed_wp()&&user_mission_dorp.drop_status!=3) {
+                                //如果错过目标航点再飞一趟
+                                next_step = user_mission_dorp.drop_wp-1;
+                                NAV_state = NAV_STATE_PROCESS_NEXT;
+                                mission_step.flag =0;
+                                user_mission_dorp.drop_status=1;
+                                GPS_prev[LAT] = GPS_coord[LAT];//重设航点
+                                GPS_prev[LON] = GPS_coord[LON];
+                            } else {
+                                //到达航点
+                                user_mission_dorp.drop_status=3;//投放标志变量
+                            }
+                        }
+                    }
+
+                    //===暂时屏蔽其它代码，直接设置NAV_state = NAV_STATE_HOLD_INFINIT
+                    if(f.GPS_mode == GPS_MODE_RTH) {
+                        NAV_state = NAV_STATE_HOLD_INFINIT;  //固定翼测试时，直接设置成定点盘旋！！！多轴不能这样，应该降落！！======================================
+                    } else {  //mission_step中的action 和flag的都值是什么，应该查一下资料==========================
+                        if (mission_step.action == MISSION_LAND) {                                  //Autoland
+                            NAV_state = NAV_STATE_LAND_START;                                         //Start landing
+                            // set_new_altitude(alt.EstAlt);                                             //Stop any altitude changes
+                            set_new_altitude(SET_ALT_ROI);//==单位米===
+                        } else if (mission_step.flag == MISSION_FLAG_END) {                         //If this was the last mission step (flag set by the mission planner), then switch to poshold
+                            //NAV_state = NAV_STATE_HOLD_INFINIT; //原来的，多轴用
+                            //NAV_error = NAV_ERROR_FINISH;
+                            init_RTH();  //后加，固定翼直接返航！！！
+                        } else if (mission_step.action == MISSION_HOLD_UNLIM) {                     //If mission_step was POSHOLD_UNLIM and we reached the position then switch to poshold unlimited
+                            NAV_state = NAV_STATE_HOLD_INFINIT;
+                            NAV_error = NAV_ERROR_FINISH;
+                        } else if (mission_step.action == MISSION_HOLD_TIME) {                      //If mission_step was a timed poshold then initiate timed poshold
+                            nav_hold_time = mission_step.parameter1;
+                            nav_timer_stop = 0;                                                       //This indicates that we are starting a timed poshold
+                            NAV_state = NAV_STATE_HOLD_TIMED;
+                        } else {
+                            NAV_state = NAV_STATE_PROCESS_NEXT;                                       //Otherwise process next step
+                        }
                     }
                 }
                 break;
 
+#if !defined (SLIM_WING)   // Save space for small proc. PatrikE
+                /***************************************************************/
+// NAV_STATE_DO_JUMP: if not needed
+#endif
             case NAV_STATE_DO_JUMP:
                 if (jump_times < 0) {                                  //Jump unconditionally (supposed to be -1) -10 should not be here
                     next_step = mission_step.parameter1;
@@ -478,12 +502,12 @@ uint8_t GPS_Compute(void) {
                     jump_times--;
                 }
                 break;
-
             case NAV_STATE_PROCESS_NEXT:                             //Processing next mission step
                 NAV_error = NAV_ERROR_NONE;
                 if (!recallWP(next_step)) {
                     abort_mission(NAV_ERROR_WP_CRC);
                 } else {
+                    clearNav();//清理上一个航点的PID计算结果
                     switch(mission_step.action)
                     {
                     //Waypoiny and hold commands all starts with an enroute status it includes the LAND command too
@@ -491,24 +515,27 @@ uint8_t GPS_Compute(void) {
                     case MISSION_HOLD_TIME:
                     case MISSION_HOLD_UNLIM:
                     case MISSION_LAND:
+                        GPS_NAV_speed_set=mission_step.parameter3;
                         set_new_altitude(mission_step.altitude);
                         GPS_set_next_wp(&mission_step.pos[LAT], &mission_step.pos[LON], &GPS_prev[LAT], &GPS_prev[LON]);
                         if ((wp_distance/100) >= GPS_conf.safe_wp_distance)  abort_mission(NAV_ERROR_TOOFAR);
                         else NAV_state = NAV_STATE_WP_ENROUTE;
+                        GPS_prev_R[LAT]=GPS_prev[LAT];
+                        GPS_prev_R[LON]=GPS_prev[LON];
                         GPS_prev[LAT] = mission_step.pos[LAT];  //Save wp coordinates for precise route calc
                         GPS_prev[LON] = mission_step.pos[LON];
                         break;
                     case MISSION_RTH:
                         f.GPS_head_set = 0;
                         if (GPS_conf.rth_altitude == 0 && mission_step.altitude == 0) //if config and mission_step alt is zero
-                            set_new_altitude(alt.EstAlt);     // RTH returns at the actual altitude
+                            set_new_altitude(SET_ALT_ROI);     // RTH returns at the actual altitude
                         else {
                             uint32_t rth_alt;
                             if (mission_step.altitude == 0) rth_alt = GPS_conf.rth_altitude * 100;   //altitude in mission step has priority
                             else rth_alt = mission_step.altitude;
 
-                            if (alt.EstAlt < rth_alt) set_new_altitude(rth_alt);                     //BUt only if we are below it.
-                            else set_new_altitude(alt.EstAlt);
+                            if (SET_ALT_ROI < rth_alt) set_new_altitude(rth_alt);                     //BUt only if we are below it.
+                            else set_new_altitude(SET_ALT_ROI);
                         }
                         NAV_state = NAV_STATE_RTH_START;
                         break;
@@ -519,6 +546,13 @@ uint8_t GPS_Compute(void) {
                         else //Error situation, invalid jump target
                             abort_mission(NAV_ERROR_INVALID_JUMP);
                         break;
+                        /***************************************************************/
+#if !defined (SLIM_WING)   // Save space for small proc. PatrikE
+                    case MISSION_SET_POI:
+                        GPS_poi[LAT] = mission_step.pos[LAT];
+                        GPS_poi[LON] = mission_step.pos[LON];
+                        f.GPS_head_set = 1;
+                        break;
                     case MISSION_SET_HEADING:
                         GPS_poi[LAT] = 0;
                         GPS_poi[LON] = 0; // zeroing this out clears the possible pervious set_poi
@@ -528,11 +562,7 @@ uint8_t GPS_Compute(void) {
                             GPS_directionToPoi = mission_step.parameter1;
                         }
                         break;
-                    case MISSION_SET_POI:
-                        GPS_poi[LAT] = mission_step.pos[LAT];
-                        GPS_poi[LON] = mission_step.pos[LON];
-                        f.GPS_head_set = 1;
-                        break;
+#endif
                     default:                                  //if we got an unknown action code abort mission and hold position
                         abort_mission(NAV_ERROR_INVALID_DATA);
                         break;
@@ -543,6 +573,7 @@ uint8_t GPS_Compute(void) {
             } // switch end
         } //end of gps calcs ###0002
     }
+
     return 1;
 } // End of GPS_compute
 
@@ -550,7 +581,7 @@ uint8_t GPS_Compute(void) {
 void abort_mission(unsigned char error_code) {
     GPS_set_next_wp(&GPS_coord[LAT], &GPS_coord[LON],&GPS_coord[LAT], &GPS_coord[LON]);
     NAV_error = error_code;
-    NAV_state = NAV_STATE_HOLD_INFINIT;
+    NAV_state = NAV_STATE_NONE;
 }
 
 //Adjusting heading according to settings - MAG mode must be enabled
@@ -578,13 +609,7 @@ void GPS_adjust_heading() {
 
 #define LAND_DETECT_THRESHOLD 40      //Counts of land situation
 #define BAROPIDMIN           -180     //BaroPID reach this if we landed.....
-void check_takeoff_ok()//检查起飞是否到位
-{
-    if(alt.EstAlt>TAKEOFF_ALT)//检查高度
-        f.TAKEOFF_COMPLETED=1;
 
-
-}
 //Check if we landed or not
 void check_land() {
     // detect whether we have landed by watching for low climb rate and throttle control
@@ -613,7 +638,6 @@ int32_t get_altitude_error() {
 void clear_new_altitude() {
     alt_change_flag = REACHED_ALT;
 }
-
 void force_new_altitude(int32_t _new_alt) {
     alt_to_hold     = _new_alt;
     target_altitude = _new_alt;
@@ -622,11 +646,11 @@ void force_new_altitude(int32_t _new_alt) {
 
 void set_new_altitude(int32_t _new_alt) {
     //Limit maximum altitude command
-    if(_new_alt > GPS_conf.nav_max_altitude*100) _new_alt = GPS_conf.nav_max_altitude * 100;
-    if(_new_alt == alt.EstAlt) {
-        force_new_altitude(_new_alt);
-        return;
-    }
+    //if(_new_alt > GPS_conf.nav_max_altitude*100) _new_alt = GPS_conf.nav_max_altitude * 100;   //===条件总是有问题，暂时屏蔽！！！=========================
+    //if(_new_alt == alt.EstAlt || f.Fixed_Wing_Nav){
+    force_new_altitude(_new_alt);
+    return;
+    //}
     // We start at the current location altitude and gradually change alt
     alt_to_hold = alt.EstAlt;
     // for calculating the delta time
@@ -730,13 +754,33 @@ void GPS_set_next_wp(int32_t* lat_to, int32_t* lon_to, int32_t* lat_from, int32_
 
     GPS_calc_longitude_scaling(*lat_to);
 
+#ifdef FIXEDWING
+// TODO build a separate function to call.
+    if (f.CRUISE_MODE) { // PatrikE CruiseMode version
+#define GEO_SKALEFACT    89.832f  // Scale to match meters  
+        int32_t hh = att.heading;
+        if (hh >180) hh -=360 ;
+
+        float scaler=( GEO_SKALEFACT/GPS_scaleLonDown) * GPS_conf.safe_wp_distance;    //========直线飞行VS绕点飞行=========================================
+        float wp_lat_diff = cos(hh*0.0174532925f); //PI/180
+        float wp_lon_diff = sin(hh*0.0174532925f) * GPS_scaleLonDown;
+        GPS_WP[LAT] +=wp_lat_diff*scaler;   //==如果距离远，可能不太精确，需要GPS_calc_longitude_scaling( GPS_WP[LAT]);以获得较精确导航=====================
+        GPS_WP[LON] +=wp_lon_diff*scaler;
+
+    }
+#endif
+
     GPS_bearing(&GPS_FROM[LAT],&GPS_FROM[LON],&GPS_WP[LAT],&GPS_WP[LON],&target_bearing);
     GPS_distance_cm(&GPS_FROM[LAT],&GPS_FROM[LON],&GPS_WP[LAT],&GPS_WP[LON],&wp_distance);
-    GPS_calc_location_error(&GPS_WP[LAT],&GPS_WP[LON],&GPS_FROM[LAT],&GPS_FROM[LON]);
-    waypoint_speed_gov = GPS_conf.nav_speed_min;
-    original_target_bearing = target_bearing;
 
+    //GPS_calc_location_error(&GPS_WP[LAT],&GPS_WP[LON],&GPS_FROM[LAT],&GPS_FROM[LON]); //固定翼此句不用================
+    //waypoint_speed_gov = GPS_conf.nav_speed_min;
+    original_target_bearing = target_bearing;
+    clearNav();
 }
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Check if we missed the destination somehow
@@ -834,6 +878,7 @@ static void GPS_calc_poshold(void) {
     int32_t target_speed;
     uint8_t axis;
     //
+    GPS_update_crosstrack();
     for (axis=0; axis<2; axis++) {
         target_speed = get_P(error[axis],&posholdPID_PARAM); // calculate desired speed from lat/lon error   //speed即经纬度修正的速度!!!!  //经纬度之差并放入error[LON],error[LAT]
         target_speed = constrain(target_speed,-100,100);      // Constrain the target speed in poshold mode to 1m/s it helps avoid runaways..
@@ -892,12 +937,74 @@ static void GPS_calc_nav_rate( uint16_t max_speed) {
     }
 }
 
-static void GPS_update_crosstrack(void) {   //Meters we are off track line
+static void GPS_update_crosstrack(void) {
     // Crosstrack Error
     // ----------------
     // If we are too far off or too close we don't do track following
-    float temp = (target_bearing - original_target_bearing) * RADX100;
+    //target_bearing 目标航点与当前航点的航向角
+    // original_target_bearing 航点指向
+    int cross_angle_add=0;
+    int temp_error_tb_otb=target_bearing - original_target_bearing;
+
+    float temp = 0;  //弧度转换
+    int temp_angle_line=wrap_18000(target_bearing - original_target_bearing);//机身与两航点间角度差
+    int temp_angle_error_heading=wrap_18000(target_bearing - Current_Heading*100);//与目标航向角度差0-36000
+//	if(temp_error_tb_otb>+180)temp_error_tb_otb-=360;
+//	if(temp_error_tb_otb<-180)temp_error_tb_otb+=360;
+    temp_error_tb_otb=wrap_18000(temp_error_tb_otb);
+    temp=temp_error_tb_otb* RADX100;
+
     crosstrack_error = sin(temp) * wp_distance; // Meters we are off track line
+    //nav_bearing = target_bearing;
+#if defined(FIXEDWING)   // =========================================================================================
+    cross_angle_add=0;
+    if(abs(temp_angle_line)<4500) { //第二步，航向偏差已经很小的情况下，趋近两点间航迹，位置与航向夹角过大时直接逼近
+//		crosstrack_error = sin(temp) * (wp_distance * GPS_conf.crosstrack_gain / 100.0 );
+//		nav_bearing  = target_bearing+constrain(crosstrack_error, -4000, 4000);
+        if(abs(crosstrack_error)>2000)//大于10m距离
+        {
+            debug[3]=2;
+            crosstrack_error*=GPS_conf.crosstrack_gain*1.5/100.0 ;
+        }
+        else {
+            crosstrack_error*=GPS_conf.crosstrack_gain/100.0;
+        }
+
+        nav_bearing=target_bearing+ constrain(crosstrack_error, -4000, 4000);
+    } else {
+
+        nav_bearing = target_bearing;
+    }
+    nav_bearing = target_bearing;
+    nav_bearing = wrap_36000(nav_bearing);
+
+
+
+
+
+
+//	/***********************/
+//    if (abs(wrap_18000(target_bearing - original_target_bearing)) < 4500) {  // If we are too far off or too close we don't do track following
+//            if(crosstrack_error>2500)//大于10m距离
+//                crosstrack_error*=GPS_conf.crosstrack_gain*2 / 100.0 ;
+//            //crosstrack_error = sin(temp) * (wp_distance * GPS_conf.crosstrack_gain / 100.0 );//CROSSTRACK_GAIN = 1);  // Meters we are off track line
+//            else
+//                crosstrack_error*=GPS_conf.crosstrack_gain/100.0;
+
+//       nav_bearing+= constrain(crosstrack_error, -4000, 4000);
+//    } else {
+//            nav_bearing = target_bearing;
+//    }
+//	//	nav_bearing = target_bearing;
+//		nav_bearing = wrap_36000(nav_bearing);
+
+//    debug[0]=original_target_bearing/100;
+//    debug[1]=target_bearing/100;
+//    debug[2]=nav_bearing/100;
+
+//   nav_bearing = target_bearing;  //===================================================
+#endif
+//nav_bearing = target_bearing;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1008,18 +1115,22 @@ uint8_t hex_c(uint8_t n) {    // convert '0'..'9','A'..'F' to 0..15
 //************************************************************************
 // Common GPS functions
 //
+
 void init_RTH() {
     f.GPS_mode = GPS_MODE_RTH;           // Set GPS_mode to RTH
     f.GPS_BARO_MODE = true;
     GPS_hold[LAT] = GPS_coord[LAT];      //All RTH starts with a poshold
-    GPS_hold[LON] = GPS_coord[LON];      //This allows to raise to rth altitude
+    GPS_hold[LON] = GPS_coord[LON];      //This allows to raise to rth altitude//原地爬升高度
     GPS_set_next_wp(&GPS_hold[LAT],&GPS_hold[LON], &GPS_hold[LAT], &GPS_hold[LON]);
     NAV_paused_at = 0;
-    if (GPS_conf.rth_altitude == 0) set_new_altitude(alt.EstAlt);     //Return at actual altitude
+    if (GPS_conf.rth_altitude == 0)
+        set_new_altitude(SET_ALT_ROI);     //Return at actual altitude
+    //set_new_altitude(GPS_altitude * 100);//==单位米===
     else {                                                            // RTH altitude is defined, but we use it only if we are below it
         if (alt.EstAlt < GPS_conf.rth_altitude * 100)
             set_new_altitude(GPS_conf.rth_altitude * 100);
-        else set_new_altitude(alt.EstAlt);
+        else
+            set_new_altitude(SET_ALT_ROI);
     }
     f.GPS_head_set = 0;                                               //Allow the RTH ti handle heading
     NAV_state = NAV_STATE_RTH_START;                                  //NAV engine status is Starting RTH.
@@ -1057,6 +1168,20 @@ void GPS_reset_nav(void) {
     }
 }
 
+// Reset nav
+void clearNav(void) {
+#if defined(FIXEDWING)     //=============================================================================================
+    NaverrorI=0;
+    AlterrorI=0;
+    lastAltDiff=0;
+    lastNavDiff=0;
+    SpeedBoost=0;
+    for(uint8_t i=0; i <GPS_UPD_HZ; i++) {
+        AltHist[i] = 0;
+        NavDif[i] =0;
+    };
+#endif
+}
 //Get the relevant P I D values and set the PID controllers
 void GPS_set_pids(void) {
     posholdPID_PARAM.kP   = (float)conf.pid[PIDPOS].P8/100.0;
@@ -1072,6 +1197,12 @@ void GPS_set_pids(void) {
     navPID_PARAM.kI   = (float)conf.pid[PIDNAVR].I8/100.0;
     navPID_PARAM.kD   = (float)conf.pid[PIDNAVR].D8/1000.0;
     navPID_PARAM.Imax = POSHOLD_RATE_IMAX * 100;
+
+#ifdef FIXEDWING
+    altPID_PARAM.kP   = (float)conf.pid[PIDALT].P8/10.0;  //conf.pid[PIDALT].P8   = 30;conf.pid[PIDALT].I8  = 20;conf.pid[PIDALT].D8   = 45;
+    altPID_PARAM.kI   = (float)conf.pid[PIDALT].I8/100.0;
+    altPID_PARAM.kD   = (float)conf.pid[PIDALT].D8/1000.0;
+#endif
 }
 //It was moved here since even i2cgps code needs it
 int32_t wrap_18000(int32_t ang) {
@@ -1079,115 +1210,11 @@ int32_t wrap_18000(int32_t ang) {
     if (ang < -18000) ang += 36000;
     return ang;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**************************************************************************************/
 /**************************************************************************************/
 /***********************       specific  GPS device section  **************************/
 /**************************************************************************************/
 /**************************************************************************************/
-
-//#if defined(GPS_SERIAL)
-
-/**************************************************************************************/
-/***********************       NMEA                          **************************/
-/**************************************************************************************/
-
-#if defined(NMEA)
-/* This is a light implementation of a GPS frame decoding
-   This should work with most of modern GPS devices configured to output NMEA frames.
-   It assumes there are some NMEA GGA frames to decode on the serial bus
-   Here we use only the following data :
-     - latitude
-     - longitude
-     - GPS fix is/is not ok
-     - GPS num sat (4 is enough to be +/- reliable)
-     - GPS altitude
-     - GPS speed
-*/
-#define FRAME_GGA  1
-#define FRAME_RMC  2
-
-void GPS_SerialInit(void) {
-// SerialOpen(GPS_SERIAL,GPS_BAUD);
-    delay(1000);
-}
-
-bool GPS_newFrame(uint8_t c) {
-    uint8_t frameOK = 0;
-    static uint8_t param = 0, offset = 0, parity = 0;
-    static char string[15];
-    static uint8_t checksum_param, frame = 0;
-
-    if (c == '$') {
-        param = 0;
-        offset = 0;
-        parity = 0;
-    } else if (c == ',' || c == '*') {
-        string[offset] = 0;
-        if (param == 0) { //frame identification
-            frame = 0;
-            if (string[0] == 'G' && string[1] == 'P' && string[2] == 'G' && string[3] == 'G' && string[4] == 'A') frame = FRAME_GGA;
-            if (string[0] == 'G' && string[1] == 'P' && string[2] == 'R' && string[3] == 'M' && string[4] == 'C') frame = FRAME_RMC;
-        } else if (frame == FRAME_GGA) {
-            if      (param == 2)                     {
-                GPS_coord[LAT] = GPS_coord_to_degrees(string);
-            }
-            else if (param == 3 && string[0] == 'S') GPS_coord[LAT] = -GPS_coord[LAT];
-            else if (param == 4)                     {
-                GPS_coord[LON] = GPS_coord_to_degrees(string);
-            }
-            else if (param == 5 && string[0] == 'W') GPS_coord[LON] = -GPS_coord[LON];
-            else if (param == 6)                     {
-                f.GPS_FIX = (string[0]  > '0');
-            }
-            else if (param == 7)                     {
-                GPS_numSat = grab_fields(string,0);
-            }
-            else if (param == 9)                     {
-                GPS_altitude = grab_fields(string,0);   // altitude in meters added by Mis
-            }
-        } else if (frame == FRAME_RMC) {
-            if      (param == 7)                     {
-                GPS_speed = ((uint32_t)grab_fields(string,1)*5144L)/1000L;   //gps speed in cm/s will be used for navigation
-            }
-            else if (param == 8)                     {
-                GPS_ground_course = grab_fields(string,1);    //ground course deg*10
-            }
-        }
-        param++;
-        offset = 0;
-        if (c == '*') checksum_param=1;
-        else parity ^= c;
-    } else if (c == '\r' || c == '\n') {
-        if (checksum_param) { //parity checksum
-            uint8_t checksum = hex_c(string[0]);
-            checksum <<= 4;
-            checksum += hex_c(string[1]);
-            if (checksum == parity) frameOK = 1;
-        }
-        checksum_param=0;
-    } else {
-        if (offset < 15) string[offset++] = c;
-        if (!checksum_param) parity ^= c;
-    }
-    return frameOK && (frame==FRAME_GGA);
-}
-
-
-#endif //NMEA
-
 
 /**************************************************************************************/
 /***********************       UBLOX                         **************************/
@@ -1293,43 +1320,7 @@ static union {
 } _buffer;
 
 uint32_t init_speed[5] = {9600,19200,38400,57600,115200};
-/*
-static void SerialGpsPrint(const char  * str) {
-  char b;
-  while(str && (b = pgm_read_byte(str++))) {
-    SerialWrite(GPS_SERIAL, b);
-    delay(5);
-  }
-}
 
-void GPS_SerialInit(void) {
-  SerialOpen(GPS_SERIAL,GPS_BAUD);
-  delay(1000);
-  for(uint8_t i=0;i<5;i++){
-    SerialOpen(GPS_SERIAL,init_speed[i]);          // switch UART speed for sending SET BAUDRATE command (NMEA mode)
-    #if (GPS_BAUD==19200)
-      SerialGpsPrint(PSTR("$PUBX,41,1,0003,0001,19200,0*23\r\n"));     // 19200 baud - minimal speed for 5Hz update rate
-    #endif
-    #if (GPS_BAUD==38400)
-      SerialGpsPrint(PSTR("$PUBX,41,1,0003,0001,38400,0*26\r\n"));     // 38400 baud
-    #endif
-    #if (GPS_BAUD==57600)
-      SerialGpsPrint(PSTR("$PUBX,41,1,0003,0001,57600,0*2D\r\n"));     // 57600 baud
-    #endif
-    #if (GPS_BAUD==115200)
-      SerialGpsPrint(PSTR("$PUBX,41,1,0003,0001,115200,0*1E\r\n"));    // 115200 baud
-    #endif
-    while(!SerialTXfree(GPS_SERIAL)) delay(10);
-  }
-  delay(200);
-  SerialOpen(GPS_SERIAL,GPS_BAUD);
-  for(uint8_t i=0; i<sizeof(UBLOX_INIT); i++) {                        // send configuration data in UBX protocol
-    SerialWrite(GPS_SERIAL, pgm_read_byte(UBLOX_INIT+i));
-    delay(5); //simulating a 38400baud pace (or less), otherwise commands are not accepted by the device.
-  }
-}
-*/
-//uint8_t  temp_GPS[512];
 u8 GPS_newFrame(u8 data) {
     static uint8_t  _step = 0; // State machine state
     static uint8_t  _msg_id;
@@ -1383,9 +1374,17 @@ u8 GPS_newFrame(u8 data) {
                     GPS_coord[LON] = _buffer.posllh.longitude;
                     GPS_coord[LAT] = _buffer.posllh.latitude;
                     //注意，临时DEBUG，调回原来的！
+                    //B5 62 01 02 1C 00 08 EC C2 0C 94 D9 CF 42 5F 32 17 0F BE 24 07 00 14 90 07 00 63 21 00 00 BA 14 00 00 fc 83
+                    //B5 62 01 02 1C 00 08 EC C2 0C 94 D9 CF 41 5F 32 17 0F BE 24 07 00 14 90 07 00 63 21 00 00 BA 14 00 00 fb 6e
+                    //B5 62 01 02 1C 00 08 EC C2 0C 94 D9 CF 41 5F 32 17 0F BE 24 07 00 14 90 07 00 63 21 00 00 BA 14 00 00 fb 6e
+                    //B5 62 01 06 34 00 98 ED C2 0C 30 A0 05 00 94 07 03 DD 19 1E AD F5 AF 7E AB 1D06 D2 57 15 F2 03 00 00 EE FF FF FF 1A 00 00 00 C4 FF FF FF 57 00 00 00 84 0102 09 AC 4C 02 00 8c 23
                     //GPS_coord[LON] = 0x5f32170f;0F 17 32 5F 41 CF D9 94
                     // GPS_coord[LAT] = 0x94d9cf41;41 CF D9 94
                     GPS_altitude   = _buffer.posllh.altitude_msl / 1000; //alt in m
+                    if(f.ARMED)
+                        GPS_altitude=GPS_altitude-GPS_altitude_cel;//解锁前保持更新差值
+                    else
+                        GPS_altitude_cel=GPS_altitude;//解锁后减去差值
                     //GPS_time       = _buffer.posllh.time; //not used for the moment
                 }
                 ret= true;        // POSLLH message received, allow blink GUI icon and LED, frame available for nav computation
@@ -1394,7 +1393,6 @@ u8 GPS_newFrame(u8 data) {
                 if((_buffer.solution.fix_status & NAV_STATUS_FIX_VALID) && (_buffer.solution.fix_type == FIX_3D || _buffer.solution.fix_type == FIX_2D))
                 {
                     f.GPS_FIX = 1;
-                    PAout(1)=0;
                 }
 
                 GPS_numSat = _buffer.solution.satellites;
@@ -1409,272 +1407,303 @@ u8 GPS_newFrame(u8 data) {
     //return 0;
 }
 #endif //UBLOX
+/*****************************************************************************************/
+/*****************************************************************************************/
+/*****************************************************************************************/
+#if defined(FIXEDWING)
+
+PID_PARAM posholdPID_PARAM;
+PID_PARAM poshold_ratePID_PARAM;
+PID_PARAM navPID_PARAM;
+PID_PARAM altPID_PARAM;
 
 
+void FW_NAV() {
+// Navigation with Planes under Development.
+    static int16_t NAV_deltaSum = 0, ALT_deltaSum=0;
+    static int16_t  GPS_FwTarget = 0;   // Gps correction for Fixed wing
+    static int16_t  GPS_AltErr = 0;
+    static int16_t  NAV_Thro = 0;
+    int16_t GPS_Heading = GPS_ground_course; // Store current bearing
 
-/**************************************************************************************/
-/***********************       MTK                           **************************/
-/**************************************************************************************/
-#if defined(MTK_BINARY16) || defined(MTK_BINARY19)
+    int16_t altDiff = 0 ;
+    int16_t RTH_Alt = GPS_conf.rth_altitude;   //==========应该已经设置好了!!!？？？？？？======================
+    int16_t delta[2] = {0,0}; // D-Term
+    int16_t TX_Thro = rcData[THROTTLE]; // Read and store Throttle pos.
+    int16_t navDiff=0 ;
+// Calculated Altitude over home in meters
+    int16_t curr_Alt = alt.EstAlt/100; // New  //===应该不应该改成GSP高度???=======可用解锁时的GPS高度做为0高程===气压计变化较大=========
+    if(NAV_flag) {
+        //GPS不更新不进行计算
+        NAV_flag=0;
+// Wrap GPS_Heading 1800
+        if (GPS_Heading > 1800)  GPS_Heading -= 3600;
+        if (GPS_Heading < -1800) GPS_Heading += 3600;
 
-#define MTK_SET_BINARY          PSTR("$PGCMD,16,0,0,0,0,0*6A\r\n")
-#define MTK_SET_NMEA            PSTR("$PGCMD,16,1,1,1,1,1*6B\r\n")
-#define MTK_SET_NMEA_SENTENCES  PSTR("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28\r\n")
-#define MTK_OUTPUT_4HZ          PSTR("$PMTK220,250*29\r\n")
-#define MTK_OUTPUT_5HZ          PSTR("$PMTK220,200*2C\r\n")
-#define MTK_OUTPUT_10HZ         PSTR("$PMTK220,100*2F\r\n")
-#define MTK_NAVTHRES_OFF        PSTR("$PMTK397,0*23\r\n") // Set Nav Threshold (the minimum speed the GPS must be moving to update the position) to 0 m/s  
-#define SBAS_ON                 PSTR("$PMTK313,1*2E\r\n")
-#define WAAS_ON                 PSTR("$PMTK301,2*2E\r\n")
-#define SBAS_TEST_MODE          PSTR("$PMTK319,0*25\r\n")  //Enable test use of sbas satelite in test mode (usually PRN124 is in test mode)
-
-struct diyd_mtk_msg {
-    int32_t  latitude;
-    int32_t  longitude;
-    int32_t  altitude;
-    int32_t  ground_speed;
-    int32_t  ground_course;
-    uint8_t  satellites;
-    uint8_t  fix_type;
-    uint32_t utc_date;
-    uint32_t utc_time;
-    uint16_t hdop;
-};
-
-// #pragma pack(pop)
-enum diyd_mtk_fix_type {
-    FIX_NONE = 1,
-    FIX_2D = 2,
-    FIX_3D = 3,
-    FIX_2D_SBAS = 6,
-    FIX_3D_SBAS = 7
-};
-
-#if defined(MTK_BINARY16)
-enum diyd_mtk_protocol_bytes {
-    PREAMBLE1 = 0xd0,
-    PREAMBLE2 = 0xdd,
-};
-#endif
-
-#if defined(MTK_BINARY19)
-enum diyd_mtk_protocol_bytes {
-    PREAMBLE1 = 0xd1,
-    PREAMBLE2 = 0xdd,
-};
-#endif
-
-// Packet checksum accumulators
-uint8_t  _ck_a;
-uint8_t  _ck_b;
-
-// State machine state
-uint8_t  _step;
-uint8_t  _payload_counter;
-
-// Time from UNIX Epoch offset
-long  _time_offset;
-bool  _offset_calculated;
-
-// Receive buffer
-union {
-    diyd_mtk_msg  msg;
-    uint8_t       bytes[];
-} _buffer;
-
-inline long _swapl(const void *bytes) {
-    const uint8_t *b = (const uint8_t *)bytes;
-    union {
-        long    v;
-        uint8_t b[4];
-    } u;
-
-    u.b[0] = b[3];
-    u.b[1] = b[2];
-    u.b[2] = b[1];
-    u.b[3] = b[0];
-
-    return(u.v);
-}
-
-uint32_t init_speed[5] = {9600,19200,38400,57600,115200};
-
-void SerialGpsPrint(const char PROGMEM * str) {
-    char b;
-    while(str && (b = pgm_read_byte(str++))) {
-        SerialWrite(GPS_SERIAL, b);
-    }
-}
-
-void GPS_SerialInit(void) {
-    SerialOpen(GPS_SERIAL,GPS_BAUD);
-    delay(1000);
-#if defined(INIT_MTK_GPS)                              // MTK GPS setup
-    for(uint8_t i=0; i<5; i++) {
-        SerialOpen(GPS_SERIAL,init_speed[i]);                // switch UART speed for sending SET BAUDRATE command
-#if (GPS_BAUD==19200)
-        SerialGpsPrint(PSTR("$PMTK251,19200*22\r\n"));     // 19200 baud - minimal speed for 5Hz update rate
-#endif
-#if (GPS_BAUD==38400)
-        SerialGpsPrint(PSTR("$PMTK251,38400*27\r\n"));     // 38400 baud
-#endif
-#if (GPS_BAUD==57600)
-        SerialGpsPrint(PSTR("$PMTK251,57600*2C\r\n"));     // 57600 baud
-#endif
-#if (GPS_BAUD==115200)
-        SerialGpsPrint(PSTR("$PMTK251,115200*1F\r\n"));    // 115200 baud
-#endif
-        while(!SerialTXfree(GPS_SERIAL)) delay(80);
-    }
-    // at this point we have GPS working at selected (via #define GPS_BAUD) baudrate
-    // So now we have to set the desired mode and update rate (which depends on the NMEA or MTK_BINARYxx settings)
-    SerialOpen(GPS_SERIAL,GPS_BAUD);
-
-    SerialGpsPrint(MTK_NAVTHRES_OFF);
-    while(!SerialTXfree(GPS_SERIAL)) delay(80);
-    SerialGpsPrint(SBAS_ON);
-    while(!SerialTXfree(GPS_SERIAL)) delay(80);
-    SerialGpsPrint(WAAS_ON);
-    while(!SerialTXfree(GPS_SERIAL)) delay(80);
-    SerialGpsPrint(SBAS_TEST_MODE);
-    while(!SerialTXfree(GPS_SERIAL)) delay(80);
-    SerialGpsPrint(MTK_OUTPUT_5HZ);           // 5 Hz update rate
-
-#if defined(NMEA)
-    SerialGpsPrint(MTK_SET_NMEA_SENTENCES); // only GGA and RMC sentence
-#endif
-#if defined(MTK_BINARY19) || defined(MTK_BINARY16)
-    SerialGpsPrint(MTK_SET_BINARY);
-#endif
-#endif  // init_mtk_gps
-}
-/*
-bool GPS_newFrame(uint8_t data) {
-  bool parsed = false;
-
-  restart:
-  switch(_step) {
-    // Message preamble, class, ID detection
-    //
-    // If we fail to match any of the expected bytes, we
-    // reset the state machine and re-consider the failed
-    // byte as the first byte of the preamble.  This
-    // improves our chances of recovering from a mismatch
-    // and makes it less likely that we will be fooled by
-    // the preamble appearing as data in some other message.
-    //
-    case 0:
-      if(PREAMBLE1 == data)
-        _step++;
-      break;
-    case 1:
-      if (PREAMBLE2 == data) {
-        _step++;
-        break;
-      }
-      _step = 0;
-      goto restart;
-    case 2:
-      if (sizeof(_buffer) == data) {
-        _step++;
-        _ck_b = _ck_a = data;                  // reset the checksum accumulators
-        _payload_counter = 0;
-      } else {
-        _step = 0;                             // reset and wait for a message of the right class
-        goto restart;
-      }
-      break;
-      // Receive message data
-    case 3:
-      _buffer.bytes[_payload_counter++] = data;
-      _ck_b += (_ck_a += data);
-      if (_payload_counter == sizeof(_buffer))
-        _step++;
-      break;
-      // Checksum and message processing
-    case 4:
-      _step++;
-      if (_ck_a != data)
-        _step = 0;
-      break;
-    case 5:
-      _step = 0;
-      if (_ck_b != data)
-        break;
-      f.GPS_FIX                   = ((_buffer.msg.fix_type == FIX_3D) || (_buffer.msg.fix_type == FIX_3D_SBAS));
-      #if defined(MTK_BINARY16)
-      GPS_coord[LAT]              = _buffer.msg.latitude * 10;    // XXX doc says *10e7 but device says otherwise
-      GPS_coord[LON]              = _buffer.msg.longitude * 10;   // XXX doc says *10e7 but device says otherwise
-      #endif
-      #if defined(MTK_BINARY19)
-      GPS_coord[LAT]              = _buffer.msg.latitude;         // With 1.9 now we have real 10e7 precision
-      GPS_coord[LON]              = _buffer.msg.longitude;
-      #endif
-      GPS_altitude                = _buffer.msg.altitude /100;    // altitude in meter
-      GPS_speed                   = _buffer.msg.ground_speed;     // in m/s * 100 == in cm/s
-      GPS_ground_course           = _buffer.msg.ground_course/100;  //in degrees
-      GPS_numSat                  = _buffer.msg.satellites;
-      //GPS_time                    = _buffer.msg.utc_time;
-      //GPS_hdop                  = _buffer.msg.hdop;
-      parsed = true;
-  }
-  return parsed;
-}
-#endif //MTK
-
-#endif //GPS SERIAL
-
-*/
-
-
-/**************************************************************************************/
-/***************                       I2C GPS                     ********************/
-/**************************************************************************************/
-#if defined(I2C_GPS)
-#define I2C_GPS_ADDRESS               0x20 //7 bits       
-
-#define I2C_GPS_STATUS_00             00    //(Read only)
-#define I2C_GPS_STATUS_NEW_DATA       0x01  // New data is available (after every GGA frame)
-#define I2C_GPS_STATUS_2DFIX          0x02  // 2dfix achieved
-#define I2C_GPS_STATUS_3DFIX          0x04  // 3dfix achieved
-#define I2C_GPS_STATUS_NUMSATS        0xF0  // Number of sats in view
-#define I2C_GPS_LOCATION              07    // current location 8 byte (lat, lon) int32_t
-#define I2C_GPS_GROUND_SPEED          31    // GPS ground speed in m/s*100 (uint16_t)      (Read Only)
-#define I2C_GPS_ALTITUDE              33    // GPS altitude in meters (uint16_t)           (Read Only)
-#define I2C_GPS_GROUND_COURSE         35    // GPS ground course (uint16_t)
-#define I2C_GPS_TIME                  39    // UTC Time from GPS in hhmmss.sss * 100 (uint32_t)(unneccesary precision) (Read Only)
-#define I2C_GPS_SONAR_ALT             239   // Sonar Altitude
-
-uint8_t GPS_NewData(void) {
-    uint8_t i2c_gps_status;
-
-    i2c_gps_status = i2c_readReg(I2C_GPS_ADDRESS,I2C_GPS_STATUS_00);                 //Get status register
-
-#if defined(I2C_GPS_SONAR)
-    i2c_read_reg_to_buf(I2C_GPS_ADDRESS, I2C_GPS_SONAR_ALT, (uint8_t*)&sonarAlt,2);
-#endif
-
-    f.GPS_FIX = 0;
-    if (i2c_gps_status & I2C_GPS_STATUS_3DFIX) {                                     //Check is we have a good 3d fix (numsats>5)
-        f.GPS_FIX = 1;
-        if (i2c_gps_status & I2C_GPS_STATUS_NEW_DATA) {                                //Check about new data
-            GPS_Frame = 1;
-            if (GPS_update == 1) GPS_update = 0;
-            else GPS_update = 1; //Blink GPS update
-            GPS_numSat = i2c_gps_status >>4;
-            i2c_read_reg_to_buf(I2C_GPS_ADDRESS, I2C_GPS_LOCATION,     (uint8_t*)&GPS_coord[LAT],4);
-            i2c_read_reg_to_buf(I2C_GPS_ADDRESS, I2C_GPS_LOCATION+4,   (uint8_t*)&GPS_coord[LON],4);
-            // note: the following vars are currently not used in nav code -- avoid retrieving it to save time
-            //i2c_read_reg_to_buf(I2C_GPS_ADDRESS, I2C_GPS_GROUND_SPEED, (uint8_t*)&GPS_speed,2);
-            //i2c_read_reg_to_buf(I2C_GPS_ADDRESS, I2C_GPS_ALTITUDE,     (uint8_t*)&GPS_altitude,2);
-            //i2c_read_reg_to_buf(I2C_GPS_ADDRESS, I2C_GPS_GROUND_COURSE,(uint8_t*)&GPS_ground_course,2);
-            return 1;
+// Only use MAG with small Tilt angle and if Mag and Gps.heading aligns
+#if MAG
+        if (abs(att.heading -(GPS_Heading/10))>10 && GPS_speed >800) // GPS and MAG heading diff.
+        {
+            Current_Heading = GPS_Heading/10;
+            //	debug[0]=1;
         }
-    }
-    return 0;
-}
-#endif //I2C_GPS
+        else {
+            Current_Heading = att.heading;
+            //	debug[0]=2;
+        }
+#else
+        Current_Heading =GPS_Heading/10 ;
 #endif
 
+#ifdef SIMDEBUG // TODO remove//===========================================================
+        //Current_Heading = att.heading;  //=====使用体身磁力计确定方向，可能在受干扰时不可靠，测试时可使用。 原来使用的GPS方向进行导航！！！！！！
+#endif
+// Calculate Navigation errors
+        GPS_FwTarget = nav_bearing/100 ;// target_bearing/100;
+        //=============================
+        //magHold=GPS_FwTarget;
+        navDiff =GPS_FwTarget - Current_Heading;	// Navigation Error in degrees
+
+        /*2018-8-25测试 使用地理坐标系计算航向角误差*/
+
+// Wrap Heading 180
+
+        if (navDiff <= - 180) navDiff += 360;
+        if (navDiff >= + 180) navDiff -= 360;
+        //=====================================================================================================
+
+// Force a left turn unless Waypointmode.
+        if (NAV_state != NAV_STATE_WP_ENROUTE)
+            if (abs(navDiff) > 165)
+                navDiff  = -179; //======================
+
+// Filtering of navDiff 10m around home to stop nervous servos
+        //if ( GPS_distanceToHome <10 )navDiff*=0.1;
+//wp_distance
+        uint32_t wp_distance_R;
+        GPS_distance_cm(&GPS_coord[LAT],&GPS_coord[LON],&GPS_prev_R[LAT],&GPS_prev_R[LON],&wp_distance_R);
+        //计算上一个航点的距离
+        if (wp_distance<1000||wp_distance_R<1000 )//半径10m不改变方向
+        {
+            //navDiff=0;
+            f.NAV_ROLL_LOCK=1;
+        } else {
+            f.NAV_ROLL_LOCK=0;
+        }
+
+        //=====两种高度设定对比测试===在init_RTH();需要修改对应的高度参考值！！！！！================================================================================================================================
+//  //GPS_AltErr      = -get_altitude_error()/100; //  Altitude error in meters Negative means you're to low  //alt_to_hold - alt.EstAlt;   //====气压计高度做为高度设定===============================================================
+        GPS_AltErr      = -(alt_to_hold - GPS_altitude * 100)/100; //====GPS高度做为高度设定=====当set_new_altitude(alt)=alt单位为CM时采用====GPS_altitude单位为米====正为超高==================================================================
+        static uint32_t gpsTimer = 0;
+        static uint16_t gpsFreq = 1000/GPS_UPD_HZ;  // 5HZ 200ms DT   //可直接定义常量减少计算量！！！！
+        if ( millis() - gpsTimer >= gpsFreq ) {   //===确保更新GPS数据时才进行处理！！！======
+            gpsTimer = millis();
+
+// Throttle control
+
+// desired speed to stick setting Test TEST  //==初始油门大小========
+            if (rcData[THROTTLE] > MAXCHECK || f.FS_MODE) { // if throttle is on Full use predefined setting   //MAXCHECK=1900
+                NAV_Thro = CRUICETHROTTLE;   //1400
+                if (NAV_state == NAV_STATE_WP_ENROUTE && alt_to_hold == 0)
+                    NAV_Thro = IDLE_THROTTLE; // TODO  Idle For landing Test
+            } else { // pilot has control over desired speed
+                NAV_Thro = rcData[THROTTLE];
+            }
+
+            if (f.FAILSAFE_RTH_ENABLE) // Don't listen to Pilot until FAILSAFE_RTH_ENABLE is disabled.
+                NAV_Thro = CRUICETHROTTLE;//1400
+
+// Deadpan for throttle at correct Alt.
+            if (abs(GPS_AltErr) > 1) { // Add AltitudeError  and scale up with a factor to throttle  //#define SCALER_THROTTLE  8 ->10
+                NAV_Thro=constrain(NAV_Thro - (GPS_AltErr *SCALER_THROTTLE), IDLE_THROTTLE,CLIMBTHROTTLE);
+            }   //GPS_AltErr      = -get_altitude_error()/100; //  Altitude error in meters Negative means you're to low
+
+// Reset Climbout Flag when Alt have been reached
+            if (f.CLIMBOUT_FW && GPS_AltErr >= 0 )
+                f.CLIMBOUT_FW = 0;  //GPS_AltErr>0为高于目标，小于0低于目标
+// Climb out before RTH
+            if (f.GPS_mode == GPS_MODE_RTH ) {
+                if (f.CLIMBOUT_FW) { //按照给定误差控制角度进行爬升！！数据是不是太大？？？！！！！=====================
+                    GPS_AltErr =  - (GPS_MAXCLIMB *10) ; // Max climbAngle   //#define GPS_MAXCLIMB   20     // Degrees climbing . To much can stall the plane.
+                    NAV_Thro = CLIMBTHROTTLE;            // Max Allowed Throttle  //CLIMBTHROTTLE=1900
+                    if (curr_Alt <= SAFE_NAV_ALT) navDiff=0; // Force climb with Level Wings below safe Alt  //SAFE_NAV_ALT = 20 meters  //===如果用GPS高度刚需修改curr_Alt==============
+                }
+
+            }
+
+
+
+            /******************************
+            PID for Navigating planes.
+            ******************************/
+            float NavDT ;
+            static uint32_t nav_loopT;
+            int32_t nav_delta=0;
+            NavDT = (float)(millis() - nav_loopT)/ 1000;
+            nav_loopT = millis();
+
+            /****************************************************************************************************/
+// Altitude PID
+            //关掉下面这句测试一下效果！！！======================
+            if (abs(GPS_AltErr)<=3) AlterrorI*=NavDT;  // Remove I-Term in deadspan //什么原理？？？
+
+            GPS_AltErr*=10;
+            AlterrorI += (GPS_AltErr * altPID_PARAM.kI) * NavDT;          // Acumulate I from PIDPOSR   //altPID_PARAM.kI=0.2  altPID_PARAM.kP=3,  altPID_PARAM.kD=0.045
+            //AlterrorI =constrain(AlterrorI,-500,500);                     // limits I term influence
+            AlterrorI =constrain(AlterrorI,-600,550);                     // limits I term influence
+            //debug[3] = AlterrorI; //===================================================================================================================================================================================================
+            delta[0] = (GPS_AltErr - lastAltDiff);
+            lastAltDiff = GPS_AltErr;
+            if (ABS(delta[0])>100) delta[0] = 0;  //限制D值的可信范围！！！！！！！
+            //===用最近3个值进行测试=================================================================
+            AltHist[2] = AltHist[1]; //第2次
+            AltHist[1] = AltHist[0]; //前1次
+            AltHist[0] = delta[0];  //当前
+            ALT_deltaSum =  ((AltHist[0] + AltHist[1] + AltHist[2])<<4) * altPID_PARAM.kD / NavDT ;
+            //debug[3] = ALT_deltaSum; //ok==============================================================
+
+            altDiff = GPS_AltErr * altPID_PARAM.kP ;  // Add P in Elevator compensation.//altPID_PARAM.kP = 3
+            altDiff +=(AlterrorI);   // Add I
+            altDiff =constrain(altDiff,-890,750);//修改定高限幅
+
+
+
+            /****************************************************************************************************/
+// Nav PID NAV
+            if (abs(navDiff)<=2) NaverrorI*=NavDT; // Remove I-Term in deadspan //接近目标高度移除积分
+            navDiff*=10;
+            NaverrorI += (navDiff * navPID_PARAM.kI) *NavDT;
+            NaverrorI =constrain(NaverrorI,-250,250);
+            nav_delta = (navDiff - lastNavDiff);
+            lastNavDiff = navDiff;
+            if (abs(nav_delta)>100) nav_delta = 0; // Filter out too big values  //限制值可以再考虑一下！！！！
+// Store 1 sec history for D-term in shift register
+            for(uint8_t i=0; i < GPS_UPD_HZ-1; i++) {//此处原文由溢出，循环了9次，修改为GPS_UPD_HZ-1
+                NavDif[i] = NavDif[i+1];
+            }
+//            NavDif[GPS_UPD_HZ-1]=nav_delta;
+//            NAV_deltaSum = 0; // Sum History
+//            for(uint8_t i=0; i<GPS_UPD_HZ; i++) {
+//                NAV_deltaSum += NavDif[i];
+//            }
+            NAV_deltaSum = ( NAV_deltaSum *navPID_PARAM.kD )/ NavDT; // Add D
+            navDiff *= navPID_PARAM.kP;        // Add Nav P
+            navDiff += NaverrorI;        // Add I
+            /****************************************************************************************************/
+            /******* End of PID *******/
+
+// Limit outputs
+            //GPS_angle[PITCH] = constrain(altDiff/10,-GPS_MAXCLIMB*10,GPS_MAXDIVE*10) + ALT_deltaSum; //GPS_MAXDIVE=20   GPS_MAXCLIMB=30
+            int16_t temp_angle_pitch;
+            if (!f.CLIMBOUT_FW) {
+                temp_angle_pitch= constrain(ABS(att.angle[ROLL]) * (0.7),0,220);   //#define ELEVATORCOMPENSATION   100 升力补偿
+            } else {
+                GPS_angle[PITCH]= 0;
+            }
+            D_U[5]=altDiff/4;
+            D_U[6]=GPS_angle[PITCH];//这里检查倾角油门补偿
+            GPS_angle[PITCH] = constrain(altDiff/4 + ALT_deltaSum-temp_angle_pitch,-GPS_MAXCLIMB*10,GPS_MAXDIVE*10); //GPS_MAXDIVE=20   GPS_MAXCLIMB=15  //==原来的P,I值权重太小===========
+            GPS_angle[YAW]   = constrain(navDiff/6 + NAV_deltaSum,-GPS_RUDDER*10,  GPS_RUDDER*10 ); //GPS_RUDDER=20
+            GPS_angle[ROLL]  = constrain(navDiff/10 + NAV_deltaSum,-GPS_MAXCORR*10, GPS_MAXCORR*10); //GPS_MAXCORR=32
+
+            if(mission_step.parameter2==1||f.NAV_ROLL_LOCK)//特殊航点锁定横滚
+            {
+                GPS_angle[ROLL]=0;
+            }
+            //GPS_angle[ROLL]  = constrain(navDiff/10,-GPS_conf.nav_bank_max, GPS_conf.nav_bank_max) + NAV_deltaSum; // From Gui
+            //debug[0]=GPS_angle[ROLL];
+//***********************************************//
+// Elevator compensation depending on behaviour. //
+//***********************************************//
+// Prevent stall with Disarmed motor  New TEST
+            if ( f.MOTORS_STOPPED ) {
+                GPS_angle[PITCH]=constrain(GPS_angle[PITCH],0, GPS_MAXDIVE*10);   //==小油门时的失速保护！！！==================================================
+            }
+
+// Add elevator compared with rollAngle
+            //if (!f.CLIMBOUT_FW) {GPS_angle[PITCH]-= abs(att.angle[ROLL]) * (ELEVATORCOMPENSATION /100);}  //#define ELEVATORCOMPENSATION   100
+
+            D_U[7]=GPS_angle[PITCH];
+//***********************************************//
+// Throttle compensation depending on behaviour. //
+//***********************************************//
+            // Compensate throttle with pitch Angle
+            //NAV_Thro -= constrain(att.angle[PITCH] * PITCH_COMP ,0 ,450 );  //#define PITCH_COMP             0.5f   //只当机头下时，减油？？！！！
+            NAV_Thro -= constrain(att.angle[PITCH] * PITCH_COMP,-200,200 );    //#define PITCH_COMP             0.5f   //=测试机头向下，减汕，向上时加油==========================================
+            NAV_Thro  = constrain(NAV_Thro,IDLE_THROTTLE,CLIMBTHROTTLE );
+            FW_NavSpeed();
+            NAV_Thro += SpeedBoost;
+        }
+        /******* End of NavTimer *******/
+    }
+// PassThru for throttle In AcroMode
+    if ( (!f.ANGLE_MODE && !f.HORIZON_MODE) || ( f.PASSTHRU_MODE && !f.FAILSAFE_RTH_ENABLE ) ) {
+        NAV_Thro = TX_Thro;
+        GPS_angle[PITCH] =0;
+        GPS_angle[ROLL]  =0;
+        GPS_angle[YAW]   =0;
+    }
+    //NAV_Thro  = constrain(NAV_Thro,IDLE_THROTTLE,CLIMBTHROTTLE );//对油门进行限幅
+    NAV_Thro  = constrain(NAV_Thro,1400,CLIMBTHROTTLE );//对油门进行限幅
+
+    rcCommand[THROTTLE] = NAV_Thro;
+    rcCommand[YAW] += GPS_angle[YAW];
+
+}
+/******* End of FixedWing Navigation *******/
+
+
+/*############### Nav Speed ###############*/
+void FW_NavSpeed(void) {
+#define GPS_MINSPEED  950   //500  // 500= ~18km/h
+#define GPS_MAXSPEED  2000  //2000cm/s =72km/h
+#define I_TERM        0.1f
+#if defined (AIRSPEED)
+    static int16_t air_Navspeed = AIRSPEED *100;  //AIRSPEED=15
+    static int16_t air_Maxspeed = AIR_MAXSPEED *100; //AIR_MAXSPEED=20
+    int spDiff = 0;
+    static int spAdd  = 0;
+    int this_speed__=0;
+
+    if ((GPS_speed ) < (GPS_MINSPEED )) { // check for too slow ground speed  //#define GPS_MINSPEED  500
+        int Delta = (GPS_MINSPEED - GPS_speed)*I_TERM;  //#define I_TERM        0.1f
+        spAdd += (Delta == 0)? 1 : Delta;  // increase nav air speed
+    } else {
+        spAdd -= spAdd*I_TERM;                       // decrease nav air speed
+    }
+    spAdd = constrain(spAdd, 0, air_Maxspeed - air_Navspeed - 100);//怎么确定的？？？？================
+
+    if (airspeedSpeed < air_Navspeed - 100 + spAdd || airspeedSpeed > air_Navspeed + 100 + spAdd) {  // maintain air speed between NAVSPEED and MAXSPEED
+        spDiff = (air_Navspeed + spAdd - airspeedSpeed);  //math bug if put multiplication in same line
+        spDiff = spDiff * I_TERM;
+        SpeedBoost += spDiff;
+    }
+
+    SpeedBoost = constrain(SpeedBoost,-500,500);
+#else
+    // Force the Plane move forward in headwind with SpeedBoost
+    int16_t groundSpeed = GPS_speed;
+    static uint16_t boostlimit = MAXTHROTTLE - CRUICETHROTTLE;  //MAXTHROTTLE =2000
+    static int16_t boostlimitm = MINTHROTTLE - CRUICETHROTTLE;
+    int16_t target_speed=0;
+    //int spDiff=(GPS_MINSPEED -groundSpeed)*I_TERM;   //#define I_TERM        0.1f
+    //int spDiff=(GPS_MINSPEED -groundSpeed)/10;   //#define I_TERM        0.1f  //==原来的，速度较慢===============
+    int spDiff=0;
+
+    target_speed=constrain(GPS_NAV_speed_set,GPS_MINSPEED,GPS_MAXSPEED);//对预计速度进行控制
+    //debug[3] = spDiff;//=====速度差值=============================================================================================================
+    spDiff=(target_speed -groundSpeed)/5;   //#define I_TERM        0.2f'
+
+    if (GPS_speed < target_speed-50 || GPS_speed > target_speed+50)
+        SpeedBoost += spDiff;
+    SpeedBoost = constrain(SpeedBoost,boostlimitm,boostlimit);
+#endif
+}
+
+/*############### End Nav Speed ###############*/
+
+#endif // FIXEDWING
 
 #endif // GPS Defined
+
+#endif

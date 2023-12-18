@@ -50,7 +50,7 @@ void spl0601_write(unsigned char hwadr, unsigned char regadr, unsigned char val)
 //	
 //	I2C0_Engine(2,0,0);
 	//IIC_Write_1Byte(hwadr,regadr,val);
-	Single_WriteI2C(hwadr<<1,regadr,val);
+	EX_Single_WriteI2C(hwadr<<1,regadr,val);
 }
 
 /*****************************************************************************
@@ -78,7 +78,7 @@ uint8 spl0601_read(unsigned char hwadr, unsigned char regadr)
 //	I2C0_Engine(1,1,1);	
 
 //	reg_data = bI2C0_RxM_Data[0];
-	reg_data=Single_ReadI2C(hwadr<<1,regadr);
+	reg_data=EX_Single_ReadI2C(hwadr<<1,regadr);
 	//IIC_Read_1Byte(hwadr,regadr,&reg_data);
 	return reg_data;
 }

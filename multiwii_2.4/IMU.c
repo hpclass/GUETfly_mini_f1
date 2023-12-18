@@ -8,7 +8,8 @@
 
 #include "math.h"
 #include "timer.h"
-
+#include "ano_of.h"
+#include "DJI_Guidance_usat.h"
 int16_t  sonarAltMy; //平滑后的超声波高度
 int16_t  PressAltMy;//平滑后的气压计高度
 uint8_t alt_switch=0;//测距模块标志
@@ -349,7 +350,7 @@ uint8_t getEstimatedAltitude() {
 
     alt.EstAlt = (alt.EstAlt * 6 + BaroAlt ) >> 3; // additional LPF to reduce baro noise (faster by 30 µs)
 #endif
-    if(!f.BARO_MODE) return 0;
+		if(!f.BARO_MODE) return 0;
 #if (defined(VARIOMETER) && (VARIOMETER != 2)) || !defined(SUPPRESS_BARO_ALTHOLD)
     //P
 

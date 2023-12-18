@@ -429,19 +429,24 @@ static void buff_read_block(void *buf,void *addr, size_t n)
 
     u8 * pbuff=(u8*)buf;//内存中的地址
     u32 i=(u32)addr;//地址转换成指针下标
+    if(msp_wp_buff[0]!=1)
+        //__breakpoint(0);
+        1==1;
+    LED2_ON
     while(n--)
     {
         *pbuff=msp_wp_buff[i];
         i++;//移动下标
         pbuff++;//移动指针
     }
+    LED2_OFF
 }
 static void buff_write_block(void *buf,void *addr, size_t n)
 {
     u8 *pbuff=(u8*)buf;//内存中的地址
     u8 *last_buff=msp_wp_buff_last;
     u32 i=(u32)addr;//地址转换成指针下标
-
+    LED1_ON
     while(n--)
     {
 
@@ -450,7 +455,7 @@ static void buff_write_block(void *buf,void *addr, size_t n)
         pbuff++;//移动指针
         last_buff++;
     }
-
+    LED1_OFF
 
 }
 u8 last_cu_w=0;
@@ -458,6 +463,8 @@ u8 last_cu_w=0;
 void storeWP() {
 //flag=0xa5;//最后节点
     last_cu_w++;
+    if(mission_step.number==temp_i)
+        1==1;
     if(mission_step.number >254) return;
     msp_wp_buff_num=mission_step.number;
     mission_step.checksum = calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3);//由于STM32的内存4字节对齐，该结构体会多出三个字节
@@ -475,6 +482,8 @@ void storeWP() {
 u8 last_cun=0;
 bool recallWP(uint8_t wp_number) {
     u8 c=0;
+    if(mission_step.number==temp_i)
+        1==1;
     if (wp_number > 254) return false;
 //		if(wp_number==0x09)
 //			1==1;

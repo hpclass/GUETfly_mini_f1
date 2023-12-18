@@ -4,7 +4,7 @@
  *      *** Do not modify ! ***
  *
  * Project: 'Project' 
- * Target:  'HY-RedBull V3.0' 
+ * Target:  'multiwii_2.4_STM32' 
  */
 
 #ifndef RTE_COMPONENTS_H

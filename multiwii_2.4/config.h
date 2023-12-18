@@ -1,9 +1,10 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
-//#define LEDPIN_TOGGLE              PCout(13)=~PCin(13);
+
 /*************************************************************************************************/
 /****           CONFIGURABLE PARAMETERS                                                       ****/
 /*************************************************************************************************/
+
 /* this file consists of several sections
  * to create a working combination you must at least make your choices in section 1.
  * 1 - BASIC SETUP - you must select an option in every block.
@@ -22,29 +23,32 @@
  * 1. parameters marked with (*) in the comment are stored in eeprom and can be changed via serial monitor or LCD.
  * 2. parameters marked with (**) in the comment are stored in eeprom and can be changed via the GUI
  */
-#define LED2_ON 
-#define LED1_ON 
-#define LED2_OFF 
-#define LED1_OFF 
-//=========超声波==================================
-#define TrigPin 66  //A12黑色
 
-#define EchoPin 15  //使用串口3tx3
-//#define SONAR 1
-#define SONAR_ALT_SW 200 //定义高度切换中心
-#define SONAR_ALT_LOAD 10 //定义高度切换窗口半径
-#define TAKEOFF_SPEED 50 //起飞速度cm/s
-#define TAKEOFF_ALT 150 //起飞高度
-#define TAKEOFF_Init_SPEED 1200  //自动起飞怠速
+#define SET_ALT_ROI GPS_altitude * 100
+#define Gravitational__ 		9.8  //当地重力加速度
+#define DELAY_FOR_DORP			0.4  //解锁机构的延迟
+#define SBUS__			//使用SBUS模式
+#define DIFF_MOTOR_ 90
+//#define SET_ALT_ROI alt.EstAlt
 
 //RX 遥控器相关设置
-#define SBUS__			//使用SBUS模式
-//#define FRSHY_SBUS  //使用FRSHY
-//#define RC_CHANS 12			//遥控器通道数
+
+//#define RC_CHANS 8			//遥控器通道数
 #define PPM_AT9					//遥控器类型
-#define OPTIC 1					//光流
-//#define AT24C64
-//#define PPM_FSI6
+//#define OPTIC 1					//光流
+//#define OV7670_FLOW 1
+//#define EXTERN_IIC1 1
+
+// #define PPM_FSI6
+
+//
+//#define EXTERN_IIC1  //使用外置IIC总线
+//#define USE_EX_MAG		//磁力计为外置设备
+//#define EX_BORA_SPL06		//气压计为外置设备
+//#define EX_ACC		//陀螺仪为外置设备
+//#define EX_airspeed //外置IIC空速计 https://www.nxp.com/docs/en/data-sheet/MPXV7002.pdf
+#define A_airspeed //外置模拟空速计
+
 /*************************************************************************************************/
 /*****************                                                                 ***************/
 /****************  SECTION  1 - BASIC SETUP                                                *******/
@@ -55,8 +59,8 @@
 //#define GIMBAL
 //#define BI
 //#define TRI
-// #define QUADP
-#define QUADX
+//#define QUADP
+//#define QUADX
 //#define Y4
 //#define Y6
 //#define HEX6
@@ -66,9 +70,9 @@
 //#define OCTOFLATP
 //#define OCTOFLATX
 //#define FLYING_WING
-//#define FLYING_WING_J10
+//#define FLYING_WING_D
 //#define VTAIL4
-//#define AIRPLANE
+#define AIRPLANE
 //#define SINGLECOPTER
 //#define DUALCOPTER
 //#define HELI_120_CCPM
@@ -82,7 +86,7 @@
 //#define MINTHROTTLE 1064 // special ESC (simonk)
 //#define MINTHROTTLE 1050 // for brushed ESCs like ladybird
 //#define MINTHROTTLE 1150 // (*) (**)
-#define MINTHROTTLE 1050
+#define MINTHROTTLE 1000
 
 /****************************    Motor maxthrottle    *******************************/
 /* this is the maximum value for the ESCs at full power, this value can be increased up to 2000 */
@@ -102,7 +106,7 @@
 //#define INTERNAL_I2C_PULLUPS
 
 /**********************************  constant loop time  ******************************/
-#define LOOP_TIME 2500
+#define LOOP_TIME 2800
 
 /**************************************************************************************/
 /*****************          boards and sensor definitions            ******************/
@@ -112,7 +116,12 @@
 /* if you use a specific sensor board:
    please submit any correction to this list.
      Note from Alex: I only own some boards, for other boards, I'm not sure, the info was gathered via rc forums, be cautious */
-//#define GUET_FLY_V1
+//#define GUET_FLY_V1				//自定义板子GUET
+//#define GUET_FLY_Mini_20181127				//自定义板子GUET
+//#define USE_EX_MAG				//使用外置5883
+//#define AT24C08						//定义EEPROM的型号AT24C08代表1k byte AT24C16 代表 2k byte
+#define AT24C64
+//#define USE_STM32_I2C1 //使用stm32的硬件IIC,未调好
 //#define FFIMUv1         // first 9DOF+baro board from Jussi, with HMC5843                   <- confirmed by Alex
 //#define FFIMUv2         // second version of 9DOF+baro board from Jussi, with HMC5883       <- confirmed by Alex
 //#define FREEIMUv1       // v0.1 & v0.2 & v0.3 version of 9DOF board from Fabio
@@ -209,7 +218,7 @@
 /* I2C barometer */
 //#define BMP085
 //#define MS561101BA
-//#define SPL06_001
+
 /* I2C magnetometer */
 //#define HMC5843
 //#define HMC5883
@@ -228,6 +237,9 @@
 //#define ADCACC
 
 /* enforce your individual sensor orientation - even overrides board specific defaults */
+//#define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  Y; imu.accADC[PITCH]  = -X; imu.accADC[YAW]  = Z;}
+//#define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] = -Y; imu.gyroADC[PITCH] =  X; imu.gyroADC[YAW] = Z;}
+//#define FORCE_MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  X; imu.magADC[PITCH]  =  Y; imu.magADC[YAW]  = Z;}
 #define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  X; imu.accADC[PITCH]  = Y; imu.accADC[YAW]  = Z;}
 #define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] = -Y; imu.gyroADC[PITCH] =  X; imu.gyroADC[YAW] = -Z;}
 #define FORCE_MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  -Y; imu.magADC[PITCH]  =  -X; imu.magADC[YAW]  = Z;}
@@ -250,7 +262,7 @@
  * 1 = evolved oldschool algorithm (similar to v2.2)
  * 2 = new experimental algorithm from Alex Khoroshko - unsupported - http://www.multiwii.com/forum/viewtopic.php?f=8&t=3671&start=10#p37387
  * */
-#define PID_CONTROLLER 2
+#define PID_CONTROLLER 1
 
 /* NEW: not used anymore for servo coptertypes  <== NEEDS FIXING - MOVE TO WIKI */
 #define YAW_DIRECTION 1
@@ -429,105 +441,9 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
 //#define SUMD PITCH,YAW,THROTTLE,ROLL,AUX1,AUX2,AUX3,AUX4
 //#define RX_SERIAL_PORT 1
 
-/*************************************************************************************************/
-/*****************                                                                 ***************/
-/****************  SECTION  4 - ALTERNATE CPUs & BOARDS                                    *******/
-/*****************                                                                 ***************/
-/*************************************************************************************************/
-
-/**************************************************************************************/
-/********                      Promini Specifig Settings           ********************/
-/**************************************************************************************/
-
-/**************************    Hexa Motor 5 & 6 Pins    *******************************/
-/* PIN A0 and A1 instead of PIN D5 & D6 for 6 motors config and promini config
-   This mod allow the use of a standard receiver on a pro mini
-   (no need to use a PPM sum receiver) */
-//#define A0_A1_PIN_HEX
-
-/*********************************    Aux 2 Pin     ***********************************/
-/* possibility to use PIN8 or PIN12 as the AUX2 RC input (only one, not both)
-   it deactivates in this case the POWER PIN (pin 12) or the BUZZER PIN (pin 8) */
-//#define RCAUXPIN8   //第6通道
-//#define RCAUXPIN12
-
-
-/**************************************************************************************/
-/*****************             Teensy 2.0 Support                    ******************/
-/**************************************************************************************/
-/* uncomment this if you use a teensy 2.0 with teensyduino
-   it needs to run at 16MHz */
-//#define TEENSY20
-
-
-/**************************************************************************************/
-/********   Settings for ProMicro, Leonardo and other Atmega32u4 Boards     ***********/
-/**************************************************************************************/
-
-/*********************************    pin Layout     **********************************/
-/* activate this for a better pinlayout if all pins can be used => not possible on ProMicro */
-//#define A32U4ALLPINS
-
-/**********************************    PWM Setup     **********************************/
-/* activate all 6 hardware PWM outputs Motor 5 = D11 and 6 = D13.
-   note: not possible on the sparkfun promicro (pin 11 & 13 are not broken out there)
-   if activated:
-   Motor 1-6 = 10-bit hardware PWM
-   Motor 7-8 = 8-bit Software PWM
-   Servos    = 8-bit Software PWM
-   if deactivated:
-   Motor 1-4 = 10-bit hardware PWM
-   Motor 5-8 = 10-bit Software PWM
-   Servos    = 10-bit Software PWM */
-//#define HWPWM6
-
-/**********************************    Aux 2 Pin     **********************************/
-/* AUX2 pin on pin RXO */
-//#define RCAUX2PINRXO
-
-/* aux2 pin on pin D17 (RXLED) */
-//#define RCAUX2PIND17
-
-/**********************************    Buzzer Pin    **********************************/
-/* this moves the Buzzer pin from TXO to D8 for use with ppm sum or spectrum sat. RX (not needed if A32U4ALLPINS is active) */
-//#define D8BUZZER
-
-/***********************      Promicro version related     ****************************/
-/* Inverted status LED for Promicro ver 10 */
-//#define PROMICRO10
-
-
-/**************************************************************************************/
-/********                      override default pin assignments    ********************/
-/**************************************************************************************/
-
-/* only enable any of this if you must change the default pin assignment, e.g. your board does not have a specific pin */
-/* you may need to change PINx and PORTx plus #shift according to the desired pin! */
-//#define OVERRIDE_V_BATPIN                   A0 // instead of A3    // Analog PIN 3
-
-//#define OVERRIDE_PSENSORPIN                 A1 // instead of A2    // Analog PIN 2
-
-//#define OVERRIDE_LEDPIN_PINMODE             pinMode (A1, OUTPUT); // use A1 instead of d13
-//#define OVERRIDE_LEDPIN_TOGGLE              PINC |= 1<<1; // PINB |= 1<<5;     //switch LEDPIN state (digital PIN 13)
-//#define OVERRIDE_LEDPIN_OFF                 PORTC &= ~(1<<1); // PORTB &= ~(1<<5);
-//#define OVERRIDE_LEDPIN_ON                  PORTC |= 1<<1;    // was PORTB |= (1<<5);
-
-//#define OVERRIDE_BUZZERPIN_PINMODE          pinMode (A2, OUTPUT); // use A2 instead of d8
-//#define OVERRIDE_BUZZERPIN_ON               PORTC |= 1<<2 //PORTB |= 1;
-//#define OVERRIDE_BUZZERPIN_OFF              PORTC &= ~(1<<2); //PORTB &= ~1;
-
-
-///////////////////////STM32////////////////////////////
-
-
-#define OVERRIDE_LEDPIN_PINMODE             BIT_ADDR(GPIOA_ODR_Addr,0)  //PC13
-#define OVERRIDE_LEDPIN_TOGGLE             PAout(0)=~PAin(0);      //switch LEDPIN state (digital PIN 13)
-#define OVERRIDE_LEDPIN_OFF                 GPIO_SetBits(GPIOA,GPIO_Pin_0)
-#define OVERRIDE_LEDPIN_ON                  GPIO_ResetBits(GPIOA,GPIO_Pin_0)
-#define LEDPIN_OFF																			GPIO_SetBits(GPIOA,GPIO_Pin_0)
-#define LEDPIN_ON																			GPIO_ResetBits(GPIOA,GPIO_Pin_0)
-//#define LEDPIN_OFF																			GPIO_SetBits(GPIOD,GPIO_Pin_1)
-//#define LEDPIN_ON																			GPIO_ResetBits(GPIOD,GPIO_Pin_1)
+///	#define LEDPIN_ON																			GPIO_ResetBits(GPIOC,GPIO_Pin_13)//
+#define LEDPIN_OFF																			GPIO_SetBits(GPIOD,GPIO_Pin_1)
+#define LEDPIN_ON																			GPIO_ResetBits(GPIOD,GPIO_Pin_1)
 
 // #define OVERRIDE_BUZZERPIN_PINMODE          pinMode (A2, OUTPUT); // use A2 instead of d8
 //#define OVERRIDE_BUZZERPIN_ON               PORTC |= 1<<2 //PORTB |= 1;
@@ -544,6 +460,8 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
 #define SERIAL1_COM_SPEED 115200
 #define SERIAL2_COM_SPEED 115200
 #define SERIAL3_COM_SPEED 115200
+#define SERIAL4_COM_SPEED 115200
+//#define SERIAL5_COM_SPEED 9600
 
 /* when there is an error on I2C bus, we neutralize the values during a short time. expressed in microseconds
    it is relevent only for a conf with at least a WMP */
@@ -599,10 +517,10 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
 /* Automatically increase throttle based on the angle of the copter
    Original idea by Kraut Rob, first implementation HAdrian */
 
-//#define THROTTLE_ANGLE_CORRECTION 30
+#define THROTTLE_ANGLE_CORRECTION 35
 
 /*** HEADFREE : the copter can be controled by an absolute stick orientation, whatever the yaw orientation ***/
-//#define HEADFREE
+#define HEADFREE
 
 /*************************        Advanced Headfree Mode             ********************/
 /* In Advanced Headfree mode when the copter is farther than ADV_HEADFREE_RANGE meters then
@@ -612,8 +530,8 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
    first implementation by HAdrian, mods by EOSBandi
 */
 
-#define ADVANCED_HEADFREE      //Advanced headfree mode is enabled when this is uncommented
-#define ADV_HEADFREE_RANGE 15  //Range where advanced headfree mode activated
+//#define ADVANCED_HEADFREE      //Advanced headfree mode is enabled when this is uncommented
+//#define ADV_HEADFREE_RANGE 15  //Range where advanced headfree mode activated
 
 
 /************************        continuous gyro calibration        ********************/
@@ -707,13 +625,13 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
    in NMEA mode the GPS must be configured to output GGA and RMC NMEA sentences (which is generally the default conf for most GPS devices)
    at least 5Hz update rate. uncomment the first line to select the GPS serial port of the arduino */
 
-//#define GPS_SERIAL 1         // should be 2 for flyduino v2. It's the serial port number on arduino MEGA
+#define GPS_SERIAL 1         // should be 2 for flyduino v2. It's the serial port number on arduino MEGA
 // must be 0 for PRO_MINI (ex GPS_PRO_MINI)
 // note: Now a GPS can share MSP on the same port. The only constrain is to not use it simultaneously, and use the same port speed.
 
 // avoid using 115200 baud because with 16MHz arduino the 115200 baudrate have more than 2% speed error (57600 have 0.8% error)
-#define GPS_BAUD   921600       // GPS_BAUD will override SERIALx_COM_SPEED for the selected port
-//#define GPS_BAUD   115200
+#define GPS_BAUD   115200       // GPS_BAUD will override SERIALx_COM_SPEED for the selected port
+
 /* GPS protocol
     NMEA  - Standard NMEA protocol GGA, GSA and RMC  sentences are needed
     UBLOX - U-Blox binary protocol, use the ublox config file (u-blox-config.ublox.txt) from the source tree
@@ -790,12 +708,12 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 // Slow down to zero when reaching waypoint (same as NAV_SPEED_MIN = 0)
 #define NAV_SLOW_NAV               0      //(**)
 // Weight factor of the crosstrack error in navigation calculations (do not touch)
-#define CROSSTRACK_GAIN            .4     //(**)
+#define CROSSTRACK_GAIN            1.6     //(**)
 // Maximum allowable banking than navigation outputs
 #define NAV_BANK_MAX 3000                 //(**)
 
 //Defines the RTH altitude. 0 means keep current alt during RTH (in meters)
-#define RTH_ALTITUDE               15        //(**)
+#define RTH_ALTITUDE               45        //(**)
 //Wait to reach RTH alt before start moving to home (0-no, 1-yes)
 #define WAIT_FOR_RTH_ALT           1         //(**)
 
@@ -814,120 +732,29 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 //this is wait compeliete to disarm 5000 ms
 #define LAND_COMPLITE_DELAY_TIME 3000
 
-
+// Sets the alt (in cm) to softly switch to MIN_NAV_VARIO from MAX_NAV_VARIO at landing
+// also on takeoff (at RTH and WP navigation) vario will be limited to MIN_NAV_VARIO when current altitude less than SAFE_NAV_ALT to avoid unpredictable jumps
+#define SAFE_NAV_ALTITUDE       500 // =5m
+// Sets the vario during landing, takeoff and alt change at WP navigation (between 100 and MAX_VARIO cm/sec)
+#define MAX_NAV_VARIO          	250
 //#define ONLY_ALLOW_ARM_WITH_GPS_3DFIX      // Only allow FC arming if GPS has a 3D fix.
 
 /**************************************************************************************/
-/***********************        LCD/OLED - display settings       *********************/
+/***********************                  INS                **************************/
 /**************************************************************************************/
 
-/* http://www.multiwii.com/wiki/index.php?title=Extra_features#LCD_.2F_OLED */
+// Enable inertial navigation by using ACC + GPS to increase precision of position hold
+#define INS_PH_NAV_ON
 
-/*****************************   The type of LCD     **********************************/
-/* choice of LCD attached for configuration and telemetry, see notes below */
-//#define LCD_DUMMY       // No Physical LCD attached.  With this & LCD_CONF defined, TX sticks still work to set gains, by watching LED blink.
-//#define LCD_SERIAL3W    // Alex' initial variant with 3 wires, using rx-pin for transmission @9600 baud fixed
-//#define LCD_TEXTSTAR    // SERIAL LCD: Cat's Whisker LCD_TEXTSTAR Module CW-LCD-02 (Which has 4 input keys for selecting menus)
-//#define LCD_VT100       // SERIAL LCD: vt100 compatible terminal emulation (blueterm, putty, etc.)
-//#define LCD_TTY         // SERIAL LCD: useful to tweak parameters over cable with arduino IDE 'serial monitor'
-//#define LCD_ETPP        // I2C LCD: Eagle Tree Power Panel LCD, which is i2c (not serial)
-//#define LCD_LCD03       // I2C LCD: LCD03, which is i2c
-//#define LCD_LCD03S      // SERIAL LCD: LCD03 whit serial 9600 baud comunication enabled.
-//#define OLED_I2C_128x64 // I2C LCD: OLED http://www.multiwii.com/forum/viewtopic.php?f=7&t=1350
-//#define OLED_DIGOLE     // I2C OLED from http://www.digole.com/index.php?productID=550
+// !!! important parameter for INS to calculate correction through the history for X,Y velocity and position
+// this is the gps delay/lag, 0.2sec = 200ms by default
+#define GPS_LAG		100		// in ms
 
-/******************************   Display settings   ***********************************/
-#define LCD_SERIAL_PORT 0    // must be 0 on Pro Mini and single serial boards; Set to your choice on any Mega based board
+// Disable INS when position hold is off. It can help when INS not stable because vibrations, bad mag calibrations etc.
+//#define DISABLE_INS_WHEN_PH_OFF
 
-//#define SUPPRESS_OLED_I2C_128x64LOGO  // suppress display of OLED logo to save memory
-
-/* double font height for better readability. Reduces visible #lines by half.
- * The lower part of each page is accessible under the name of shifted keyboard letter :
- * 1 - ! , 2 - @ , 3 - # , 4 - $ , 5 - % , 6 - ^ , 7 - & , 8 - * , 9 - (
- * You must add both to your lcd.telemetry.* sequences
- */
-//#define DISPLAY_FONT_DSIZE //currently only aplicable for OLED_I2C_128x64 and OLED_DIGOLE
-
-/* style of display - AUTODETECTED via LCD_ setting - only activate to override defaults */
-//#define DISPLAY_2LINES
-#define DISPLAY_MULTILINE
-//#define MULTILINE_PRE 2  // multiline configMenu # pref lines
-//#define MULTILINE_POST 6 // multiline configMenu # post lines
-//#define DISPLAY_COLUMNS 16
-/********************************    Navigation     ***********************************/
-/* keys to navigate the LCD menu */
-#define LCD_MENU_PREV 'p'
-#define LCD_MENU_NEXT 'n'
-#define LCD_VALUE_UP 'u'
-#define LCD_VALUE_DOWN 'd'
-
-#define LCD_MENU_SAVE_EXIT 's'
-#define LCD_MENU_ABORT 'x'
-
-/**************************************************************************************/
-/***********************      LCD configuration menu         **************************/
-/**************************************************************************************/
-
-/* uncomment this line if you plan to use a LCD or OLED for tweaking parameters
- * http://www.multiwii.com/wiki/index.php?title=Extra_features#Configuration_Menu */
-//#define LCD_CONF
-
-/* to include setting the aux switches for AUX1 -> AUX4 via LCD */
-//#define LCD_CONF_AUX
-
-/* optional exclude some functionality - uncomment to suppress unwanted aux channel configuration options */
-//#define SUPPRESS_LCD_CONF_AUX2
-//#define SUPPRESS_LCD_CONF_AUX34
-
-/**************************************************************************************/
-/***********************      LCD       telemetry            **************************/
-/**************************************************************************************/
-
-/* to monitor system values (battery level, loop time etc. with LCD
- * http://www.multiwii.com/wiki/index.php?title=LCD_Telemetry */
-
-/********************************    Activation     ***********************************/
-//#define LCD_TELEMETRY
-
-/* to enable automatic hopping between a choice of telemetry pages uncomment this. */
-//#define LCD_TELEMETRY_AUTO "123452679" // pages 1 to 9 in ascending order
-//#define LCD_TELEMETRY_AUTO  "212232425262729" // strong emphasis on page 2
-
-/* manual stepping sequence; first page of the sequence gets loaded at startup to allow non-interactive display */
-//#define LCD_TELEMETRY_STEP "0123456789" // should contain a 0 to allow switching off.
-
-/* optional exclude some functionality - uncomment to suppress some unwanted telemetry pages */
-//#define SUPPRESS_TELEMETRY_PAGE_1
-//#define SUPPRESS_TELEMETRY_PAGE_2 // sensor readings
-//#define SUPPRESS_TELEMETRY_PAGE_3 // checkboxitems
-//#define SUPPRESS_TELEMETRY_PAGE_4 // rx inputs
-//#define SUPPRESS_TELEMETRY_PAGE_5 // servo&motor outputs
-//#define SUPPRESS_TELEMETRY_PAGE_6 // cells voltages
-//#define SUPPRESS_TELEMETRY_PAGE_7 // gps
-//#define SUPPRESS_TELEMETRY_PAGE_8 // alarms states
-//#define SUPPRESS_TELEMETRY_PAGE_9 // cycle & fails
-//#define SUPPRESS_TELEMETRY_PAGE_R // reset
-
-/* optional override default items for some telemetry pages - for complete list of usable functions see LCD.h */
-//#define LCD_TELEMETRY_PAGE1 { output_V, output_mAh, }
-//#define LCD_TELEMETRY_PAGE2 { output_gyroX, output_gyroY, output_accZ, }
-//#define LCD_TELEMETRY_PAGE9 { output_fails, output_annex, output_debug0, output_debug3, }
-
-/********************************************************************/
-/****                             RSSI                           ****/
-/********************************************************************/
-//#define RX_RSSI
-//#define RX_RSSI_PIN A3
-//#define RX_RSSI_CHAN 8   //RSSI injection on selected channel (for PPM, Olrs, SBUS, etc.) (Starts at 0)
-
-/********************************************************************/
-/****                             Buzzer                         ****/
-/********************************************************************/
-//#define BUZZER
-//#define RCOPTIONSBEEP         // uncomment this if you want the buzzer to beep at any rcOptions change on channel Aux1 to Aux4
-//#define ARMEDTIMEWARNING 330  // (*) Trigger an alarm after a certain time of being armed [s] to save you lipo (if your TX does not have a countdown)
-//#define PILOTLAMP             //Uncomment if you are using a X-Arcraft Pilot Lamp
-
+// additional filter for acc data used at INS
+#define ACC_EF_LPF_FACTOR		7.0f
 /********************************************************************/
 /****           battery voltage monitoring                       ****/
 /********************************************************************/
@@ -979,10 +806,11 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 
 /* defines the neutral zone of throttle stick during altitude hold, default setting is
    +/-50 uncommend and change the value below if you want to change it. */
-#define ALT_HOLD_THROTTLE_NEUTRAL_ZONE    50
-#define ALT_HOLD_THROTTLE_MIDPOINT        1500  // in us    - if uncommented, this value is used in ALT_HOLD for throttle stick middle point instead of initialThrottleHold parameter.
+#define ALT_HOLD_THROTTLE_NEUTRAL_ZONE    60
+#define ALT_HOLD_THROTTLE_MIDPOINT2        1390  // in us    - if uncommented, this value is used in ALT_HOLD for throttle stick middle point instead of initialThrottleHold parameter.
 
-
+// Set the alt vario range (in cm/s) for alt hold and land functions
+#define MAX_VARIO           350 // #define MAX_VARIO           350 //= +/-3.5m/s
 /* uncomment to disable the altitude hold feature.
  * This is useful if all of the following apply
  * + you have a baro
@@ -991,21 +819,6 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
  * + want to save memory space */
 //#define SUPPRESS_BARO_ALTHOLD
 
-/********************************************************************/
-/****           altitude variometer                              ****/
-/********************************************************************/
-
-/* enable to get audio feedback upon rising/falling copter/plane.
- * Requires a working baro.
- * For now, Output gets sent to an enabled vt100 terminal program over the serial line.
- * choice of two methods (enable either one or both)
- * method 1 : use short term movement from baro ( bigger code size)
- * method 2 : use long term observation of altitude from baro (smaller code size)
- */
-//#define VARIOMETER 12            // possible values: 12 = methods 1 & 2 ; 1 = method 1 ; 2 = method 2
-//#define SUPPRESS_VARIOMETER_UP   // if no signaling for up movement is desired
-//#define SUPPRESS_VARIOMETER_DOWN // if no signaling for down movement is desired
-//#define VARIOMETER_SINGLE_TONE   // use only one tone (BEL); neccessary for non-patched vt100 terminals
 
 /********************************************************************/
 /****           board naming                                     ****/
@@ -1038,24 +851,6 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 
 #define VBAT_PRESCALER 16 // set this to 8 if vbatscale would exceed 255
 
-/**************************************************************************************/
-/********   special ESC with extended range [0-2000] microseconds  ********************/
-/**************************************************************************************/
-//#define EXT_MOTOR_RANGE // using this with wii-esc requires to change MINCOMMAND to 1008 for promini and mega
-
-/**************************************************************************************/
-/********  brushed ESC ****************************************************************/
-/**************************************************************************************/
-// for 328p proc
-//#define EXT_MOTOR_32KHZ
-//#define EXT_MOTOR_4KHZ
-//#define EXT_MOTOR_1KHZ
-
-// for 32u4 proc
-//#define EXT_MOTOR_64KHZ
-//#define EXT_MOTOR_32KHZ
-//#define EXT_MOTOR_16KHZ
-//#define EXT_MOTOR_8KHZ
 
 /**************************************************************************************/
 /***********************     motor, servo and other presets     ***********************/
@@ -1070,25 +865,6 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 /***********************         Servo Refreshrates            ***********************/
 /* Default 50Hz Servo refresh rate*/
 #define SERVO_RFR_50HZ
-
-/* up to 160Hz servo refreshrate .. works with the most analog servos*/
-//#define SERVO_RFR_160HZ
-
-/* up to 300Hz refreshrate it is as fast as possible (100-300Hz depending on the cound of used servos and the servos state).
-   for use with digital servos
-   dont use it with analog servos! thay may get damage. (some will work but be careful) */
-//#define SERVO_RFR_300HZ
-
-/***********************             HW PWM Servos             ***********************/
-/* HW PWM Servo outputs for Arduino Mega.. moves:
-  Pitch   = pin 44
-  Roll    = pin 45
-  CamTrig = pin 46
-  SERVO4  = pin 11 (aileron left for fixed wing or TRI YAW SERVO)
-  SERVO5  = pin 12 (aileron right for fixed wing)
-  SERVO6  = pin 6   (rudder for fixed wing)
-  SERVO7  = pin 7   (elevator for fixed wing)
-  SERVO8  = pin 8   (motor for fixed wing)       */
 
 #define MEGA_HW_PWM_SERVOS
 
@@ -1188,7 +964,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
    Read How To at http://code.google.com/p/multiwii/wiki/ESCsCalibration */
 #define ESC_CALIB_LOW  MINCOMMAND
 #define ESC_CALIB_HIGH 2000
-//#define ESC_CALIB_CANNOT_FLY  // uncomment to activate
+//#define ESC_CALIB_CANNOT_FLY  // uncomment to activate  电调校准 注意安全
 
 /****           internal frequencies                             ****/
 /* frequenies for rare cyclic actions in the main loop, depend on cycle time
@@ -1206,7 +982,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 /********************************************************************/
 /*                   !!! No Fly Mode !!!                            */
 
-//#define DYNBALANCE   // (**) Dynamic balancing controlled from Gui
+//#define DYNBALANCE   // (**) Dynamic balancing controlled from Gui //校准马达
 
 /********************************************************************/
 /****           Regression testing                               ****/
@@ -1243,5 +1019,6 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 /****           END OF CONFIGURABLE PARAMETERS                                                ****/
 /*************************************************************************************************/
 #define PROMINI
+
 #endif /* CONFIG_H_ */
 
