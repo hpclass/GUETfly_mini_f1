@@ -135,10 +135,10 @@ void MYRCC_DeInit(void)
 // 采用如下方法实现执行汇编指令WFI
 // CHECK OK
 // 091209
-__asm void WFI_SET(void)
-{
-    WFI;
-}
+// __asm void WFI_SET(void)
+// {
+//     WFI;
+// }
 // 进入待机模式
 // check ok
 // 091202

@@ -43,33 +43,12 @@ SOURCES = \
     ./USER/stm32f10x_it.c \
     ./USER/timer.c \
     ./USER/AltHold.c \
-    ./multiwii_2.4/config.h \
     ./USER/delay.c \
     ./USER/re_eeprom.c \
     ./USER/sys.c \
     ./USER/gy_86.c \
     ./USER/SPL06_001.c \
     ./Libraries/CMSIS/CM3/CoreSupport/core_cm3.c \
-	./multiwii_2.4/Alarms.c \
-	./multiwii_2.4/EEPROM.c \
-	./multiwii_2.4/GPS.c \
-	./multiwii_2.4/IMU.c \
-	./multiwii_2.4/Protocol.c \
-	./multiwii_2.4/MultiWii.c \
-	./multiwii_2.4/Output.c \
-	./multiwii_2.4/Sensors.c \
-	./multiwii_2.4/Serial.c \
-	./multiwii_2.4/RX.c \
-	./USER/stm32f10x_it.c \
-	./USER/timer.c \
-	./USER/AltHold.c \
-	./multiwii_2.4/config.h \
-	./USER/delay.c \
-	./USER/re_eeprom.c \
-	./USER/sys.c \
-	./USER/gy_86.c \
-	./USER/SPL06_001.c \
-	./Libraries/CMSIS\CM3\CoreSupport\core_cm3.c \
 	./USER/system_stm32f10x.c \
 	./Libraries/STM32F10x_StdPeriph_DriveR/src\misc.c \
 	./Libraries/CMSIS\CM3\DeviceSupport\ST\STM32F10x\startup\arm\startup_stm32f10x_hd.s \
