@@ -10,7 +10,8 @@ OBJCOPY = arm-none-eabi-objcopy
 CFLAGS = -mcpu=cortex-m3 \
          -mthumb -std=gnu11 -Wall \
          -DSTM32F10X_MD \
-         -DGUET_FLY_MINI_V1
+         -DGUET_FLY_MINI_V1 \
+		 -mfloat-abi=soft 
 ASFLAGS = -mcpu=cortex-m3 -mthumb
 
 # Directories
@@ -19,8 +20,7 @@ USER_DIR = ./USER
 CMSIS_DIR = ./Libraries/CMSIS/CM3/CoreSupport
 
 # Source files
-SRC_FILES = $(wildcard $(SRC_DIR)/*.c) $(USER_DIR)/stm32f10x_it.c $(USER_DIR)/timer.c
-ASM_FILES = $(wildcard $(SRC_DIR)/*.s*) ./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/arm/startup_stm32f10x_hd.S 
+ASM_FILES = ./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/arm/startup_stm32f10x_hd.S 
 CMSIS_FILES = $(CMSIS_DIR)/core_cm3.c
 
 # Header files
@@ -48,7 +48,6 @@ SOURCES = \
     ./USER/re_eeprom.c \
     ./USER/system_stm32f10x.c \
     ./USER/Ano_OF.c \
-    ./USER/USART.c \
     ./USER/math_.c \
     ./USER/soft_iic.c \
     ./USER/test1.c \
@@ -99,7 +98,7 @@ TARGET = multiwii_2.4_STM32.elf
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(LD) $(LDFLAGS) -o $@ $^
+	$(LD) $(LDFLAGS) -o $@ $(filter-out $(ASM_FILES), $^) $(filter %.o,$(OBJECTS))
 
 %.o: %.c
 	$(CC) $(INC_DIRS) $(CFLAGS) -c -o $@ $<
