@@ -9,7 +9,7 @@ void readSerial_RX(void);
 void initOpenLRS(void);
 void Read_OpenLRS_RC(void);
 #endif
-#if defined(SPEK_BIND)  // Bind Support
+#if defined(SPEK_BIND) // Bind Support
 void spekBind(void);
 #endif
 

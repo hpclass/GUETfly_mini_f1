@@ -5,7 +5,7 @@ void configurationLoop();
 void LCDprint(uint8_t i);
 void lcd_telemetry();
 void initLCD();
-void i2c_OLED_DIGOLE_init ();
+void i2c_OLED_DIGOLE_init();
 void i2c_OLED_init();
 void LCDclear();
 void toggle_telemetry(uint8_t t);
@@ -39,9 +39,9 @@ void output_accX();
 void output_accY();
 void output_accZ();
 
-void output_debug0() ;
-void output_debug1() ;
-void output_debug2() ;
-void output_debug3() ;
+void output_debug0();
+void output_debug1();
+void output_debug2();
+void output_debug3();
 
 #endif /* LCD_H_ */

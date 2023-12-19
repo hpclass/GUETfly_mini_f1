@@ -1,77 +1,72 @@
 #ifndef _GY_86_H
 #define _GY_86_H
-//#include "stm32f10x.h"
+// #include "stm32f10x.h"
 #include "stm32f10x_i2c.h"
 #include "math.h"
 #include "usart.h"
 #include "def.h"
 #include "config.h"
-//IIC总线引脚配置
+// IIC总线引脚配置
 #if defined(GUET_FLY_V1)
-#if defined(EXTERN_IIC1)//使用了外置IIC
+#if defined(EXTERN_IIC1) // 使用了外置IIC
 
-#define EX_SCL_H         GPIOB->BSRR |= GPIO_Pin_6
-#define EX_SCL_L         GPIOB->BRR  |= GPIO_Pin_6
+#define EX_SCL_H GPIOB->BSRR |= GPIO_Pin_6
+#define EX_SCL_L GPIOB->BRR |= GPIO_Pin_6
 
-#define EX_SDA_H         GPIOB->BSRR |= GPIO_Pin_7
-#define EX_SDA_L         GPIOB->BRR  |= GPIO_Pin_7
+#define EX_SDA_H GPIOB->BSRR |= GPIO_Pin_7
+#define EX_SDA_L GPIOB->BRR |= GPIO_Pin_7
 
-//#define EX_SCL_read      GPIOA->IDR  & GPIO_Pin_0
-//#define EX_SDA_read      GPIOA->IDR  & GPIO_Pin_1
-#define EX_SDA_read      PBin(7)
+// #define EX_SCL_read      GPIOA->IDR  & GPIO_Pin_0
+// #define EX_SDA_read      GPIOA->IDR  & GPIO_Pin_1
+#define EX_SDA_read PBin(7)
 #endif
 
+// #define SCL_H         GPIOA->BSRR |= GPIO_Pin_0
+// #define SCL_L         GPIOA->BRR  |= GPIO_Pin_0
 
-//#define SCL_H         GPIOA->BSRR |= GPIO_Pin_0
-//#define SCL_L         GPIOA->BRR  |= GPIO_Pin_0
+// #define SDA_H         GPIOA->BSRR |= GPIO_Pin_1
+// #define SDA_L         GPIOA->BRR  |= GPIO_Pin_1
 
-//#define SDA_H         GPIOA->BSRR |= GPIO_Pin_1
-//#define SDA_L         GPIOA->BRR  |= GPIO_Pin_1
+// #define SCL_read      GPIOA->IDR  & GPIO_Pin_0
+// #define SDA_read      GPIOA->IDR  & GPIO_Pin_1
 
-//#define SCL_read      GPIOA->IDR  & GPIO_Pin_0
-//#define SDA_read      GPIOA->IDR  & GPIO_Pin_1
-
-	#define SCL_H         GPIOB->BSRR |= GPIO_Pin_13
-	#define SCL_L         GPIOB->BRR  &= ~GPIO_Pin_13
-	#define SDA_H         GPIOB->BSRR |= GPIO_Pin_15
-	#define SDA_L         GPIOB->BRR  &= ~GPIO_Pin_15
-	#define SCL_read      GPIOB->IDR  & GPIO_Pin_13
-	#define SDA_read      GPIOB->IDR  & GPIO_Pin_15
+#define SCL_H GPIOB->BSRR |= GPIO_Pin_13
+#define SCL_L GPIOB->BRR &= ~GPIO_Pin_13
+#define SDA_H GPIOB->BSRR |= GPIO_Pin_15
+#define SDA_L GPIOB->BRR &= ~GPIO_Pin_15
+#define SCL_read GPIOB->IDR &GPIO_Pin_13
+#define SDA_read GPIOB->IDR &GPIO_Pin_15
 #elif defined(GUET_FLY_MINI_V1)
 
+#define SCL_H GPIOB->BSRR |= GPIO_Pin_15
+#define SCL_L GPIOB->BRR |= GPIO_Pin_15
 
-#define SCL_H         GPIOB->BSRR |= GPIO_Pin_15
-#define SCL_L         GPIOB->BRR  |= GPIO_Pin_15
+#define SDA_H GPIOB->BSRR |= GPIO_Pin_14
+#define SDA_L GPIOB->BRR |= GPIO_Pin_14
 
-#define SDA_H         GPIOB->BSRR |= GPIO_Pin_14
-#define SDA_L         GPIOB->BRR  |= GPIO_Pin_14
+#define SCL_read GPIOB->IDR &GPIO_Pin_15
+#define SDA_read GPIOB->IDR &GPIO_Pin_14
 
-#define SCL_read      GPIOB->IDR  & GPIO_Pin_15
-#define SDA_read      GPIOB->IDR  & GPIO_Pin_14
+// #define SCL_H         GPIOB->BSRR |= GPIO_Pin_15
+// #define SCL_L         GPIOB->BRR  &= ~GPIO_Pin_15
 
+// #define SDA_H         GPIOB->BSRR |= GPIO_Pin_14
+// #define SDA_L         GPIOB->BRR  &= ~GPIO_Pin_14
 
-//#define SCL_H         GPIOB->BSRR |= GPIO_Pin_15
-//#define SCL_L         GPIOB->BRR  &= ~GPIO_Pin_15
-
-//#define SDA_H         GPIOB->BSRR |= GPIO_Pin_14
-//#define SDA_L         GPIOB->BRR  &= ~GPIO_Pin_14
-
-//#define SCL_read      GPIOB->IDR  & GPIO_Pin_15
-//#define SDA_read      GPIOB->IDR  & GPIO_Pin_14
+// #define SCL_read      GPIOB->IDR  & GPIO_Pin_15
+// #define SDA_read      GPIOB->IDR  & GPIO_Pin_14
 #else
-	
-	#define SCL_H         GPIOA->BSRR |= GPIO_Pin_5
-	#define SCL_L         GPIOA->BRR  |= GPIO_Pin_5
 
-	#define SDA_H         GPIOA->BSRR |= GPIO_Pin_4
-	#define SDA_L         GPIOA->BRR  |= GPIO_Pin_4
+#define SCL_H GPIOA->BSRR |= GPIO_Pin_5
+#define SCL_L GPIOA->BRR |= GPIO_Pin_5
 
-	#define SCL_read      GPIOA->IDR  & GPIO_Pin_5
-	#define SDA_read      GPIOA->IDR  & GPIO_Pin_4
+#define SDA_H GPIOA->BSRR |= GPIO_Pin_4
+#define SDA_L GPIOA->BRR |= GPIO_Pin_4
+
+#define SCL_read GPIOA->IDR &GPIO_Pin_5
+#define SDA_read GPIOA->IDR &GPIO_Pin_4
 #endif
 //****************************************
-
-
 
 void I2C_GPIO_Config(void);
 static void I2C_Mode_Config(void);

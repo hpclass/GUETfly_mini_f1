@@ -1,7 +1,6 @@
 #ifndef ALT_HOLD_H_
 #define ALT_HOLD_H_
 
-
 extern int32_t targetVario;
 
 #if BARO
@@ -30,7 +29,6 @@ void applyPIDControl(uint16_t dTime, bool isHoveringState);
 void beepBuzzer(int16_t targetVario);
 void stopBuzzer();
 #endif
-
 
 #endif
 

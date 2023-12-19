@@ -11,9 +11,9 @@
 #include "stddef.h"
 #define bool u8
 
-//#define E2END STM32_FLASH_BASE+1024*STM32_FLASH_SIZE  //末尾地址
-void eeprom_read_block (void *buf, void *addr, size_t n);//读取由指定地址开始的指定长度的EEPROM数据
-void eeprom_write_block (void *buf, void *addr, size_t n);
+// #define E2END STM32_FLASH_BASE+1024*STM32_FLASH_SIZE  //末尾地址
+void eeprom_read_block(void *buf, void *addr, size_t n); // 读取由指定地址开始的指定长度的EEPROM数据
+void eeprom_write_block(void *buf, void *addr, size_t n);
 void readGlobalSet();
 bool readEEPROM();
 void update_constants();
@@ -24,15 +24,15 @@ void readPLog(void);
 void writePLog(void);
 
 #if defined(GPS)
-//EEPROM functions for storing and restoring waypoints
+// EEPROM functions for storing and restoring waypoints
 
 void storeWP(void);     // Stores the WP data in the wp struct in the EEPROM
 bool recallWP(uint8_t); // Read the given number of WP from the eeprom, supposedly we can use this during flight.
 // Returns true when reading is successfull and returns false if there were some error (for example checksum)
-uint8_t getMaxWPNumber(void);  // Returns the maximum WP number that can be stored in the EEPROM, calculated from conf and plog sizes, and the eeprom size
+uint8_t getMaxWPNumber(void); // Returns the maximum WP number that can be stored in the EEPROM, calculated from conf and plog sizes, and the eeprom size
 
 void loadGPSdefaults(void);
-void writeGPSconf(void) ;
+void writeGPSconf(void);
 bool recallGPSconf(void);
 
 void EEPROM_I2C_GPIO_Config(void);

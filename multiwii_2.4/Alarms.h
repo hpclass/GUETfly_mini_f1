@@ -1,7 +1,7 @@
 #ifndef ALARMS_H_
 #define ALARMS_H_
 
-void blinkLED(uint8_t num, uint8_t ontime,uint8_t repeat);
+void blinkLED(uint8_t num, uint8_t ontime, uint8_t repeat);
 uint8_t isBuzzerON(void);
 void alarmHandler(void);
 void vario_signaling(void);
@@ -28,7 +28,8 @@ AlarmArray
 8: Acc
 9: I2C Error
 */
-enum alrm_fac {
+enum alrm_fac
+{
     ALRM_FAC_TOGGLE = 0,
     ALRM_FAC_FAILSAFE,
     ALRM_FAC_GPS,
@@ -42,7 +43,6 @@ enum alrm_fac {
     ALRM_FAC_SIZE, // MUST be LAST - used for size of array alarmArray
 };
 
-
 /*
 Resources:
 0: onboard LED
@@ -51,7 +51,8 @@ Resources:
 3: PL BLUE
 4: PL RED
 */
-enum alrm_res {
+enum alrm_res
+{
     ALRM_RES_LED = 0,
     ALRM_RES_BUZZER,
     ALRM_RES_PL_GREEN,
@@ -61,32 +62,38 @@ enum alrm_res {
     ALRM_RES_ANY,
 };
 
-enum alrm_lvl_onoff {
+enum alrm_lvl_onoff
+{
     ALRM_LVL_OFF = 0,
     ALRM_LVL_ON = 1,
 };
-enum alrm_lvl_failsafe {
+enum alrm_lvl_failsafe
+{
     ALRM_LVL_FAILSAFE_FINDME = 1,
     ALRM_LVL_FAILSAFE_PANIC,
 };
-enum alrm_lvl_toggle {
-    ALRM_LVL_TOGGLE_1  = 1,
+enum alrm_lvl_toggle
+{
+    ALRM_LVL_TOGGLE_1 = 1,
     ALRM_LVL_TOGGLE_2,
     ALRM_LVL_TOGGLE_ELSE,
 };
 #if GPS
-enum alrm_lvl_gps {
-    ALRM_LVL_GPS_NOFIX  = 2,
+enum alrm_lvl_gps
+{
+    ALRM_LVL_GPS_NOFIX = 2,
 };
 #endif
 #ifdef VBAT
-enum alrm_lvl_vbat {
-    ALRM_LVL_VBAT_INFO  = 1,
+enum alrm_lvl_vbat
+{
+    ALRM_LVL_VBAT_INFO = 1,
     ALRM_LVL_VBAT_WARN,
     ALRM_LVL_VBAT_CRIT,
 };
 #endif
-enum alrm_lvl_confirm {
+enum alrm_lvl_confirm
+{
     ALRM_LVL_CONFIRM_1 = 1,
     ALRM_LVL_CONFIRM_2,
     ALRM_LVL_CONFIRM_ELSE,
@@ -94,11 +101,11 @@ enum alrm_lvl_confirm {
 
 #define SET_ALARM(fac, level) alarmArray[fac] = level
 #ifdef BUZZER
-#define SET_ALARM_BUZZER(fac, level)    SET_ALARM( fac, level)
+#define SET_ALARM_BUZZER(fac, level) SET_ALARM(fac, level)
 #else
 #define SET_ALARM_BUZZER(fac, level)
 #endif
 
-#define IS_ALARM_SET(fac, level) ( alarmArray[fac] == level )
+#define IS_ALARM_SET(fac, level) (alarmArray[fac] == level)
 
 #endif /* ALARMS_H_ */

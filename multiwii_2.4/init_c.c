@@ -5,6 +5,4 @@ void multiwii_start()
 {
     setup();
     loop();
-
-
 }
