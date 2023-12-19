@@ -8,9 +8,9 @@ OBJCOPY = arm-none-eabi-objcopy
 
 # Compiler flags
 CFLAGS = -mcpu=cortex-m3 \
-			-mthumb -std=gnu11 -Wall \
-			-DSTM32F10X_MD \
-			-DGUET_FLY_MINI_V1
+         -mthumb -std=gnu11 -Wall \
+         -DSTM32F10X_MD \
+         -DGUET_FLY_MINI_V1
 ASFLAGS = -mcpu=cortex-m3 -mthumb
 
 # Directories
@@ -20,83 +20,80 @@ CMSIS_DIR = ./Libraries/CMSIS/CM3/CoreSupport
 
 # Source files
 SRC_FILES = $(wildcard $(SRC_DIR)/*.c) $(USER_DIR)/stm32f10x_it.c $(USER_DIR)/timer.c
-ASM_FILES = $(wildcard $(SRC_DIR)/*.s*)
+ASM_FILES = $(wildcard $(SRC_DIR)/*.s*) ./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/arm/startup_stm32f10x_hd.S 
 CMSIS_FILES = $(CMSIS_DIR)/core_cm3.c
 
 # Header files
 INC_DIRS = -I$(SRC_DIR) -I$(USER_DIR) -I$(CMSIS_DIR) \
--I./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/ \
--I./Libraries/STM32F10x_StdPeriph_Driver/inc/ \
--I./USB
+           -I./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/ \
+           -I./Libraries/STM32F10x_StdPeriph_Driver/inc/ \
+           -I./USB
 
 SOURCES = \
     ./multiwii_2.4/Alarms.c \
-	./multiwii_2.4/IMU.c \
-	./multiwii_2.4/Output.c \
-	./multiwii_2.4/Sensors.c \
-	./multiwii_2.4/EEPROM.c \
-	./multiwii_2.4/LCD.c \
-	./multiwii_2.4/Protocol.c \
-	./multiwii_2.4/Serial.c \
-	./multiwii_2.4/GPS.c \
-	./multiwii_2.4/MultiWii.c \
-	./multiwii_2.4/RX.c \
-	./multiwii_2.4/init_c.c \
-	./USER/AltHold.c \
-	./USER/SPL06_001.c \
-	./USER/main.c \
-	./USER/re_eeprom.c \
-	./USER/system_stm32f10x.c \
-	./USER/Ano_OF.c \
-	./USER/USART.c \
-	./USER/math_.c \
-	./USER/soft_iic.c \
-	./USER/test1.c \
-	./USER/DJI_Guidance_usat.c \
-	./USER/delay.c \
-	./USER/oled.c \
-	./USER/spi.c \
-	./USER/timer.c \
-	./USER/IIC_SOFTWARE.c \
-	./USER/gy_86.c \
-	./USER/optic_.c \
-	./USER/stm32f10x_it.c \
-	./USER/INS.c \
-	./USER/ov7670_Dir.c \
-	./USER/sys.c \
-	./USB/usart.c \
-	./USB/USB_CH341.c \
+    ./multiwii_2.4/IMU.c \
+    ./multiwii_2.4/Output.c \
+    ./multiwii_2.4/Sensors.c \
+    ./multiwii_2.4/EEPROM.c \
+    ./multiwii_2.4/LCD.c \
+    ./multiwii_2.4/Protocol.c \
+    ./multiwii_2.4/Serial.c \
+    ./multiwii_2.4/GPS.c \
+    ./multiwii_2.4/MultiWii.c \
+    ./multiwii_2.4/RX.c \
+    ./multiwii_2.4/init_c.c \
+    ./USER/AltHold.c \
+    ./USER/SPL06_001.c \
+    ./USER/main.c \
+    ./USER/re_eeprom.c \
+    ./USER/system_stm32f10x.c \
+    ./USER/Ano_OF.c \
+    ./USER/USART.c \
+    ./USER/math_.c \
+    ./USER/soft_iic.c \
+    ./USER/test1.c \
+    ./USER/DJI_Guidance_usat.c \
+    ./USER/delay.c \
+    ./USER/oled.c \
+    ./USER/spi.c \
+    ./USER/timer.c \
+    ./USER/IIC_SOFTWARE.c \
+    ./USER/gy_86.c \
+    ./USER/optic_.c \
+    ./USER/stm32f10x_it.c \
+    ./USER/INS.c \
+    ./USER/ov7670_Dir.c \
+    ./USER/sys.c \
+    ./USB/usart.c \
+    ./USB/USB_CH341.c \
     ./Libraries/CMSIS/CM3/CoreSupport/core_cm3.c \
-	./USER/system_stm32f10x.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_can.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dbgmcu.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_fsmc.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_pwr.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_cec.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_adc.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_crc.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_exti.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rtc.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_bkp.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dac.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_iwdg.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_sdio.c \
-	./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_wwdg.c \
+    ./USER/system_stm32f10x.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_can.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dbgmcu.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_fsmc.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_pwr.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_cec.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_adc.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_crc.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_exti.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rtc.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_bkp.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dac.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_iwdg.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_sdio.c \
+    ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_wwdg.c \
 
-#	./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/arm/startup_stm32f10x_hd.s \
-# Object files
-OBJECTS = $(SOURCES:.c=.o)
+OBJECTS = $(SOURCES:.c=.o) $(ASM_FILES:.s=.o)
 
-# Output file
 TARGET = multiwii_2.4_STM32.elf
 
 all: $(TARGET)
@@ -107,5 +104,8 @@ $(TARGET): $(OBJECTS)
 %.o: %.c
 	$(CC) $(INC_DIRS) $(CFLAGS) -c -o $@ $<
 
+%.o: %.s
+	$(AS) $(ASFLAGS) -o $@ $<
+
 clean:
-	rm -f $(OBJECTS) $(TARGET)
+	rm -f $(filter-out $(ASM_FILES), $(OBJECTS) $(TARGET))
