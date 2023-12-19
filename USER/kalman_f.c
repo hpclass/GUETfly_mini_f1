@@ -2,24 +2,24 @@
 #include "Kalman_f.h"
 #include "math.h"
 
-float Accel_x;	     //XÖá¼ÓËÙ¶ÈÖµÔİ´æ
-float Accel_y;	     //YÖá¼ÓËÙ¶ÈÖµÔİ´æ
-float Accel_z;	     //ZÖá¼ÓËÙ¶ÈÖµÔİ´æ
+float Accel_x;	     //Xè½´åŠ é€Ÿåº¦å€¼æš‚å­˜
+float Accel_y;	     //Yè½´åŠ é€Ÿåº¦å€¼æš‚å­˜
+float Accel_z;	     //Zè½´åŠ é€Ÿåº¦å€¼æš‚å­˜
 
-float Gyro_x;		 //XÖáÍÓÂİÒÇÊı¾İÔİ´æ
-float Gyro_y;    //YÖáÍÓÂİÒÇÊı¾İÔİ´æ
-float Gyro_z;		 //ZÖáÍÓÂİÒÇÊı¾İÔİ´æ
+float Gyro_x;		 //Xè½´é™€èºä»ªæ•°æ®æš‚å­˜
+float Gyro_y;    //Yè½´é™€èºä»ªæ•°æ®æš‚å­˜
+float Gyro_z;		 //Zè½´é™€èºä»ªæ•°æ®æš‚å­˜
 
-//float Angle_gy;    //ÓÉ½ÇËÙ¶È¼ÆËãµÄÇãĞ±½Ç¶È
-float Angle_x_temp;  //ÓÉ¼ÓËÙ¶È¼ÆËãµÄxÇãĞ±½Ç¶È
-float Angle_y_temp;  //ÓÉ¼ÓËÙ¶È¼ÆËãµÄyÇãĞ±½Ç¶È
+//float Angle_gy;    //ç”±è§’é€Ÿåº¦è®¡ç®—çš„å€¾æ–œè§’åº¦
+float Angle_x_temp;  //ç”±åŠ é€Ÿåº¦è®¡ç®—çš„xå€¾æ–œè§’åº¦
+float Angle_y_temp;  //ç”±åŠ é€Ÿåº¦è®¡ç®—çš„yå€¾æ–œè§’åº¦
 float Angle_z_temp;
 
-float Angle_X_Final; //X×îÖÕÇãĞ±½Ç¶È
-float Angle_Y_Final; //Y×îÖÕÇãĞ±½Ç¶È
-float Angle_Z_Final; //Z×îÖÕÇãĞ±½Ç¶È
+float Angle_X_Final; //Xæœ€ç»ˆå€¾æ–œè§’åº¦
+float Angle_Y_Final; //Yæœ€ç»ˆå€¾æ–œè§’åº¦
+float Angle_Z_Final; //Zæœ€ç»ˆå€¾æ–œè§’åº¦
 
-//¿¨¶ûÂü²ÎÊı
+//å¡å°”æ›¼å‚æ•°
 char  C_0 = 1;
 float Q_bias_x, Q_bias_y, Q_bias_z;
 float Angle_err_x, Angle_err_y, Angle_err_z;
@@ -44,47 +44,47 @@ double KalmanFilter(const double ResrcData, double ProcessNiose_Q, double Measur
     double p_now;
     double kg;
     x_mid = x_last; //x_last=x(k-1|k-1),x_mid=x(k|k-1)
-    p_mid = p_last + Q; //p_mid=p(k|k-1),p_last=p(k-1|k-1),Q=ÔëÉù
-    kg = p_mid / (p_mid + R); //kg=kalman filter,R=ÔëÉù
-    x_now = x_mid + kg*(ResrcData - x_mid);//¹À×îÓÅÖµ
-    p_now = (1 - kg)*p_mid;//×îÓÅÖµ¶ÔÓ¦µÄcovariance
-    p_last = p_now; //¸üĞÂcovarianceÖµ
-    x_last = x_now; //¸üĞÂÏµÍ³×´Ì¬Öµ
+    p_mid = p_last + Q; //p_mid=p(k|k-1),p_last=p(k-1|k-1),Q=å™ªå£°
+    kg = p_mid / (p_mid + R); //kg=kalman filter,R=å™ªå£°
+    x_now = x_mid + kg*(ResrcData - x_mid);//ä¼°æœ€ä¼˜å€¼
+    p_now = (1 - kg)*p_mid;//æœ€ä¼˜å€¼å¯¹åº”çš„covariance
+    p_last = p_now; //æ›´æ–°covarianceå€¼
+    x_last = x_now; //æ›´æ–°ç³»ç»ŸçŠ¶æ€å€¼
     return x_now;
 }
 
-//½Ç¶È¼ÆËã
+//è§’åº¦è®¡ç®—
 void Angle_Calcu(void)
 {
-    //·¶Î§Îª2gÊ±£¬»»Ëã¹ØÏµ£º16384 LSB/g
+    //èŒƒå›´ä¸º2gæ—¶ï¼Œæ¢ç®—å…³ç³»ï¼š16384 LSB/g
     //deg = rad*180/3.14
     float x=0, y=0, z=0;
 
-    Accel_x = aacx; //xÖá¼ÓËÙ¶ÈÖµÔİ´æ
-    Accel_y = aacy; //yÖá¼ÓËÙ¶ÈÖµÔİ´æ
-    Accel_z = aacz; //zÖá¼ÓËÙ¶ÈÖµÔİ´æ
-    Gyro_x = gyrox;  //xÖáÍÓÂİÒÇÖµÔİ´æ
-    Gyro_y = gyroy;  //yÖáÍÓÂİÒÇÖµÔİ´æ
-    Gyro_z = gyroz;  //zÖáÍÓÂİÒÇÖµÔİ´æ
+    Accel_x = aacx; //xè½´åŠ é€Ÿåº¦å€¼æš‚å­˜
+    Accel_y = aacy; //yè½´åŠ é€Ÿåº¦å€¼æš‚å­˜
+    Accel_z = aacz; //zè½´åŠ é€Ÿåº¦å€¼æš‚å­˜
+    Gyro_x = gyrox;  //xè½´é™€èºä»ªå€¼æš‚å­˜
+    Gyro_y = gyroy;  //yè½´é™€èºä»ªå€¼æš‚å­˜
+    Gyro_z = gyroz;  //zè½´é™€èºä»ªå€¼æš‚å­˜
 
-    //´¦ÀíxÖá¼ÓËÙ¶È
+    //å¤„ç†xè½´åŠ é€Ÿåº¦
     if (Accel_x<32764) x = Accel_x / 16384;
     else              x = 1 - (Accel_x - 49152) / 16384;
 
-    //´¦ÀíyÖá¼ÓËÙ¶È
+    //å¤„ç†yè½´åŠ é€Ÿåº¦
     if (Accel_y<32764) y = Accel_y / 16384;
     else              y = 1 - (Accel_y - 49152) / 16384;
 
-    //´¦ÀízÖá¼ÓËÙ¶È
+    //å¤„ç†zè½´åŠ é€Ÿåº¦
     if (Accel_z<32764) z = Accel_z / 16384;
     else              z = (Accel_z - 49152) / 16384;
 
-    //ÓÃ¼ÓËÙ¶È¼ÆËãÈı¸öÖáºÍË®Æ½Ãæ×ø±êÏµÖ®¼äµÄ¼Ğ½Ç
+    //ç”¨åŠ é€Ÿåº¦è®¡ç®—ä¸‰ä¸ªè½´å’Œæ°´å¹³é¢åæ ‡ç³»ä¹‹é—´çš„å¤¹è§’
     Angle_x_temp = (atan2(z, y)) * 180 / Pi;
     Angle_y_temp = (atan2(x, z)) * 180 / Pi;
     Angle_z_temp = (atan2(y, x)) * 180 / Pi;
 
-    //½Ç¶ÈµÄÕı¸ººÅ
+    //è§’åº¦çš„æ­£è´Ÿå·
     if (Accel_y<32764) Angle_y_temp = +Angle_y_temp;
     if (Accel_y>32764) Angle_y_temp = -Angle_y_temp;
     if (Accel_x<32764) Angle_x_temp = +Angle_x_temp;
@@ -92,44 +92,44 @@ void Angle_Calcu(void)
     if (Accel_z<32764) Angle_z_temp = +Angle_z_temp;
     if (Accel_z>32764) Angle_z_temp = -Angle_z_temp;
 
-    //½ÇËÙ¶È
-    //ÏòÇ°ÔË¶¯
-    if (Gyro_x<32768) Gyro_x = -(Gyro_x / 16.4);//·¶Î§Îª1000deg/sÊ±£¬»»Ëã¹ØÏµ£º16.4 LSB/(deg/s)
-    //ÏòºóÔË¶¯
+    //è§’é€Ÿåº¦
+    //å‘å‰è¿åŠ¨
+    if (Gyro_x<32768) Gyro_x = -(Gyro_x / 16.4);//èŒƒå›´ä¸º1000deg/sæ—¶ï¼Œæ¢ç®—å…³ç³»ï¼š16.4 LSB/(deg/s)
+    //å‘åè¿åŠ¨
     if (Gyro_x>32768) Gyro_x = +(65535 - Gyro_x) / 16.4;
-    //ÏòÇ°ÔË¶¯
-    if (Gyro_y<32768) Gyro_y = -(Gyro_y / 16.4);//·¶Î§Îª1000deg/sÊ±£¬»»Ëã¹ØÏµ£º16.4 LSB/(deg/s)
-    //ÏòºóÔË¶¯
+    //å‘å‰è¿åŠ¨
+    if (Gyro_y<32768) Gyro_y = -(Gyro_y / 16.4);//èŒƒå›´ä¸º1000deg/sæ—¶ï¼Œæ¢ç®—å…³ç³»ï¼š16.4 LSB/(deg/s)
+    //å‘åè¿åŠ¨
     if (Gyro_y>32768) Gyro_y = +(65535 - Gyro_y) / 16.4;
-    //ÏòÇ°ÔË¶¯
-    if (Gyro_z<32768) Gyro_z = -(Gyro_z / 16.4);//·¶Î§Îª1000deg/sÊ±£¬»»Ëã¹ØÏµ£º16.4 LSB/(deg/s)
-    //ÏòºóÔË¶¯
+    //å‘å‰è¿åŠ¨
+    if (Gyro_z<32768) Gyro_z = -(Gyro_z / 16.4);//èŒƒå›´ä¸º1000deg/sæ—¶ï¼Œæ¢ç®—å…³ç³»ï¼š16.4 LSB/(deg/s)
+    //å‘åè¿åŠ¨
     if (Gyro_z>32768) Gyro_z = +(65535 - Gyro_z) / 16.4;
 
-    //Angle_gy = Angle_gy + Gyro_y*0.025;  //½ÇËÙ¶È»ı·ÖµÃµ½ÇãĞ±½Ç¶È.Ô½´ó»ı·Ö³öÀ´µÄ½Ç¶ÈÔ½´ó
-    Kalman_Filter_X(Angle_x_temp, Gyro_x);  //¿¨¶ûÂüÂË²¨¼ÆËãXÇã½Ç
+    //Angle_gy = Angle_gy + Gyro_y*0.025;  //è§’é€Ÿåº¦ç§¯åˆ†å¾—åˆ°å€¾æ–œè§’åº¦.è¶Šå¤§ç§¯åˆ†å‡ºæ¥çš„è§’åº¦è¶Šå¤§
+    Kalman_Filter_X(Angle_x_temp, Gyro_x);  //å¡å°”æ›¼æ»¤æ³¢è®¡ç®—Xå€¾è§’
 //	yijiehubu_P(Angle_x_temp, Gyro_x);
 //	Erjielvbo(Angle_x_temp, Gyro_x);
-    Kalman_Filter_Y(Angle_y_temp, Gyro_y);  //¿¨¶ûÂüÂË²¨¼ÆËãYÇã½Ç
-    Kalman_Filter_Z(Angle_z_temp, Gyro_z);  //¿¨¶ûÂüÂË²¨¼ÆËãYÇã½Ç
+    Kalman_Filter_Y(Angle_y_temp, Gyro_y);  //å¡å°”æ›¼æ»¤æ³¢è®¡ç®—Yå€¾è§’
+    Kalman_Filter_Z(Angle_z_temp, Gyro_z);  //å¡å°”æ›¼æ»¤æ³¢è®¡ç®—Yå€¾è§’
 }
 
-void Kalman_Filter_X(float Accel, float Gyro) //¿¨¶ûÂüº¯Êı
+void Kalman_Filter_X(float Accel, float Gyro) //å¡å°”æ›¼å‡½æ•°
 {
-    Angle_X_Final += (Gyro - Q_bias_x) * dt; //ÏÈÑé¹À¼Æ
+    Angle_X_Final += (Gyro - Q_bias_x) * dt; //å…ˆéªŒä¼°è®¡
 
-    Pdot[0] = Q_angle - PP[0][1] - PP[1][0]; // Pk-ÏÈÑé¹À¼ÆÎó²îĞ­·½²îµÄÎ¢·Ö
+    Pdot[0] = Q_angle - PP[0][1] - PP[1][0]; // Pk-å…ˆéªŒä¼°è®¡è¯¯å·®åæ–¹å·®çš„å¾®åˆ†
 
     Pdot[1] = -PP[1][1];
     Pdot[2] = -PP[1][1];
     Pdot[3] = Q_gyro;
 
-    PP[0][0] += Pdot[0] * dt;   // Pk-ÏÈÑé¹À¼ÆÎó²îĞ­·½²îÎ¢·ÖµÄ»ı·Ö
-    PP[0][1] += Pdot[1] * dt;   // =ÏÈÑé¹À¼ÆÎó²îĞ­·½²î
+    PP[0][0] += Pdot[0] * dt;   // Pk-å…ˆéªŒä¼°è®¡è¯¯å·®åæ–¹å·®å¾®åˆ†çš„ç§¯åˆ†
+    PP[0][1] += Pdot[1] * dt;   // =å…ˆéªŒä¼°è®¡è¯¯å·®åæ–¹å·®
     PP[1][0] += Pdot[2] * dt;
     PP[1][1] += Pdot[3] * dt;
 
-    Angle_err_x = Accel - Angle_X_Final;	//zk-ÏÈÑé¹À¼Æ
+    Angle_err_x = Accel - Angle_X_Final;	//zk-å…ˆéªŒä¼°è®¡
 
     PCt_0 = C_0 * PP[0][0];
     PCt_1 = C_0 * PP[1][0];
@@ -142,32 +142,32 @@ void Kalman_Filter_X(float Accel, float Gyro) //¿¨¶ûÂüº¯Êı
     t_0 = PCt_0;
     t_1 = C_0 * PP[0][1];
 
-    PP[0][0] -= K_0 * t_0;		 //ºóÑé¹À¼ÆÎó²îĞ­·½²î
+    PP[0][0] -= K_0 * t_0;		 //åéªŒä¼°è®¡è¯¯å·®åæ–¹å·®
     PP[0][1] -= K_0 * t_1;
     PP[1][0] -= K_1 * t_0;
     PP[1][1] -= K_1 * t_1;
 
-    Angle_X_Final += K_0 * Angle_err_x;	 //ºóÑé¹À¼Æ
-    Q_bias_x += K_1 * Angle_err_x;	 //ºóÑé¹À¼Æ
-    Gyro_x = Gyro - Q_bias_x;	 //Êä³öÖµ(ºóÑé¹À¼Æ)µÄÎ¢·Ö=½ÇËÙ¶È
+    Angle_X_Final += K_0 * Angle_err_x;	 //åéªŒä¼°è®¡
+    Q_bias_x += K_1 * Angle_err_x;	 //åéªŒä¼°è®¡
+    Gyro_x = Gyro - Q_bias_x;	 //è¾“å‡ºå€¼(åéªŒä¼°è®¡)çš„å¾®åˆ†=è§’é€Ÿåº¦
 }
 
-void Kalman_Filter_Y(float Accel, float Gyro) //¿¨¶ûÂüº¯Êı
+void Kalman_Filter_Y(float Accel, float Gyro) //å¡å°”æ›¼å‡½æ•°
 {
-    Angle_Y_Final += (Gyro - Q_bias_y) * dt; //ÏÈÑé¹À¼Æ
+    Angle_Y_Final += (Gyro - Q_bias_y) * dt; //å…ˆéªŒä¼°è®¡
 
-    Pdot[0] = Q_angle - PP[0][1] - PP[1][0]; // Pk-ÏÈÑé¹À¼ÆÎó²îĞ­·½²îµÄÎ¢·Ö
+    Pdot[0] = Q_angle - PP[0][1] - PP[1][0]; // Pk-å…ˆéªŒä¼°è®¡è¯¯å·®åæ–¹å·®çš„å¾®åˆ†
 
     Pdot[1] = -PP[1][1];
     Pdot[2] = -PP[1][1];
     Pdot[3] = Q_gyro;
 
-    PP[0][0] += Pdot[0] * dt;   // Pk-ÏÈÑé¹À¼ÆÎó²îĞ­·½²îÎ¢·ÖµÄ»ı·Ö
-    PP[0][1] += Pdot[1] * dt;   // =ÏÈÑé¹À¼ÆÎó²îĞ­·½²î
+    PP[0][0] += Pdot[0] * dt;   // Pk-å…ˆéªŒä¼°è®¡è¯¯å·®åæ–¹å·®å¾®åˆ†çš„ç§¯åˆ†
+    PP[0][1] += Pdot[1] * dt;   // =å…ˆéªŒä¼°è®¡è¯¯å·®åæ–¹å·®
     PP[1][0] += Pdot[2] * dt;
     PP[1][1] += Pdot[3] * dt;
 
-    Angle_err_y = Accel - Angle_Y_Final;	//zk-ÏÈÑé¹À¼Æ
+    Angle_err_y = Accel - Angle_Y_Final;	//zk-å…ˆéªŒä¼°è®¡
 
     PCt_0 = C_0 * PP[0][0];
     PCt_1 = C_0 * PP[1][0];
@@ -180,32 +180,32 @@ void Kalman_Filter_Y(float Accel, float Gyro) //¿¨¶ûÂüº¯Êı
     t_0 = PCt_0;
     t_1 = C_0 * PP[0][1];
 
-    PP[0][0] -= K_0 * t_0;		 //ºóÑé¹À¼ÆÎó²îĞ­·½²î
+    PP[0][0] -= K_0 * t_0;		 //åéªŒä¼°è®¡è¯¯å·®åæ–¹å·®
     PP[0][1] -= K_0 * t_1;
     PP[1][0] -= K_1 * t_0;
     PP[1][1] -= K_1 * t_1;
 
-    Angle_Y_Final += K_0 * Angle_err_y;	 //ºóÑé¹À¼Æ
-    Q_bias_y += K_1 * Angle_err_y;	 //ºóÑé¹À¼Æ
-    Gyro_y = Gyro - Q_bias_y;	 //Êä³öÖµ(ºóÑé¹À¼Æ)µÄÎ¢·Ö=½ÇËÙ¶È
+    Angle_Y_Final += K_0 * Angle_err_y;	 //åéªŒä¼°è®¡
+    Q_bias_y += K_1 * Angle_err_y;	 //åéªŒä¼°è®¡
+    Gyro_y = Gyro - Q_bias_y;	 //è¾“å‡ºå€¼(åéªŒä¼°è®¡)çš„å¾®åˆ†=è§’é€Ÿåº¦
 }
 
-void Kalman_Filter_Z(float Accel, float Gyro) //¿¨¶ûÂüº¯Êı
+void Kalman_Filter_Z(float Accel, float Gyro) //å¡å°”æ›¼å‡½æ•°
 {
-    Angle_Z_Final += (Gyro - Q_bias_z) * dt; //ÏÈÑé¹À¼Æ
+    Angle_Z_Final += (Gyro - Q_bias_z) * dt; //å…ˆéªŒä¼°è®¡
 
-    Pdot[0] = Q_angle - PP[0][1] - PP[1][0]; // Pk-ÏÈÑé¹À¼ÆÎó²îĞ­·½²îµÄÎ¢·Ö
+    Pdot[0] = Q_angle - PP[0][1] - PP[1][0]; // Pk-å…ˆéªŒä¼°è®¡è¯¯å·®åæ–¹å·®çš„å¾®åˆ†
 
     Pdot[1] = -PP[1][1];
     Pdot[2] = -PP[1][1];
     Pdot[3] = Q_gyro;
 
-    PP[0][0] += Pdot[0] * dt;   // Pk-ÏÈÑé¹À¼ÆÎó²îĞ­·½²îÎ¢·ÖµÄ»ı·Ö
-    PP[0][1] += Pdot[1] * dt;   // =ÏÈÑé¹À¼ÆÎó²îĞ­·½²î
+    PP[0][0] += Pdot[0] * dt;   // Pk-å…ˆéªŒä¼°è®¡è¯¯å·®åæ–¹å·®å¾®åˆ†çš„ç§¯åˆ†
+    PP[0][1] += Pdot[1] * dt;   // =å…ˆéªŒä¼°è®¡è¯¯å·®åæ–¹å·®
     PP[1][0] += Pdot[2] * dt;
     PP[1][1] += Pdot[3] * dt;
 
-    Angle_err_z = Accel - Angle_Z_Final;	//zk-ÏÈÑé¹À¼Æ
+    Angle_err_z = Accel - Angle_Z_Final;	//zk-å…ˆéªŒä¼°è®¡
 
     PCt_0 = C_0 * PP[0][0];
     PCt_1 = C_0 * PP[1][0];
@@ -218,14 +218,14 @@ void Kalman_Filter_Z(float Accel, float Gyro) //¿¨¶ûÂüº¯Êı
     t_0 = PCt_0;
     t_1 = C_0 * PP[0][1];
 
-    PP[0][0] -= K_0 * t_0;		 //ºóÑé¹À¼ÆÎó²îĞ­·½²î
+    PP[0][0] -= K_0 * t_0;		 //åéªŒä¼°è®¡è¯¯å·®åæ–¹å·®
     PP[0][1] -= K_0 * t_1;
     PP[1][0] -= K_1 * t_0;
     PP[1][1] -= K_1 * t_1;
 
-    Angle_Z_Final += K_0 * Angle_err_z;	 //ºóÑé¹À¼Æ
-    Q_bias_z += K_1 * Angle_err_z;	 //ºóÑé¹À¼Æ
-    Gyro_z = Gyro - Q_bias_z;	 //Êä³öÖµ(ºóÑé¹À¼Æ)µÄÎ¢·Ö=½ÇËÙ¶È
+    Angle_Z_Final += K_0 * Angle_err_z;	 //åéªŒä¼°è®¡
+    Q_bias_z += K_1 * Angle_err_z;	 //åéªŒä¼°è®¡
+    Gyro_z = Gyro - Q_bias_z;	 //è¾“å‡ºå€¼(åéªŒä¼°è®¡)çš„å¾®åˆ†=è§’é€Ÿåº¦
 }
 
 float angle_P,angle_R;

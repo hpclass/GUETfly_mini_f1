@@ -6,9 +6,9 @@
 #include "usart.h"
 #include "def.h"
 #include "config.h"
-//IIC×ÜÏßÒý½ÅÅäÖÃ
+//IICæ€»çº¿å¼•è„šé…ç½®
 #if defined(GUET_FLY_V1)
-#if defined(EXTERN_IIC1)//Ê¹ÓÃÁËÍâÖÃIIC
+#if defined(EXTERN_IIC1)//ä½¿ç”¨äº†å¤–ç½®IIC
 
 #define EX_SCL_H         GPIOB->BSRR |= GPIO_Pin_6
 #define EX_SCL_L         GPIOB->BRR  |= GPIO_Pin_6

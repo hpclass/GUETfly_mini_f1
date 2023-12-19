@@ -6,14 +6,14 @@
 #include "sys.h"
 
 
-double XPosition,YPosition;//Î»ÖÃĞÅÏ¢
-double DirectionXSpeed,DirectionYSpeed;//Î»ÒÆĞÅÏ¢
-double HIGH_CURRENT_CSB=0;//¸ß¶ÈĞÅÏ¢
-double DOWNSPEED_CURRENT_CSB=0;//¶ÔµØËÙ¶ÈĞÅÏ¢
-uint8_t ov7670_flag=0;//Ö¡±êÖ¾
+double XPosition,YPosition;//ä½ç½®ä¿¡æ¯
+double DirectionXSpeed,DirectionYSpeed;//ä½ç§»ä¿¡æ¯
+double HIGH_CURRENT_CSB=0;//é«˜åº¦ä¿¡æ¯
+double DOWNSPEED_CURRENT_CSB=0;//å¯¹åœ°é€Ÿåº¦ä¿¡æ¯
+uint8_t ov7670_flag=0;//å¸§æ ‡å¿—
 int16_t angle_ov7670[2];
 extern int16_t  debug[4];
-//´®¿Ú½âÎöĞ­Òé
+//ä¸²å£è§£æåè®®
 void ov7670_get_one_byte(uint8_t c)
 {
     static uint8_t state=0;
@@ -21,12 +21,12 @@ void ov7670_get_one_byte(uint8_t c)
     state++;
     if(state==1)
     {
-        if(c!=0x01)//Ğ£ÑéÍ·²¿µÚÒ»¸ö×Ö½Ú
+        if(c!=0x01)//æ ¡éªŒå¤´éƒ¨ç¬¬ä¸€ä¸ªå­—èŠ‚
             state=0;
     } else if(state==2) {
-        if(c!=0xfe)//Ğ£ÑéÍ·²¿µÚ¶ş¸ö×Ö½Ú
+        if(c!=0xfe)//æ ¡éªŒå¤´éƒ¨ç¬¬äºŒä¸ªå­—èŠ‚
             state=0;
-    } else if(state>=3) { //Ğ£ÑéÁËÍ·²¿£¬½ÓÏÂÀ´ÊÇÊı¾İÄÚÈİ
+    } else if(state>=3) { //æ ¡éªŒäº†å¤´éƒ¨ï¼Œæ¥ä¸‹æ¥æ˜¯æ•°æ®å†…å®¹
         switch(state)
         {
         case 3:
@@ -42,23 +42,23 @@ void ov7670_get_one_byte(uint8_t c)
             DirectionYSpeed=(double)((int)(c-120));
             break;
         case 7:
-            temp[0]=c<<8;//¸ß°ËÎ»
+            temp[0]=c<<8;//é«˜å…«ä½
             break;
         case 8:
-            temp[0]|=c;//µÍ°ËÎ»
+            temp[0]|=c;//ä½å…«ä½
             HIGH_CURRENT_CSB=(double)((short)temp[0]);
             break;
         case 9:
-            temp[1]=c<<8;//¸ß°ËÎ»
+            temp[1]=c<<8;//é«˜å…«ä½
             break;
         case 10:
-            temp[1]|=c;//µÍ°ËÎ»
+            temp[1]|=c;//ä½å…«ä½
             DOWNSPEED_CURRENT_CSB=(double)((short)temp[1]);
             break;
 
         default:
-            state=0;//Ò»Ö¡½ÓÊÕÍê³É
-            ov7670_flag=1;//±êÖ¾Ö¡
+            state=0;//ä¸€å¸§æ¥æ”¶å®Œæˆ
+            ov7670_flag=1;//æ ‡å¿—å¸§
 
             break;
 
@@ -115,14 +115,14 @@ void c_flow()
     K_D[PITCH]=8;
 
 
-    if(!ov7670_flag)//Î´¸üĞÂÖ¡²»´¦ÀíÊı¾İ
+    if(!ov7670_flag)//æœªæ›´æ–°å¸§ä¸å¤„ç†æ•°æ®
         return ;
     ov7670_flag=0;
 
     GPS_TOGGLE;
     for(axis=0; axis<2; axis++)
     {
-        //Ç°¼¶ÊäÈë
+        //å‰çº§è¾“å…¥
         //P
         head_error_P=constrain(head_P[axis]*temp_POSITION[axis],-3,+3);
         debug[axis]=head_error_P;
@@ -133,8 +133,8 @@ void c_flow()
 
 
 
-        //ºó¼¶ÊäÈë
-        error=temp_SPEED[axis] + head_error_P + head_error_I;//Ç°¼¶Êä³ö×öºó¼¶ÊäÈë
+        //åçº§è¾“å…¥
+        error=temp_SPEED[axis] + head_error_P + head_error_I;//å‰çº§è¾“å‡ºåšåçº§è¾“å…¥
         //P
         error_P=K_P[axis]*error;
 
@@ -147,14 +147,14 @@ void c_flow()
         err_D_last[axis]=error;
 
         //OUTPUT=P+I+D
-        angle_ov7670[axis]=constrain(error_P+error_I-error_D,-50,+50);//ÏŞÖÆÊä³ö´óĞ¡
+        angle_ov7670[axis]=constrain(error_P+error_I-error_D,-50,+50);//é™åˆ¶è¾“å‡ºå¤§å°
     }
 
 
 }
 void init_c_flow()
 {
-    //»ı·ÖÇåÁã
+    //ç§¯åˆ†æ¸…é›¶
     head_error_P=head_error_I=head_error_I_SUM[0]=head_error_I_SUM[1]=0;
     error=error_P=error_I=error_I_SUM[0]=error_I_SUM[1]=error_D=err_D_last[0]=err_D_last[1]=0;
 

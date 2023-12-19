@@ -13,5 +13,5 @@ typedef struct __flow {
 
 
 extern  _flow flow;
-//光流数据接收
+//鍏夋祦鏁版嵁鎺ユ敹
 void Player_Flow_Receive(uint8_t data);

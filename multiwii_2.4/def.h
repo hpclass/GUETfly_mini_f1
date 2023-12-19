@@ -1,7 +1,7 @@
 #ifndef DEF_H_
 #define DEF_H_
 #include "config.h"
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt))) //∂®“Â◊‘∂®≥Ã–Ú
+#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt))) //ÂÆö‰πâËá™ÂÆöÁ®ãÂ∫è
 //typedef enum {FALSE = 0, TRUE = !FALSE} bool;
 /**************************************************************************************/
 /***************             test configurations                   ********************/
@@ -1694,45 +1694,45 @@
 
 #if defined(GUET_FLY_V1)
 #if defined(AT24C01)||defined(AT24C02)||defined(AT24C04)||defined(AT24C08)||defined(AT24C16)||defined(AT24C16)||defined(AT24C32)||defined(AT24C64)||defined(AT24C128)||defined(AT24C256)||defined(AT24C512)
-#define USE_EX_EEPROM			// π”√Õ‚÷√EEPROM
+#define USE_EX_EEPROM			//‰ΩøÁî®Â§ñÁΩÆEEPROM
 #if defined(AT24C01)
-#define E2END 127 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 8 //“ª“≥¥Û–°
+#define E2END 127 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 8 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C02)
-#define E2END 255 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 8 //“ª“≥¥Û–°
+#define E2END 255 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 8 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C04)
-#define E2END 511 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 16 //“ª“≥¥Û–°
+#define E2END 511 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 16 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C08)
-#define E2END 1023 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 16 //“ª“≥¥Û–°
+#define E2END 1023 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 16 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C16)
-#define E2END 2047 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 16 //“ª“≥¥Û–°
+#define E2END 2047 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 16 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C32)
-#define E2END 4095 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 32 //“ª“≥¥Û–°
+#define E2END 4095 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 32 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C64)
-#define E2END 8191 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 32 //“ª“≥¥Û–°
+#define E2END 8191 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 32 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C128)
-#define E2END 16383 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 32 //“ª“≥¥Û–°
+#define E2END 16383 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 32 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C256)
-#define E2END 32767 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 32 //“ª“≥¥Û–°
+#define E2END 32767 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 32 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #else
-#define USE_FLASH_SIZE 20  // π”√FLASHƒ£ƒ‚‘ –Ì π”√10k
+#define USE_FLASH_SIZE 20  //‰ΩøÁî®FLASHÊ®°ÊãüÂÖÅËÆ∏‰ΩøÁî®10k
 #define E2END 1024*USE_FLASH_SIZE-1
 #endif
 #define LED1_ON GPIOE->BRR = GPIO_Pin_1;
@@ -1760,7 +1760,7 @@
 #define HMC5883 // mag ex
 #define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  Y; imu.magADC[PITCH]  =  X; imu.magADC[YAW]  = -Z;}
 #else
-#define AK8963  //∞Â‘ÿ¥≈¡¶º∆
+#define AK8963  //ÊùøËΩΩÁ£ÅÂäõËÆ°
 #define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  X; imu.magADC[PITCH]  =  -Y; imu.magADC[YAW]  = Z;}
 #endif
 #if !defined(EX_BORA_SPL06)
@@ -1777,45 +1777,45 @@
 /*************************GUETFLY MINI*************************************************/
 #if defined(GUET_FLY_MINI_V1)
 #if defined(AT24C01)||defined(AT24C02)||defined(AT24C04)||defined(AT24C08)||defined(AT24C16)||defined(AT24C16)||defined(AT24C32)||defined(AT24C64)||defined(AT24C128)||defined(AT24C256)||defined(AT24C512)
-#define USE_EX_EEPROM			// π”√Õ‚÷√EEPROM
+#define USE_EX_EEPROM			//‰ΩøÁî®Â§ñÁΩÆEEPROM
 #if defined(AT24C01)
-#define E2END 127 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 8 //“ª“≥¥Û–°
+#define E2END 127 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 8 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C02)
-#define E2END 255 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 8 //“ª“≥¥Û–°
+#define E2END 255 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 8 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C04)
-#define E2END 511 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 16 //“ª“≥¥Û–°
+#define E2END 511 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 16 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C08)
-#define E2END 1023 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 16 //“ª“≥¥Û–°
+#define E2END 1023 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 16 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C16)
-#define E2END 2047 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 16 //“ª“≥¥Û–°
+#define E2END 2047 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 16 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C32)
-#define E2END 4095 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 32 //“ª“≥¥Û–°
+#define E2END 4095 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 32 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C64)
-#define E2END 8191 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 32 //“ª“≥¥Û–°
+#define E2END 8191 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 32 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C128)
-#define E2END 16383 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 32 //“ª“≥¥Û–°
+#define E2END 16383 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 32 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #if defined(AT24C256)
-#define E2END 32767 //∂®“Â◊÷Ω⁄ ˝
-#define E2PAGESIZE 32 //“ª“≥¥Û–°
+#define E2END 32767 //ÂÆö‰πâÂ≠óËäÇÊï∞
+#define E2PAGESIZE 32 //‰∏ÄÈ°µÂ§ßÂ∞è
 #endif
 #else
-#define USE_FLASH_SIZE 20  // π”√FLASHƒ£ƒ‚‘ –Ì π”√10k
+#define USE_FLASH_SIZE 20  //‰ΩøÁî®FLASHÊ®°ÊãüÂÖÅËÆ∏‰ΩøÁî®10k
 #define E2END 1024*USE_FLASH_SIZE-1
 #endif
 #define LED1_ON GPIOA->BRR = GPIO_Pin_0;
@@ -1842,10 +1842,10 @@
 #define HMC5883 // mag ex
 #define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  Y; imu.magADC[PITCH]  =  X; imu.magADC[YAW]  = -Z;}
 #else
-#define AK8963  //∞Â‘ÿ¥≈¡¶º∆
+#define AK8963  //ÊùøËΩΩÁ£ÅÂäõËÆ°
 #define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  -Y; imu.magADC[PITCH]  =  -X; imu.magADC[YAW]  = Z;}
 #endif
-//#define SPL06_001 //∞Â‘ÿ∆¯—πº∆
+//#define SPL06_001 //ÊùøËΩΩÊ∞îÂéãËÆ°
 #define ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  X; imu.accADC[PITCH]  = Y; imu.accADC[YAW]  = Z;}
 #define GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] = -Y; imu.gyroADC[PITCH] =  X; imu.gyroADC[YAW] = -Z;}
 //#define MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  X; imu.magADC[PITCH]  =  -Y; imu.magADC[YAW]  = Z;}

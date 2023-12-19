@@ -98,8 +98,8 @@ void __attribute__ ((noinline)) waitTransmissionI2C(uint8_t twcr) {
 */
 #if defined(USE_STM32_I2C1)
 void i2c_rep_start(uint8_t address) {
-    i2c_Start();              //ÆğÊ¼ĞÅºÅ
-    i2c_write(address);   //·¢ËÍÉè±¸µØÖ·+Ğ´ĞÅºÅ
+    i2c_Start();              //èµ·å§‹ä¿¡å·
+    i2c_write(address);   //å‘é€è®¾å¤‡åœ°å€+å†™ä¿¡å·
 
 }
 void i2c_read_reg_to_buf(uint8_t add, uint8_t reg, uint8_t buf[6], uint8_t size) {
@@ -120,7 +120,7 @@ void i2c_writeReg(uint8_t add, uint8_t reg, uint8_t val) {
     i2c_write(reg);
     i2c_rep_start(add<<1);
     i2c_write(val);
-    i2c_stop();                    //Í£Ö¹ĞÅºÅ
+    i2c_stop();                    //åœæ­¢ä¿¡å·
 }
 uint8_t i2c_readReg(uint8_t add, uint8_t reg) {
     u8 REG_data;
@@ -137,20 +137,20 @@ uint8_t i2c_readReg(uint8_t add, uint8_t reg) {
 #else
 
 #if defined(EXTERN_IIC1)
-////////IICÆô¶¯º¯Êı//////////
+////////IICå¯åŠ¨å‡½æ•°//////////
 void EX_I2C_Start(void)
 {
     EX_SDA_H;
     EX_SCL_H;
     EX_Delay_1us(1);
-    if(!EX_SDA_read) return;//SDAÏßÎªµÍµçÆ½Ôò×ÜÏßÃ¦,ÍË³ö
+    if(!EX_SDA_read) return;//SDAçº¿ä¸ºä½ç”µå¹³åˆ™æ€»çº¿å¿™,é€€å‡º
     EX_SDA_L;
     EX_Delay_1us(1);
     EX_SCL_L;
     EX_Delay_1us(1);
 }
 //**************************************
-//IICÍ£Ö¹ĞÅºÅ
+//IICåœæ­¢ä¿¡å·
 //**************************************
 void EX_I2C_Stop(void)
 {
@@ -160,26 +160,26 @@ void EX_I2C_Stop(void)
     EX_SCL_H;
     EX_Delay_1us(1);
     EX_SDA_H;
-    EX_Delay_1us(1);                 //ÑÓÊ±
+    EX_Delay_1us(1);                 //å»¶æ—¶
 }
 //**************************************
-//IIC·¢ËÍÓ¦´ğĞÅºÅ
-//Èë¿Ú²ÎÊı:ack (0:ACK 1:NAK)
+//IICå‘é€åº”ç­”ä¿¡å·
+//å…¥å£å‚æ•°:ack (0:ACK 1:NAK)
 //**************************************
 void EX_I2C_SendACK(u8 i)
 {
-    if(1==i)EX_SDA_H;                  //Ğ´Ó¦´ğĞÅºÅ
+    if(1==i)EX_SDA_H;                  //å†™åº”ç­”ä¿¡å·
     else EX_SDA_L;
-    EX_SCL_H;                    //À­¸ßÊ±ÖÓÏß
-    EX_Delay_1us(1);                 //ÑÓÊ±
-    EX_SCL_L ;                  //À­µÍÊ±ÖÓÏß
+    EX_SCL_H;                    //æ‹‰é«˜æ—¶é’Ÿçº¿
+    EX_Delay_1us(1);                 //å»¶æ—¶
+    EX_SCL_L ;                  //æ‹‰ä½æ—¶é’Ÿçº¿
     EX_Delay_1us(1);
 }
 //**************************************
-//IICµÈ´ıÓ¦´ğ
-//·µ»ØÖµ£ºack (1:ACK 0:NAK)
+//IICç­‰å¾…åº”ç­”
+//è¿”å›å€¼ï¼šack (1:ACK 0:NAK)
 //**************************************
-bool EX_I2C_WaitAck(void) 	 //·µ»ØÎª:=1ÓĞACK,=0ÎŞACK
+bool EX_I2C_WaitAck(void) 	 //è¿”å›ä¸º:=1æœ‰ACK,=0æ— ACK
 {
     unsigned int i;
     EX_SDA_H;
@@ -202,7 +202,7 @@ bool EX_I2C_WaitAck(void) 	 //·µ»ØÎª:=1ÓĞACK,=0ÎŞACK
 }
 
 //**************************************
-//ÏòIIC×ÜÏß·¢ËÍÒ»¸ö×Ö½ÚÊı¾İ
+//å‘IICæ€»çº¿å‘é€ä¸€ä¸ªå­—èŠ‚æ•°æ®
 //**************************************
 void EX_I2C_SendByte(u8 dat)
 {
@@ -210,110 +210,110 @@ void EX_I2C_SendByte(u8 dat)
 //	unsigned char ack=1;
 
     //EX_SCL_L;
-    for (i=0; i<8; i++)         //8Î»¼ÆÊıÆ÷
+    for (i=0; i<8; i++)         //8ä½è®¡æ•°å™¨
     {
         if(dat&0x80) {
-            EX_SDA_H;   //ËÍÊı¾İ¿Ú
+            EX_SDA_H;   //é€æ•°æ®å£
         }
         else EX_SDA_L;
-        EX_SCL_H;                //À­¸ßÊ±ÖÓÏß
-        EX_Delay_1us(1);             //ÑÓÊ±
-        EX_SCL_L;                //À­µÍÊ±ÖÓÏß
-        EX_Delay_1us(1); 		  //ÑÓÊ±
-        dat <<= 1;          //ÒÆ³öÊı¾İµÄ×î¸ßÎ»
+        EX_SCL_H;                //æ‹‰é«˜æ—¶é’Ÿçº¿
+        EX_Delay_1us(1);             //å»¶æ—¶
+        EX_SCL_L;                //æ‹‰ä½æ—¶é’Ÿçº¿
+        EX_Delay_1us(1); 		  //å»¶æ—¶
+        dat <<= 1;          //ç§»å‡ºæ•°æ®çš„æœ€é«˜ä½
     }
 }
 
 //**************************************
-//´ÓIIC×ÜÏß½ÓÊÕÒ»¸ö×Ö½ÚÊı¾İ
+//ä»IICæ€»çº¿æ¥æ”¶ä¸€ä¸ªå­—èŠ‚æ•°æ®
 //**************************************
 u8 EX_I2C_RecvByte()
 {
     u8 i;
     u8 dat = 0;
-    EX_SDA_H;                    //Ê¹ÄÜÄÚ²¿ÉÏÀ­,×¼±¸¶ÁÈ¡Êı¾İ,
-    for (i=0; i<8; i++)         //8Î»¼ÆÊıÆ÷
+    EX_SDA_H;                    //ä½¿èƒ½å†…éƒ¨ä¸Šæ‹‰,å‡†å¤‡è¯»å–æ•°æ®,
+    for (i=0; i<8; i++)         //8ä½è®¡æ•°å™¨
     {
 
         dat <<= 1;
-        EX_SCL_H;                //À­¸ßÊ±ÖÓÏß
-        EX_Delay_1us(1);            //ÑÓÊ±
-        if(EX_SDA_read) //¶ÁÊı¾İ
+        EX_SCL_H;                //æ‹‰é«˜æ—¶é’Ÿçº¿
+        EX_Delay_1us(1);            //å»¶æ—¶
+        if(EX_SDA_read) //è¯»æ•°æ®
         {
             dat |=0x01;
         }
-        EX_SCL_L;                //À­µÍÊ±ÖÓÏß
+        EX_SCL_L;                //æ‹‰ä½æ—¶é’Ÿçº¿
         EX_Delay_1us(1);
     }
 
     return dat;
 }
 //**************************************
-//ÏòIICÉè±¸Ğ´ÈëÒ»¸ö×Ö½ÚÊı¾İ
+//å‘IICè®¾å¤‡å†™å…¥ä¸€ä¸ªå­—èŠ‚æ•°æ®
 //**************************************
 bool EX_Single_WriteI2C(u8 Slave_Address,u8 REG_Address,u8 REG_data)
 {
-    EX_I2C_Start();              //ÆğÊ¼ĞÅºÅ
+    EX_I2C_Start();              //èµ·å§‹ä¿¡å·
 
-    EX_I2C_SendByte(Slave_Address);   //·¢ËÍÉè±¸µØÖ·+Ğ´ĞÅºÅ
+    EX_I2C_SendByte(Slave_Address);   //å‘é€è®¾å¤‡åœ°å€+å†™ä¿¡å·
     if(!EX_I2C_WaitAck()) {
         EX_I2C_Stop();
         return false;
     }
 
-    EX_I2C_SendByte(REG_Address);    //ÄÚ²¿¼Ä´æÆ÷µØÖ·£¬
+    EX_I2C_SendByte(REG_Address);    //å†…éƒ¨å¯„å­˜å™¨åœ°å€ï¼Œ
     if(!EX_I2C_WaitAck()) {
         EX_I2C_Stop();
         return false;
     }
 
-    EX_I2C_SendByte(REG_data);       //ÄÚ²¿¼Ä´æÆ÷Êı¾İ£¬
+    EX_I2C_SendByte(REG_data);       //å†…éƒ¨å¯„å­˜å™¨æ•°æ®ï¼Œ
     if(!EX_I2C_WaitAck()) {
         EX_I2C_Stop();
         return false;
     }
 
-    EX_I2C_Stop();                   //·¢ËÍÍ£Ö¹ĞÅºÅ
+    EX_I2C_Stop();                   //å‘é€åœæ­¢ä¿¡å·
     return true;
 }
 //**************************************
-//´ÓIICÉè±¸¶ÁÈ¡Ò»¸ö×Ö½ÚÊı¾İ
+//ä»IICè®¾å¤‡è¯»å–ä¸€ä¸ªå­—èŠ‚æ•°æ®
 //**************************************
 u8 EX_Single_ReadI2C(u8 Slave_Address,u8 REG_Address)
 {
     u8 REG_data;
-    EX_I2C_Start();                   //ÆğÊ¼ĞÅºÅ
+    EX_I2C_Start();                   //èµ·å§‹ä¿¡å·
 
-    EX_I2C_SendByte(Slave_Address);    //·¢ËÍÉè±¸µØÖ·+Ğ´ĞÅºÅ
+    EX_I2C_SendByte(Slave_Address);    //å‘é€è®¾å¤‡åœ°å€+å†™ä¿¡å·
     if(!EX_I2C_WaitAck()) {
         EX_I2C_Stop();
         return false;
     }
 
-    EX_I2C_SendByte(REG_Address);     //·¢ËÍ´æ´¢µ¥ÔªµØÖ·£¬´Ó0¿ªÊ¼
+    EX_I2C_SendByte(REG_Address);     //å‘é€å­˜å‚¨å•å…ƒåœ°å€ï¼Œä»0å¼€å§‹
     if(!EX_I2C_WaitAck()) {
         EX_I2C_Stop();
         return false;
     }
 
-    EX_I2C_Start();                   //ÆğÊ¼ĞÅºÅ
+    EX_I2C_Start();                   //èµ·å§‹ä¿¡å·
 
-    EX_I2C_SendByte(Slave_Address+1);  //·¢ËÍÉè±¸µØÖ·+¶ÁĞÅºÅ
+    EX_I2C_SendByte(Slave_Address+1);  //å‘é€è®¾å¤‡åœ°å€+è¯»ä¿¡å·
     if(!EX_I2C_WaitAck()) {
         EX_I2C_Stop();
         return false;
     }
 
-    REG_data=EX_I2C_RecvByte();       //¶Á³ö¼Ä´æÆ÷Êı¾İ
+    REG_data=EX_I2C_RecvByte();       //è¯»å‡ºå¯„å­˜å™¨æ•°æ®
 
-    EX_I2C_SendACK(1);                //·¢ËÍÍ£Ö¹´«ÊäĞÅºÅ
+    EX_I2C_SendACK(1);                //å‘é€åœæ­¢ä¼ è¾“ä¿¡å·
 
-    EX_I2C_Stop();                    //Í£Ö¹ĞÅºÅ
+    EX_I2C_Stop();                    //åœæ­¢ä¿¡å·
     return REG_data;
 }
 void EX_i2c_rep_start(uint8_t address) {
-    EX_I2C_Start();              //ÆğÊ¼ĞÅºÅ
-    EX_I2C_SendByte(address);   //·¢ËÍÉè±¸µØÖ·+Ğ´ĞÅºÅ
+    EX_I2C_Start();              //èµ·å§‹ä¿¡å·
+    EX_I2C_SendByte(address);   //å‘é€è®¾å¤‡åœ°å€+å†™ä¿¡å·
     if(!EX_I2C_WaitAck()) {
         EX_I2C_Stop();
         i2c_errors_count++;
@@ -322,11 +322,11 @@ void EX_i2c_rep_start(uint8_t address) {
 }
 
 void EX_i2c_stop(void) {
-    EX_I2C_Stop();                   //·¢ËÍÍ£Ö¹ĞÅºÅ
+    EX_I2C_Stop();                   //å‘é€åœæ­¢ä¿¡å·
 }
 
 void EX_i2c_write(uint8_t data ) {
-    EX_I2C_SendByte(data);       //ÄÚ²¿¼Ä´æÆ÷Êı¾İ£¬
+    EX_I2C_SendByte(data);       //å†…éƒ¨å¯„å­˜å™¨æ•°æ®ï¼Œ
     if(!EX_I2C_WaitAck()) {
         EX_I2C_Stop();
         i2c_errors_count++;
@@ -352,8 +352,8 @@ void EX_i2c_read_reg_to_buf(uint8_t add, uint8_t reg, uint8_t *buf, uint8_t size
 
     uint8_t *b = buf;
     //i2c_rep_start(add<<1); // I2C write direction
-    EX_I2C_Start();                   //ÆğÊ¼ĞÅºÅ
-    EX_I2C_SendByte(add<<1);    //·¢ËÍÉè±¸µØÖ·+Ğ´ĞÅºÅ
+    EX_I2C_Start();                   //èµ·å§‹ä¿¡å·
+    EX_I2C_SendByte(add<<1);    //å‘é€è®¾å¤‡åœ°å€+å†™ä¿¡å·
     EX_Delay_1us(1);
     if(!EX_I2C_WaitAck()) {
         EX_I2C_Stop();
@@ -362,7 +362,7 @@ void EX_i2c_read_reg_to_buf(uint8_t add, uint8_t reg, uint8_t *buf, uint8_t size
     }
     //i2c_write(reg);        // register selection
 
-    EX_I2C_SendByte(reg);     //·¢ËÍ´æ´¢µ¥ÔªµØÖ·£¬´Ó0¿ªÊ¼
+    EX_I2C_SendByte(reg);     //å‘é€å­˜å‚¨å•å…ƒåœ°å€ï¼Œä»0å¼€å§‹
     EX_Delay_1us(1);
     EX_Delay_1us(1);
     if(!EX_I2C_WaitAck()) {
@@ -371,9 +371,9 @@ void EX_i2c_read_reg_to_buf(uint8_t add, uint8_t reg, uint8_t *buf, uint8_t size
         return ;
     }
 
-    EX_I2C_Start();                   //ÆğÊ¼ĞÅºÅ
+    EX_I2C_Start();                   //èµ·å§‹ä¿¡å·
 
-    EX_I2C_SendByte((add<<1)|1);    //·¢ËÍÉè±¸µØÖ·+¶ÁĞÅºÅ
+    EX_I2C_SendByte((add<<1)|1);    //å‘é€è®¾å¤‡åœ°å€+è¯»ä¿¡å·
     EX_Delay_1us(1);
     if(!EX_I2C_WaitAck()) {
         EX_I2C_Stop();
@@ -399,8 +399,8 @@ void EX_i2c_getSixRawADC(uint8_t add, uint8_t reg) {
 }
 #endif
 void i2c_rep_start(uint8_t address) {
-    I2C_Start();              //ÆğÊ¼ĞÅºÅ
-    I2C_SendByte(address);   //·¢ËÍÉè±¸µØÖ·+Ğ´ĞÅºÅ
+    I2C_Start();              //èµ·å§‹ä¿¡å·
+    I2C_SendByte(address);   //å‘é€è®¾å¤‡åœ°å€+å†™ä¿¡å·
     if(!I2C_WaitAck()) {
         I2C_Stop();
         i2c_errors_count++;
@@ -409,11 +409,11 @@ void i2c_rep_start(uint8_t address) {
 }
 
 void i2c_stop(void) {
-    I2C_Stop();                   //·¢ËÍÍ£Ö¹ĞÅºÅ
+    I2C_Stop();                   //å‘é€åœæ­¢ä¿¡å·
 }
 
 void i2c_write(uint8_t data ) {
-    I2C_SendByte(data);       //ÄÚ²¿¼Ä´æÆ÷Êı¾İ£¬
+    I2C_SendByte(data);       //å†…éƒ¨å¯„å­˜å™¨æ•°æ®ï¼Œ
     if(!I2C_WaitAck()) {
         I2C_Stop();
         i2c_errors_count++;
@@ -439,9 +439,9 @@ void i2c_read_reg_to_buf(uint8_t add, uint8_t reg, uint8_t buf[6], uint8_t size)
 
     uint8_t *b = buf;
     //i2c_rep_start(add<<1); // I2C write direction
-    I2C_Start();                   //ÆğÊ¼ĞÅºÅ
+    I2C_Start();                   //èµ·å§‹ä¿¡å·
 
-    I2C_SendByte(add<<1);    //·¢ËÍÉè±¸µØÖ·+Ğ´ĞÅºÅ
+    I2C_SendByte(add<<1);    //å‘é€è®¾å¤‡åœ°å€+å†™ä¿¡å·
     if(!I2C_WaitAck()) {
         I2C_Stop();
         i2c_errors_count++;
@@ -449,16 +449,16 @@ void i2c_read_reg_to_buf(uint8_t add, uint8_t reg, uint8_t buf[6], uint8_t size)
     }
     //i2c_write(reg);        // register selection
 
-    I2C_SendByte(reg);     //·¢ËÍ´æ´¢µ¥ÔªµØÖ·£¬´Ó0¿ªÊ¼
+    I2C_SendByte(reg);     //å‘é€å­˜å‚¨å•å…ƒåœ°å€ï¼Œä»0å¼€å§‹
     if(!I2C_WaitAck()) {
         I2C_Stop();
         i2c_errors_count++;
         return ;
     }
 
-    I2C_Start();                   //ÆğÊ¼ĞÅºÅ
+    I2C_Start();                   //èµ·å§‹ä¿¡å·
 
-    I2C_SendByte((add<<1)|1);    //·¢ËÍÉè±¸µØÖ·+¶ÁĞÅºÅ
+    I2C_SendByte((add<<1)|1);    //å‘é€è®¾å¤‡åœ°å€+è¯»ä¿¡å·
     if(!I2C_WaitAck()) {
         I2C_Stop();
         i2c_errors_count++;
@@ -466,7 +466,7 @@ void i2c_read_reg_to_buf(uint8_t add, uint8_t reg, uint8_t buf[6], uint8_t size)
     }
 
     //uint8_t *b = buf;
-    /******Ô­ÎÄ²ÉÓÃÁ¬Ğø¶ÁÈ¡µÄ·½Ê½**********/
+    /******åŸæ–‡é‡‡ç”¨è¿ç»­è¯»å–çš„æ–¹å¼**********/
     while (--size)
         *b++ = i2c_readAck(); // acknowledge all but the final byte
     *b = i2c_readNak();
@@ -754,7 +754,7 @@ static void Baro_Common() {
 //  4) raw temp + raw pressure => calculation of the adjusted pressure
 //  the following code uses the maximum precision setting (oversampling setting 3)
 // ************************************************************************************************************
-//#if defined(EX_SPL06_001)//¸ê¶ûÆøÑ¹¼Æ
+//#if defined(EX_SPL06_001)//æˆˆå°”æ°”å‹è®¡
 //#define SPL06_001_ADDRESS 0x76
 //static void Baro_init() {
 //	i2c_writeReg(SPL06_001_ADDRESS,0x06,0xe5);
@@ -1129,7 +1129,7 @@ uint8_t Baro_update() {                          // first UT conversion is start
     }
     _ms561101ba_ctx.state++;
     //i2c_MS561101BA_UT_or_UP_Read(rawValPointer);     // get the 24bit resulting from a UP of UT command request. Nothing interresting for the first cycle because we don't initiate a command in Baro_init()
-    //debug[0]=_ms561101ba_ctx.up;//´Ë´¦³ö´í
+    //debug[0]=_ms561101ba_ctx.up;//æ­¤å¤„å‡ºé”™
     //i2c_MS561101BA_UT_or_UP_Start(commandRegister);  // send the next command to get UP or UT value after at least 8.5ms
     return 1;
 }
@@ -1578,7 +1578,7 @@ static void getADC() {
 #else
     i2c_getSixRawADC(MAG_ADDRESS,MAG_DATA_REGISTER);
 #endif
-    MAG_ORIENTATION( ((int16_t)((rawADC[0]<<8) | rawADC[1])), //ÄªÃûÆäÃîµÄ¿¨ËÀÔÚÕâÀï
+    MAG_ORIENTATION( ((int16_t)((rawADC[0]<<8) | rawADC[1])), //è«åå…¶å¦™çš„å¡æ­»åœ¨è¿™é‡Œ
                      ((int16_t)((rawADC[4]<<8) | rawADC[5])),
                      ((int16_t)((rawADC[2]<<8) | rawADC[3])) );
 
@@ -1738,7 +1738,7 @@ void Device_Mag_getADC() {
 #if defined(AK8963)
 #define MAG_ADDRESS 0x0C
 #define MAG_DATA_REGISTER 0x03
-#define MAG_CNTL_REGISTER 0x11 //²âÁ¿Î»Êı ²âÁ¿Ä£Ê½
+#define MAG_CNTL_REGISTER 0x11 //æµ‹é‡ä½æ•° æµ‹é‡æ¨¡å¼
 void Mag_init() {
 
     delay(100);
@@ -2214,48 +2214,48 @@ void init_EX_airspeed()
 
 void  Adc_Init(void)
 {
-    //ÏÈ³õÊ¼»¯IO¿Ú
-    RCC->APB2ENR|=1<<2;    //Ê¹ÄÜPORTA¿ÚÊ±ÖÓ
-    GPIOA->CRL&=0XFFFFFF0F;//PA1 anologÊäÈë
-    RCC->APB2ENR|=1<<9;    //ADC1Ê±ÖÓÊ¹ÄÜ
-    RCC->APB2RSTR|=1<<9;   //ADC1¸´Î»
-    RCC->APB2RSTR&=~(1<<9);//¸´Î»½áÊø
-    RCC->CFGR&=~(3<<14);   //·ÖÆµÒò×ÓÇåÁã
-    //SYSCLK/DIV2=12M ADCÊ±ÖÓÉèÖÃÎª12M,ADC×î´óÊ±ÖÓ²»ÄÜ³¬¹ı14M!
-    //·ñÔò½«µ¼ÖÂADC×¼È·¶ÈÏÂ½µ!
+    //å…ˆåˆå§‹åŒ–IOå£
+    RCC->APB2ENR|=1<<2;    //ä½¿èƒ½PORTAå£æ—¶é’Ÿ
+    GPIOA->CRL&=0XFFFFFF0F;//PA1 anologè¾“å…¥
+    RCC->APB2ENR|=1<<9;    //ADC1æ—¶é’Ÿä½¿èƒ½
+    RCC->APB2RSTR|=1<<9;   //ADC1å¤ä½
+    RCC->APB2RSTR&=~(1<<9);//å¤ä½ç»“æŸ
+    RCC->CFGR&=~(3<<14);   //åˆ†é¢‘å› å­æ¸…é›¶
+    //SYSCLK/DIV2=12M ADCæ—¶é’Ÿè®¾ç½®ä¸º12M,ADCæœ€å¤§æ—¶é’Ÿä¸èƒ½è¶…è¿‡14M!
+    //å¦åˆ™å°†å¯¼è‡´ADCå‡†ç¡®åº¦ä¸‹é™!
     RCC->CFGR|=2<<14;
-    ADC1->CR1&=0XF0FFFF;   //¹¤×÷Ä£Ê½ÇåÁã
-    ADC1->CR1|=0<<16;      //¶ÀÁ¢¹¤×÷Ä£Ê½
-    ADC1->CR1&=~(1<<8);    //·ÇÉ¨ÃèÄ£Ê½
-    ADC1->CR2&=~(1<<1);    //µ¥´Î×ª»»Ä£Ê½
+    ADC1->CR1&=0XF0FFFF;   //å·¥ä½œæ¨¡å¼æ¸…é›¶
+    ADC1->CR1|=0<<16;      //ç‹¬ç«‹å·¥ä½œæ¨¡å¼
+    ADC1->CR1&=~(1<<8);    //éæ‰«ææ¨¡å¼
+    ADC1->CR2&=~(1<<1);    //å•æ¬¡è½¬æ¢æ¨¡å¼
     ADC1->CR2&=~(7<<17);
-    ADC1->CR2|=7<<17;	   //Èí¼ş¿ØÖÆ×ª»»
-    ADC1->CR2|=1<<20;      //Ê¹ÓÃÓÃÍâ²¿´¥·¢(SWSTART)!!!	±ØĞëÊ¹ÓÃÒ»¸öÊÂ¼şÀ´´¥·¢
-    ADC1->CR2&=~(1<<11);   //ÓÒ¶ÔÆë
+    ADC1->CR2|=7<<17;	   //è½¯ä»¶æ§åˆ¶è½¬æ¢
+    ADC1->CR2|=1<<20;      //ä½¿ç”¨ç”¨å¤–éƒ¨è§¦å‘(SWSTART)!!!	å¿…é¡»ä½¿ç”¨ä¸€ä¸ªäº‹ä»¶æ¥è§¦å‘
+    ADC1->CR2&=~(1<<11);   //å³å¯¹é½
     ADC1->SQR1&=~(0XF<<20);
-    ADC1->SQR1|=0<<20;     //1¸ö×ª»»ÔÚ¹æÔòĞòÁĞÖĞ Ò²¾ÍÊÇÖ»×ª»»¹æÔòĞòÁĞ1
-    //ÉèÖÃÍ¨µÀ1µÄ²ÉÑùÊ±¼ä
-    ADC1->SMPR2&=~(3*1);   //Í¨µÀ1²ÉÑùÊ±¼äÇå¿Õ
-    ADC1->SMPR2|=7<<(3*1); //Í¨µÀ1  239.5ÖÜÆÚ,Ìá¸ß²ÉÑùÊ±¼ä¿ÉÒÔÌá¸ß¾«È·¶È
-    ADC1->CR2|=1<<0;	   //¿ªÆôAD×ª»»Æ÷
-    ADC1->CR2|=1<<3;       //Ê¹ÄÜ¸´Î»Ğ£×¼
-    while(ADC1->CR2&1<<3); //µÈ´ıĞ£×¼½áÊø
-    //¸ÃÎ»ÓÉÈí¼şÉèÖÃ²¢ÓÉÓ²¼şÇå³ı¡£ÔÚĞ£×¼¼Ä´æÆ÷±»³õÊ¼»¯ºó¸ÃÎ»½«±»Çå³ı¡£
-    ADC1->CR2|=1<<2;        //¿ªÆôADĞ£×¼
-    while(ADC1->CR2&1<<2);  //µÈ´ıĞ£×¼½áÊø
-    //¸ÃÎ»ÓÉÈí¼şÉèÖÃÒÔ¿ªÊ¼Ğ£×¼£¬²¢ÔÚĞ£×¼½áÊøÊ±ÓÉÓ²¼şÇå³ı
+    ADC1->SQR1|=0<<20;     //1ä¸ªè½¬æ¢åœ¨è§„åˆ™åºåˆ—ä¸­ ä¹Ÿå°±æ˜¯åªè½¬æ¢è§„åˆ™åºåˆ—1
+    //è®¾ç½®é€šé“1çš„é‡‡æ ·æ—¶é—´
+    ADC1->SMPR2&=~(3*1);   //é€šé“1é‡‡æ ·æ—¶é—´æ¸…ç©º
+    ADC1->SMPR2|=7<<(3*1); //é€šé“1  239.5å‘¨æœŸ,æé«˜é‡‡æ ·æ—¶é—´å¯ä»¥æé«˜ç²¾ç¡®åº¦
+    ADC1->CR2|=1<<0;	   //å¼€å¯ADè½¬æ¢å™¨
+    ADC1->CR2|=1<<3;       //ä½¿èƒ½å¤ä½æ ¡å‡†
+    while(ADC1->CR2&1<<3); //ç­‰å¾…æ ¡å‡†ç»“æŸ
+    //è¯¥ä½ç”±è½¯ä»¶è®¾ç½®å¹¶ç”±ç¡¬ä»¶æ¸…é™¤ã€‚åœ¨æ ¡å‡†å¯„å­˜å™¨è¢«åˆå§‹åŒ–åè¯¥ä½å°†è¢«æ¸…é™¤ã€‚
+    ADC1->CR2|=1<<2;        //å¼€å¯ADæ ¡å‡†
+    while(ADC1->CR2&1<<2);  //ç­‰å¾…æ ¡å‡†ç»“æŸ
+    //è¯¥ä½ç”±è½¯ä»¶è®¾ç½®ä»¥å¼€å§‹æ ¡å‡†ï¼Œå¹¶åœ¨æ ¡å‡†ç»“æŸæ—¶ç”±ç¡¬ä»¶æ¸…é™¤
 }
-//»ñµÃADC1Ä³¸öÍ¨µÀµÄÖµ
-//ch:Í¨µÀÖµ 0~16
-//·µ»ØÖµ:×ª»»½á¹û
+//è·å¾—ADC1æŸä¸ªé€šé“çš„å€¼
+//ch:é€šé“å€¼ 0~16
+//è¿”å›å€¼:è½¬æ¢ç»“æœ
 uint16_t Get_Adc(uint8_t ch)
 {
-    //ÉèÖÃ×ª»»ĞòÁĞ
-    ADC1->SQR3&=0XFFFFFFE0;//¹æÔòĞòÁĞ1 Í¨µÀch
+    //è®¾ç½®è½¬æ¢åºåˆ—
+    ADC1->SQR3&=0XFFFFFFE0;//è§„åˆ™åºåˆ—1 é€šé“ch
     ADC1->SQR3|=ch;
-    ADC1->CR2|=1<<22;       //Æô¶¯¹æÔò×ª»»Í¨µÀ
-    while(!(ADC1->SR&1<<1));//µÈ´ı×ª»»½áÊø
-    return ADC1->DR;		//·µ»ØadcÖµ
+    ADC1->CR2|=1<<22;       //å¯åŠ¨è§„åˆ™è½¬æ¢é€šé“
+    while(!(ADC1->SR&1<<1));//ç­‰å¾…è½¬æ¢ç»“æŸ
+    return ADC1->DR;		//è¿”å›adcå€¼
 }
 #endif
 

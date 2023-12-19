@@ -3,7 +3,7 @@
 uint8_t Mini_Flow_SSI,Mini_Flow_SSI_CNT;
 uint8_t mini_flow_flag;
 _flow flow;
-//¹âÁ÷Êı¾İ½ÓÊÕ
+//å…‰æµæ•°æ®æ¥æ”¶
 void Player_Flow_Receive(uint8_t data)
 {
     static uint8_t RxBuffer[32];
@@ -14,7 +14,7 @@ void Player_Flow_Receive(uint8_t data)
     switch(state)
     {
     case 0:
-        if(data==0xFE)//°üÍ·
+        if(data==0xFE)//åŒ…å¤´
         {
             state=1;
             RxBuffer[_data_cnt++]=data;
@@ -22,7 +22,7 @@ void Player_Flow_Receive(uint8_t data)
         break;
 
     case 1:
-        if(data==0x04)//×Ö½ÚÊı
+        if(data==0x04)//å­—èŠ‚æ•°
         {
             state=2;
             RxBuffer[_data_cnt++]=data;
@@ -39,9 +39,9 @@ void Player_Flow_Receive(uint8_t data)
 
             sum =  (RxBuffer[2] + RxBuffer[3] + RxBuffer[4] + RxBuffer[5]);
 
-            if((0xAA == data) && (sum == RxBuffer[6])) //ºÍĞ£Ñé
+            if((0xAA == data) && (sum == RxBuffer[6])) //å’Œæ ¡éªŒ
             {
-                Mini_Flow_SSI_CNT++;//²âÊÔ¹âÁ÷Êı¾İÖ¡ÂÊ
+                Mini_Flow_SSI_CNT++;//æµ‹è¯•å…‰æµæ•°æ®å¸§ç‡
 
                 flow.x = ( (s16)(*(RxBuffer+3)<<8)|*(RxBuffer+2) );
                 flow.y = ( (s16)(*(RxBuffer+5)<<8)|*(RxBuffer+4) );

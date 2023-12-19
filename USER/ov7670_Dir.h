@@ -5,13 +5,13 @@
 #include "stm32f10x_it.h"
 
 
-extern double XPosition,YPosition;//位置信息
-extern double DirectionXSpeed,DirectionYSpeed;//位移信息
-extern double HIGH_CURRENT_CSB;//高度信息
-extern double DOWNSPEED_CURRENT_CSB;//对地速度信息
+extern double XPosition,YPosition;//浣嶇疆淇℃伅
+extern double DirectionXSpeed,DirectionYSpeed;//浣嶇Щ淇℃伅
+extern double HIGH_CURRENT_CSB;//楂樺害淇℃伅
+extern double DOWNSPEED_CURRENT_CSB;//瀵瑰湴閫熷害淇℃伅
 extern uint8_t ov7670_flag;
 extern int16_t angle_ov7670[2];
-//串口解析协议
+//涓插彛瑙ｆ瀽鍗忚
 void ov7670_get_one_byte(uint8_t c);
 void c_flow(void);
 

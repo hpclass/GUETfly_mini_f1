@@ -25,7 +25,7 @@ void delay_us(unsigned int Counter)
 }
 
 void delay_1us(void)
-{   //122-45=77 1¸ö´ó¸Å7.7ns,1000¸öĞèÒª
+{   //122-45=77 1ä¸ªå¤§æ¦‚7.7ns,1000ä¸ªéœ€è¦
     unsigned char i;
     for(i=0; i<10; i++)
     {

@@ -7,7 +7,7 @@
 * Author        : whq
 * Mode          : Thumb2
 * Toolchain     :                      
-* Description   : ¿âº¯Êı
+* Description   : åº“å‡½æ•°
 *
 * Date          : 2013/12/11
 * History		: 
@@ -25,9 +25,9 @@
 
 /*******************************************************************************
 * Function Name :RECORD_BcdToInt
-* Description   :BCD×Ö½Ú×ªÎªÕûĞÍ
-* Input         :uint8_t val    BCDÖµ
-* Output        :uint8_t        INT8Öµ
+* Description   :BCDå­—èŠ‚è½¬ä¸ºæ•´å‹
+* Input         :uint8_t val    BCDå€¼
+* Output        :uint8_t        INT8å€¼
 * Other         :
 * Date          :2013/12/11
 *******************************************************************************/
@@ -51,9 +51,9 @@ uint8_t LIB_Int8ToBcd(uint8_t val)
 
 /*******************************************************************************
 * Function Name :RECORD_StringBcdToInt
-* Description   :ÎŞ·ûºÅBCD×Ö·û´®×ªÎªÕûĞÍ    (BCD¸ß×Ö½ÚÔÚÇ°)
-* Input         :uint8_t * str  BCD×Ö·û´®
-* Input         :uint16_t len   BCD×Ö·û´®³¤¶È
+* Description   :æ— ç¬¦å·BCDå­—ç¬¦ä¸²è½¬ä¸ºæ•´å‹    (BCDé«˜å­—èŠ‚åœ¨å‰)
+* Input         :uint8_t * str  BCDå­—ç¬¦ä¸²
+* Input         :uint16_t len   BCDå­—ç¬¦ä¸²é•¿åº¦
 * Output        :uint32_t
 * Other         :
 * Date          :2013/12/11
@@ -72,10 +72,10 @@ uint32_t LIB_StringBcdToInt(uint8_t *str, uint16_t len)
 
 /*******************************************************************************
 * Function Name :RECORD_IntToStringBcd
-* Description   :ÕûÊı×ªÎªBCD×Ö·û´®£¬×Ö·û´®ÓÒ¶ÔÆë (BCD¸ß×Ö½ÚÔÚÇ°)
-* Input         :uint32_t val   ÕûÊı
-* Input         :uint8_t * str  ×ª»»ºó»º³åÇø
-* Input         :uint16_t size  »º³åÇø¿Õ¼ä´óĞ¡
+* Description   :æ•´æ•°è½¬ä¸ºBCDå­—ç¬¦ä¸²ï¼Œå­—ç¬¦ä¸²å³å¯¹é½ (BCDé«˜å­—èŠ‚åœ¨å‰)
+* Input         :uint32_t val   æ•´æ•°
+* Input         :uint8_t * str  è½¬æ¢åç¼“å†²åŒº
+* Input         :uint16_t size  ç¼“å†²åŒºç©ºé—´å¤§å°
 * Other         :
 * Date          :2013/12/11
 *******************************************************************************/
@@ -90,7 +90,7 @@ void LIB_IntToStringBcd( uint8_t *str, uint16_t size, uint32_t val )
 
 /*******************************************************************************
 * Function Name :RECORD_Int16ByteReversed
-* Description   :16Î»ÕûĞÍ ´óĞ¡¶Ë»¥×ª
+* Description   :16ä½æ•´å‹ å¤§å°ç«¯äº’è½¬
 * Input         :uint16_t val
 * Output        :uint16_t
 * Other         :
@@ -108,7 +108,7 @@ uint16_t LIB_Int16ByteReversed(uint16_t val)
 
 /*******************************************************************************
 * Function Name :RECORD_Int32ByteReversed
-* Description   :32Î»´óĞ¡¶Ë»¥×ª 
+* Description   :32ä½å¤§å°ç«¯äº’è½¬ 
 * Input         :uint32_t val
 * Output        :uint32_t
 * Other         :
@@ -129,10 +129,10 @@ uint32_t LIB_Int32ByteReversed(uint32_t val)
 
 /*******************************************************************************
 * Function Name :RECORD_CheckXOR
-* Description   :Òì»òĞ§Ñé
-* Input         :uint8_t * pBuf Òì»òĞ§ÑéÊı¾İ
-* Input         :uint16_t len   Êı¾İ³¤¶È
-* Output        :uint8_t        Ğ§Ñé½á¹û
+* Description   :å¼‚æˆ–æ•ˆéªŒ
+* Input         :uint8_t * pBuf å¼‚æˆ–æ•ˆéªŒæ•°æ®
+* Input         :uint16_t len   æ•°æ®é•¿åº¦
+* Output        :uint8_t        æ•ˆéªŒç»“æœ
 * Other         :
 * Date          :2013/12/11
 *******************************************************************************/
@@ -150,11 +150,11 @@ uint8_t LIB_CheckXOR(uint8_t *pBuf, uint16_t len)
 
 /*******************************************************************************
 * Function Name :RECORD_CheckXOR
-* Description   :À©Õ¹Òì»òĞ§Ñé
-* Input         :uint8_t xor    Ğ§Ñé³õÊ¼Öµ
-* Input         :uint8_t * pBuf Òì»òĞ§ÑéÊı¾İ
-* Input         :uint16_t len   Êı¾İ³¤¶È
-* Output        :uint8_t        Ğ§Ñé½á¹û
+* Description   :æ‰©å±•å¼‚æˆ–æ•ˆéªŒ
+* Input         :uint8_t xor    æ•ˆéªŒåˆå§‹å€¼
+* Input         :uint8_t * pBuf å¼‚æˆ–æ•ˆéªŒæ•°æ®
+* Input         :uint16_t len   æ•°æ®é•¿åº¦
+* Output        :uint8_t        æ•ˆéªŒç»“æœ
 * Other         :
 * Date          :2013/12/11
 *******************************************************************************/
@@ -170,10 +170,10 @@ uint8_t LIB_CheckXORExt(uint8_t cXor, uint8_t *pBuf, uint16_t len)
 
 /*******************************************************************************
 * Function Name :RECORD_CheckSum
-* Description   :¼Ó×ÜĞ§Ñé
-* Input         :uint8_t * pBuf ¼Ó×ÜĞ§ÑéÊı¾İ
-* Input         :uint16_t len   Êı¾İ³¤¶È
-* Output        :uint8_t        ¼Ó×ÜºÍ
+* Description   :åŠ æ€»æ•ˆéªŒ
+* Input         :uint8_t * pBuf åŠ æ€»æ•ˆéªŒæ•°æ®
+* Input         :uint16_t len   æ•°æ®é•¿åº¦
+* Output        :uint8_t        åŠ æ€»å’Œ
 * Other         :
 * Date          :2013/12/11
 *******************************************************************************/
@@ -191,11 +191,11 @@ uint8_t LIB_CheckSum(uint8_t *pBuf, uint16_t len)
 
 /*******************************************************************************
 * Function Name :RECORD_CheckSumExt
-* Description   :À©Õ¹¼Ó×ÜĞ§Ñé
-* Input         :uint8_t sum    ¼Ó×Ü³õÊ¼Öµ
-* Input         :uint8_t * pBuf ¼Ó×ÜĞ§ÑéÊı¾İ
-* Input         :uint16_t len   Êı¾İ³¤¶È
-* Output        :uint8_t        ¼Ó×ÜºÍ
+* Description   :æ‰©å±•åŠ æ€»æ•ˆéªŒ
+* Input         :uint8_t sum    åŠ æ€»åˆå§‹å€¼
+* Input         :uint8_t * pBuf åŠ æ€»æ•ˆéªŒæ•°æ®
+* Input         :uint16_t len   æ•°æ®é•¿åº¦
+* Output        :uint8_t        åŠ æ€»å’Œ
 * Other         :
 * Date          :2013/12/11
 *******************************************************************************/
@@ -211,9 +211,9 @@ uint8_t LIB_CheckSumExt(uint8_t sum, uint8_t *pBuf, uint16_t len)
 
 /*******************************************************************************
 * Function Name :LIB_BCDTime2Sec
-* Description   :BCD×ªÎªÕûĞÍÊ±¼ä 
-* Input         :BCDTIME * time BCDÊ±¼ä
-* Output        :uint32_t       ÕûĞÍÊ±¼ä
+* Description   :BCDè½¬ä¸ºæ•´å‹æ—¶é—´ 
+* Input         :BCDTIME * time BCDæ—¶é—´
+* Output        :uint32_t       æ•´å‹æ—¶é—´
 * Other         :
 * Date          :2013/12/12
 *******************************************************************************/
@@ -237,9 +237,9 @@ uint32_t LIB_BCDTime2Sec(BCDTIME_t *time)
 
 /*******************************************************************************
 * Function Name :LIB_Sec2BCDTime
-* Description   :ÕûĞÍÊ±¼ä×ªÎªBCD
-* Input         :BCDTIME * tim  BCD»º³åÇø
-* Input         :uint32_t sec   ÕûĞÍÊ±¼ä
+* Description   :æ•´å‹æ—¶é—´è½¬ä¸ºBCD
+* Input         :BCDTIME * tim  BCDç¼“å†²åŒº
+* Input         :uint32_t sec   æ•´å‹æ—¶é—´
 * Output        :void
 * Other         :
 * Date          :2013/12/12
@@ -277,11 +277,11 @@ void LIB_Sec2BCDTime(BCDTIME_t *tim, uint32_t sec)
 
 /*******************************************************************************
 * Function Name : int32_t LIB_StatusFilter(STATE_JUDGE_t *pState, int8_t newState, int16_t judgeCount)
-* Description   : ĞÅºÅ¹ıÂËÅĞ¶¨²Ù×÷  
-* Input         :   pState:     ĞÅºÅÅĞ¶¨±äÁ¿
-                    newState:   ĞÂµÄ×´Ì¬
-                    judgeCount: ÅĞ¶¨´ÎÊı
-* Output        : ÅĞ¶¨ºóµÄ×´Ì¬
+* Description   : ä¿¡å·è¿‡æ»¤åˆ¤å®šæ“ä½œ  
+* Input         :   pState:     ä¿¡å·åˆ¤å®šå˜é‡
+                    newState:   æ–°çš„çŠ¶æ€
+                    judgeCount: åˆ¤å®šæ¬¡æ•°
+* Output        : åˆ¤å®šåçš„çŠ¶æ€
 * Other         : 
 * Date          : 2014.05.23
 *******************************************************************************/

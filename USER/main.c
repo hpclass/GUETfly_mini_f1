@@ -1,5 +1,5 @@
 /****************************************Copyright (c)****************************************************
-STM32F103C8T6ĞÂ½¨¹¤³ÌÄ£°å
+STM32F103C8T6æ–°å»ºå·¥ç¨‹æ¨¡æ¿
 *********************************************************************************************************/
 
 /* Includes ------------------------------------------------------------------*/
@@ -21,9 +21,9 @@ STM32F103C8T6ĞÂ½¨¹¤³ÌÄ£°å
 
 
 
-float pitch,roll,yaw; 		//Å·À­½Ç
-short aacx,aacy,aacz;		//¼ÓËÙ¶È´«¸ĞÆ÷Ô­Ê¼Êı¾İ
-short gyrox,gyroy,gyroz;	//ÍÓÂİÒÇÔ­Ê¼Êı¾İ
+float pitch,roll,yaw; 		//æ¬§æ‹‰è§’
+short aacx,aacy,aacz;		//åŠ é€Ÿåº¦ä¼ æ„Ÿå™¨åŸå§‹æ•°æ®
+short gyrox,gyroy,gyroz;	//é™€èºä»ªåŸå§‹æ•°æ®
 int Mag_x=0;
 int Mag_y=0;
 int Mag_z=0;
@@ -31,8 +31,8 @@ u8 exchange_num[8];
 extern int TEMP;
 extern int Pressure;
 
-extern u8  TIM2CH1_CAPTURE_STA;		//ÊäÈë²¶»ñ×´Ì¬
-extern u16	TIM2CH1_CAPTURE_VAL;	//ÊäÈë²¶»ñÖµ
+extern u8  TIM2CH1_CAPTURE_STA;		//è¾“å…¥æ•è·çŠ¶æ€
+extern u16	TIM2CH1_CAPTURE_VAL;	//è¾“å…¥æ•è·å€¼
 extern u16 ppm_rx[];
 //////////////////////////////////////////////
 

@@ -1,8 +1,8 @@
 #ifndef EEPROM_H_
 #define EEPROM_H_
-/*  extern void eeprom_read_block (void *buf, const void *addr, size_t n);//¶ÁÈ¡ÓÉÖ¸¶¨µØÖ·¿ªÊ¼µÄÖ¸¶¨³¤¶ÈµÄEEPROMÊı¾İ
-    extern void eeprom_write_byte (uint8_t *addr, uint8_t val);//ÏòÖ¸¶¨µØÖ·Ğ´ÈëÒ»¸ö×Ö½Ú8bitµÄEEPROMÊı¾İ
-    extern void eeprom_write_word (uint16_t *addr, uint16_t val);//ÏòÖ¸¶¨µØÖ·Ğ´ÈëÒ»¸ö×Ö16bitµÄEEPROMÊı¾İ
+/*  extern void eeprom_read_block (void *buf, const void *addr, size_t n);//è¯»å–ç”±æŒ‡å®šåœ°å€å¼€å§‹çš„æŒ‡å®šé•¿åº¦çš„EEPROMæ•°æ®
+    extern void eeprom_write_byte (uint8_t *addr, uint8_t val);//å‘æŒ‡å®šåœ°å€å†™å…¥ä¸€ä¸ªå­—èŠ‚8bitçš„EEPROMæ•°æ®
+    extern void eeprom_write_word (uint16_t *addr, uint16_t val);//å‘æŒ‡å®šåœ°å€å†™å…¥ä¸€ä¸ªå­—16bitçš„EEPROMæ•°æ®
 
 */
 
@@ -11,8 +11,8 @@
 #include "stddef.h"
 #define bool u8
 
-//#define E2END STM32_FLASH_BASE+1024*STM32_FLASH_SIZE  //Ä©Î²µØÖ·
-void eeprom_read_block (void *buf, void *addr, size_t n);//¶ÁÈ¡ÓÉÖ¸¶¨µØÖ·¿ªÊ¼µÄÖ¸¶¨³¤¶ÈµÄEEPROMÊı¾İ
+//#define E2END STM32_FLASH_BASE+1024*STM32_FLASH_SIZE  //æœ«å°¾åœ°å€
+void eeprom_read_block (void *buf, void *addr, size_t n);//è¯»å–ç”±æŒ‡å®šåœ°å€å¼€å§‹çš„æŒ‡å®šé•¿åº¦çš„EEPROMæ•°æ®
 void eeprom_write_block (void *buf, void *addr, size_t n);
 void readGlobalSet();
 bool readEEPROM();

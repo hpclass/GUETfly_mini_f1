@@ -2,20 +2,20 @@
 #define __SPI_H
 #include "sys.h"
 //////////////////////////////////////////////////////////////////////////////////
-//±¾³ÌÐòÖ»¹©Ñ§Ï°Ê¹ÓÃ£¬Î´¾­×÷ÕßÐí¿É£¬²»µÃÓÃÓÚÆäËüÈÎºÎÓÃÍ¾
-//ALIENTEKÕ½½¢STM32¿ª·¢°åV3
-//SPIÇý¶¯ ´úÂë
-//ÕýµãÔ­×Ó@ALIENTEK
-//¼¼ÊõÂÛÌ³:www.openedv.com
-//´´½¨ÈÕÆÚ:2015/1/15
-//°æ±¾£ºV1.0
-//°æÈ¨ËùÓÐ£¬µÁ°æ±Ø¾¿¡£
-//Copyright(C) ¹ãÖÝÊÐÐÇÒíµç×Ó¿Æ¼¼ÓÐÏÞ¹«Ë¾ 2009-2019
+//æœ¬ç¨‹åºåªä¾›å­¦ä¹ ä½¿ç”¨ï¼Œæœªç»ä½œè€…è®¸å¯ï¼Œä¸å¾—ç”¨äºŽå…¶å®ƒä»»ä½•ç”¨é€”
+//ALIENTEKæˆ˜èˆ°STM32å¼€å‘æ¿V3
+//SPIé©±åŠ¨ ä»£ç 
+//æ­£ç‚¹åŽŸå­@ALIENTEK
+//æŠ€æœ¯è®ºå›:www.openedv.com
+//åˆ›å»ºæ—¥æœŸ:2015/1/15
+//ç‰ˆæœ¬ï¼šV1.0
+//ç‰ˆæƒæ‰€æœ‰ï¼Œç›—ç‰ˆå¿…ç©¶ã€‚
+//Copyright(C) å¹¿å·žå¸‚æ˜Ÿç¿¼ç”µå­ç§‘æŠ€æœ‰é™å…¬å¸ 2009-2019
 //All rights reserved
 //////////////////////////////////////////////////////////////////////////////////
 
 
-// SPI×ÜÏßËÙ¶ÈÉèÖÃ
+// SPIæ€»çº¿é€Ÿåº¦è®¾ç½®
 #define SPI_SPEED_2   		0
 #define SPI_SPEED_4   		1
 #define SPI_SPEED_8   		2
@@ -25,9 +25,9 @@
 #define SPI_SPEED_128 		6
 #define SPI_SPEED_256 		7
 
-void SPI2_Init(void);			 //³õÊ¼»¯SPI2¿Ú
-void SPI2_SetSpeed(u8 SpeedSet); //ÉèÖÃSPI2ËÙ¶È
-u8 SPI2_ReadWriteByte(u8 TxData);//SPI2×ÜÏß¶ÁÐ´Ò»¸ö×Ö½Ú
+void SPI2_Init(void);			 //åˆå§‹åŒ–SPI2å£
+void SPI2_SetSpeed(u8 SpeedSet); //è®¾ç½®SPI2é€Ÿåº¦
+u8 SPI2_ReadWriteByte(u8 TxData);//SPI2æ€»çº¿è¯»å†™ä¸€ä¸ªå­—èŠ‚
 
 #endif
 

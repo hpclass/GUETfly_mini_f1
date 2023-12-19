@@ -37,10 +37,10 @@ int I2c_Soft_Start()
 	SDA_H;
 	SCL_H;
 	I2c_Soft_delay();
-	if(!SDA_read)return 0;	//SDAÏßÎªµÍµçÆ½Ôò×ÜÏßÃ¦,ÍË³ö
+	if(!SDA_read)return 0;	//SDAçº¿ä¸ºä½ç”µå¹³åˆ™æ€»çº¿å¿™,é€€å‡º
 	SDA_L;
 	I2c_Soft_delay();
-	if(SDA_read) return 0;	//SDAÏßÎª¸ßµçÆ½Ôò×ÜÏß³ö´í,ÍË³ö
+	if(SDA_read) return 0;	//SDAçº¿ä¸ºé«˜ç”µå¹³åˆ™æ€»çº¿å‡ºé”™,é€€å‡º
 	SDA_L;
 	I2c_Soft_delay();
 	return 1;	
@@ -83,7 +83,7 @@ void I2c_Soft_NoAsk()
 	I2c_Soft_delay();
 }
 
-int I2c_Soft_WaitAsk(void) 	 //·µ»ØÎª:=1ÓĞASK,=0ÎŞASK
+int I2c_Soft_WaitAsk(void) 	 //è¿”å›ä¸º:=1æœ‰ASK,=0æ— ASK
 {
   u8 ErrTime = 0;
 	SCL_L;
@@ -106,7 +106,7 @@ int I2c_Soft_WaitAsk(void) 	 //·µ»ØÎª:=1ÓĞASK,=0ÎŞASK
 	return 0;
 }
 
-void I2c_Soft_SendByte(u8 SendByte) //Êı¾İ´Ó¸ßÎ»µ½µÍÎ»//
+void I2c_Soft_SendByte(u8 SendByte) //æ•°æ®ä»é«˜ä½åˆ°ä½ä½//
 {
     u8 i=8;
     while(i--)
@@ -125,8 +125,8 @@ void I2c_Soft_SendByte(u8 SendByte) //Êı¾İ´Ó¸ßÎ»µ½µÍÎ»//
     SCL_L;
 }  
 
-//¶Á1¸ö×Ö½Ú£¬ack=1Ê±£¬·¢ËÍACK£¬ack=0£¬·¢ËÍnACK
-u8 I2c_Soft_ReadByte(u8 ask)  //Êı¾İ´Ó¸ßÎ»µ½µÍÎ»//
+//è¯»1ä¸ªå­—èŠ‚ï¼Œack=1æ—¶ï¼Œå‘é€ACKï¼Œack=0ï¼Œå‘é€nACK
+u8 I2c_Soft_ReadByte(u8 ask)  //æ•°æ®ä»é«˜ä½åˆ°ä½ä½//
 { 
     u8 i=8;
     u8 ReceiveByte=0;
@@ -153,7 +153,7 @@ u8 I2c_Soft_ReadByte(u8 ask)  //Êı¾İ´Ó¸ßÎ»µ½µÍÎ»//
     return ReceiveByte;
 } 
 
-// IICĞ´Ò»¸ö×Ö½ÚÊı¾İ
+// IICå†™ä¸€ä¸ªå­—èŠ‚æ•°æ®
 u8 IIC_Write_1Byte(u8 SlaveAddress,u8 REG_Address,u8 REG_data)
 {
 	I2c_Soft_Start();
@@ -171,7 +171,7 @@ u8 IIC_Write_1Byte(u8 SlaveAddress,u8 REG_Address,u8 REG_data)
 	return 0;
 }
 
-// IIC¶Á1×Ö½ÚÊı¾İ
+// IICè¯»1å­—èŠ‚æ•°æ®
 u8 IIC_Read_1Byte(u8 SlaveAddress,u8 REG_Address,u8 *REG_data)
 {      		
 	I2c_Soft_Start();
@@ -191,7 +191,7 @@ u8 IIC_Read_1Byte(u8 SlaveAddress,u8 REG_Address,u8 *REG_data)
 	return 0;
 }	
 
-// IICĞ´n×Ö½ÚÊı¾İ
+// IICå†™nå­—èŠ‚æ•°æ®
 u8 IIC_Write_nByte(u8 SlaveAddress, u8 REG_Address, u8 len, u8 *buf)
 {	
 	I2c_Soft_Start();
@@ -212,7 +212,7 @@ u8 IIC_Write_nByte(u8 SlaveAddress, u8 REG_Address, u8 len, u8 *buf)
 	return 0;
 }
 u8 mpu_test;
-// IIC¶Án×Ö½ÚÊı¾İ
+// IICè¯»nå­—èŠ‚æ•°æ®
 u8 IIC_Read_nByte(u8 SlaveAddress, u8 REG_Address, u8 len, u8 *buf)
 {	
 	mpu_test = I2c_Soft_Start();

@@ -16,7 +16,7 @@ static  uint8_t serialBufferTX[UART_NUMBER][TX_BUFFER_SIZE];
 
 // *******************************************************
 // Interrupt driven UART transmitter - using a ring buffer
-//STM32µÄ´®¿Ú·¢ËÍ²»ÔÚÕâÀï
+//STM32çš„ä¸²å£å‘é€ä¸åœ¨è¿™é‡Œ
 // *******************************************************
 void test_Uart()
 {
@@ -46,7 +46,7 @@ void UartSendData(uint8_t port) {
     switch (port) {
     case 0:
 
-//            while(serialHeadTX[0] != serialTailTX[0]) {//¶à´Îµ÷ÓÃÐ§ÂÊµÍÏÂ
+//            while(serialHeadTX[0] != serialTailTX[0]) {//å¤šæ¬¡è°ƒç”¨æ•ˆçŽ‡ä½Žä¸‹
 //                if (++serialTailTX[0] >= TX_BUFFER_SIZE) serialTailTX[0] = 0;
 //                USB_send((u8 *)&serialBufferTX[0][serialTailTX[0]],1);
 //            }
@@ -58,14 +58,14 @@ void UartSendData(uint8_t port) {
         */
         if(serialHeadTX[0] != serialTailTX[0])
         {
-            if(serialHeadTX[0] > serialTailTX[0])//Í·ÔÚÎ²Ç°Ãæ£¬Ò»´Î¿ÉÒÔ·¢Íê
+            if(serialHeadTX[0] > serialTailTX[0])//å¤´åœ¨å°¾å‰é¢ï¼Œä¸€æ¬¡å¯ä»¥å‘å®Œ
             {
                 USB_send((u8 *)&serialBufferTX[0][serialTailTX[0]],serialHeadTX[0]-serialTailTX[0]);
                 serialTailTX[0]=serialHeadTX[0];
-            } else {															//Í·ÔÚÎ²ºóÃæ£¬·¢Á½´Î
-                USB_send((u8 *)&serialBufferTX[0][serialTailTX[0]],TX_BUFFER_SIZE-serialTailTX[0]);//Î²µ½Êý×é½áÎ²
-                USB_send((u8 *)&serialBufferTX[0][0],serialHeadTX[0]);//Êý×éÍ·µ½Í·
-                serialTailTX[0]=serialHeadTX[0];//·¢ËÍÍê³É
+            } else {															//å¤´åœ¨å°¾åŽé¢ï¼Œå‘ä¸¤æ¬¡
+                USB_send((u8 *)&serialBufferTX[0][serialTailTX[0]],TX_BUFFER_SIZE-serialTailTX[0]);//å°¾åˆ°æ•°ç»„ç»“å°¾
+                USB_send((u8 *)&serialBufferTX[0][0],serialHeadTX[0]);//æ•°ç»„å¤´åˆ°å¤´
+                serialTailTX[0]=serialHeadTX[0];//å‘é€å®Œæˆ
             }
 
         }
@@ -73,7 +73,7 @@ void UartSendData(uint8_t port) {
     case 1:
         while(serialHeadTX[1] != serialTailTX[1]) {
             if (++serialTailTX[1] >= TX_BUFFER_SIZE) serialTailTX[1] = 0;
-            while((USART1->SR&0X40)==0);//Ñ­»··¢ËÍ,Ö±µ½·¢ËÍÍê±Ï
+            while((USART1->SR&0X40)==0);//å¾ªçŽ¯å‘é€,ç›´åˆ°å‘é€å®Œæ¯•
             res = (u8) serialBufferTX[1][serialTailTX[1]];
             USART1->DR=res;
         }
@@ -81,7 +81,7 @@ void UartSendData(uint8_t port) {
     case 2:
         while(serialHeadTX[2] != serialTailTX[2]) {
             if (++serialTailTX[2] >= TX_BUFFER_SIZE) serialTailTX[2] = 0;
-            while((USART2->SR&0X40)==0);//Ñ­»··¢ËÍ,Ö±µ½·¢ËÍÍê±Ï
+            while((USART2->SR&0X40)==0);//å¾ªçŽ¯å‘é€,ç›´åˆ°å‘é€å®Œæ¯•
             res = (u8) serialBufferTX[2][serialTailTX[2]];
             USART2->DR=res;
         }
@@ -89,7 +89,7 @@ void UartSendData(uint8_t port) {
     case 3:
         while(serialHeadTX[3] != serialTailTX[3]) {
             if (++serialTailTX[3] >= TX_BUFFER_SIZE) serialTailTX[3] = 0;
-            while((USART3->SR&0X40)==0);//Ñ­»··¢ËÍ,Ö±µ½·¢ËÍÍê±Ï
+            while((USART3->SR&0X40)==0);//å¾ªçŽ¯å‘é€,ç›´åˆ°å‘é€å®Œæ¯•
             res = (u8) serialBufferTX[3][serialTailTX[3]];
             USART3->DR=res;
         }
@@ -97,7 +97,7 @@ void UartSendData(uint8_t port) {
     case 4:
         while(serialHeadTX[4] != serialTailTX[4]) {
             if (++serialTailTX[4] >= TX_BUFFER_SIZE) serialTailTX[4] = 0;
-            while((UART4->SR&0X40)==0);//Ñ­»··¢ËÍ,Ö±µ½·¢ËÍÍê±Ï
+            while((UART4->SR&0X40)==0);//å¾ªçŽ¯å‘é€,ç›´åˆ°å‘é€å®Œæ¯•
             res = (u8) serialBufferTX[4][serialTailTX[4]];
             UART4->DR=res;
         }
@@ -106,7 +106,7 @@ void UartSendData(uint8_t port) {
     case 5:
         while(serialHeadTX[5] != serialTailTX[5]) {
             if (++serialTailTX[5] >= TX_BUFFER_SIZE) serialTailTX[5] = 0;
-            while((UART5->SR&0X40)==0);//Ñ­»··¢ËÍ,Ö±µ½·¢ËÍÍê±Ï
+            while((UART5->SR&0X40)==0);//å¾ªçŽ¯å‘é€,ç›´åˆ°å‘é€å®Œæ¯•
             res = (u8) serialBufferTX[5][serialTailTX[5]];
             UART5->DR=res;
         }
@@ -151,7 +151,7 @@ uint8_t SerialRead(uint8_t port) {
     */
     uint8_t c = serialBufferRX[port][serialTailRX[port]];
     serialTailRX[port]++;
-    //serialBufferRX[port][t]=0;// ¶ÁÍêÇåÁã£¬Ô­À´Ã»ÓÐ
+    //serialBufferRX[port][t]=0;// è¯»å®Œæ¸…é›¶ï¼ŒåŽŸæ¥æ²¡æœ‰
     if (serialHeadRX[port] != serialTailRX[port]) {
         if (serialTailRX[port] >= RX_BUFFER_SIZE)
             serialTailRX[port] = 0;
@@ -172,21 +172,21 @@ uint8_t SerialPeek(uint8_t port) {
 
 uint16_t SerialAvailable(uint8_t port) {//stm32 add
 
-    if(serialHeadRX[port] >= serialTailRX[port])//Î´´æÍê»º³å
+    if(serialHeadRX[port] >= serialTailRX[port])//æœªå­˜å®Œç¼“å†²
     {
         return serialHeadRX[port] - serialTailRX[port];
-    } else { //ÒÑ´æÍê»º³å
+    } else { //å·²å­˜å®Œç¼“å†²
         return RX_BUFFER_SIZE-serialTailRX[port]+serialHeadRX[port];
 
     }
-    //  return ((uint16_t)( serialHeadRX[port] - serialTailRX[port] ))%RX_BUFFER_SIZE;//²îÖµÇóÓà
+    //  return ((uint16_t)( serialHeadRX[port] - serialTailRX[port] ))%RX_BUFFER_SIZE;//å·®å€¼æ±‚ä½™
 }
 
 uint16_t SerialUsedTXBuff(uint8_t port) {
-    if(serialHeadTX[port] >= serialTailTX[port])//Î´´æÍê»º³å
+    if(serialHeadTX[port] >= serialTailTX[port])//æœªå­˜å®Œç¼“å†²
     {
         return serialHeadTX[port] - serialTailTX[port];
-    } else { //ÒÑ´æÍê»º³å
+    } else { //å·²å­˜å®Œç¼“å†²
         return TX_BUFFER_SIZE-serialTailTX[port]+serialHeadTX[port];
     }
 

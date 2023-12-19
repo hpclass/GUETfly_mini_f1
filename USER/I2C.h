@@ -10,7 +10,7 @@
 #define SCL_read      ANO_GPIO_I2C->IDR  & I2C_Pin_SCL
 #define SDA_read      ANO_GPIO_I2C->IDR  & I2C_Pin_SDA
 
-/***************I2C GPIO¶¨Òå******************/
+/***************I2C GPIOå®šä¹‰******************/
 #define ANO_GPIO_I2C	GPIOB
 #define I2C_Pin_SCL		GPIO_Pin_6
 #define I2C_Pin_SDA		GPIO_Pin_7

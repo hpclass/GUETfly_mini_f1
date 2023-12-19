@@ -33,19 +33,19 @@ typedef unsigned  short int   uint;
 #define SCLread      GPIOA->IDR  & GPIO_Pin_5
 #define SDAread      GPIOA->IDR  & GPIO_Pin_4
 
-//IO方向设置
+//IO鏂瑰悜璁剧疆
 
 #define SDA_IN()  {GPIOB->CRL&=0X0FFFFFFF;GPIOB->CRL|=(u32)8<<28;}
 #define SDA_OUT() {GPIOB->CRL&=0X0FFFFFFF;GPIOB->CRL|=(u32)3<<28;}
 
-//IO操作函数
+//IO鎿嶄綔鍑芥暟
 //#define IIC_SCL    PBout(6) //SCL
 //#define IIC_SDA    PBout(7) //SDA
-//#define READ_SDA   PBin(7)  //输入SDA
+//#define READ_SDA   PBin(7)  //杈撳叆SDA
 
 #define IIC_SCL    PAout(5) //SCL
 #define IIC_SDA    PAout(4) //SDA	 
-#define READ_SDA   PAin(4)  //输入SDA 
+#define READ_SDA   PAin(4)  //杈撳叆SDA 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -87,9 +87,9 @@ void TWI_Ack(void);
 void TWI_Stop(void);
 uint8_t TWI_Start(void);
 //u8 TWI_Start(void);
-void TWI_SendByte(uint8_t SendByte); //数据从高位到低位//
+void TWI_SendByte(uint8_t SendByte); //鏁版嵁浠庨珮浣嶅埌浣庝綅//
 uint8_t TWI_ReadByte( uint8_t ReadAddress);
-uint8_t TWI_ReceiveByte(void);  //数据从高位到低位//
+uint8_t TWI_ReceiveByte(void);  //鏁版嵁浠庨珮浣嶅埌浣庝綅//
 
 
 

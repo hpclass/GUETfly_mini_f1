@@ -2,30 +2,30 @@ TIME3=>motor_PWN
 TIME4=>SERVO
 
 2017/11/18
-ÓÉÓÚSTM32µÄËÙ¶ÈÎÊÌâ£¬»áÔì³É´®¿ÚÃ»ÊÕÍê£¬´®¿Ú½âÎö³ÌÐò¾Í½âÎöÍêµÄÇé¿ö£¬¼ÓÈëÁËÅÐ¶ÏÓï¾ä£¬Ã»Êý¾Ý¾Í²»½âÎö
+ç”±äºŽSTM32çš„é€Ÿåº¦é—®é¢˜ï¼Œä¼šé€ æˆä¸²å£æ²¡æ”¶å®Œï¼Œä¸²å£è§£æžç¨‹åºå°±è§£æžå®Œçš„æƒ…å†µï¼ŒåŠ å…¥äº†åˆ¤æ–­è¯­å¥ï¼Œæ²¡æ•°æ®å°±ä¸è§£æž
 
 2017/11/18 19:01
-ÐÞ¸´GPS½âÎö£¬´®¿Ú½âÎö²¿·ÖÎÊÌâ£¬½«²»»á³öÏÖubxÐ­ÒéÎÞ·¨½âÎöµÄÎÊÌâ£¬Ô­Òò£¬ÔÚSTM32ÖÐ½á¹¹Ìå»á½øÐÐ4×Ö½Ú¶ÔÆë
+ä¿®å¤GPSè§£æžï¼Œä¸²å£è§£æžéƒ¨åˆ†é—®é¢˜ï¼Œå°†ä¸ä¼šå‡ºçŽ°ubxåè®®æ— æ³•è§£æžçš„é—®é¢˜ï¼ŒåŽŸå› ï¼Œåœ¨STM32ä¸­ç»“æž„ä½“ä¼šè¿›è¡Œ4å­—èŠ‚å¯¹é½
 
 
 2017/11/18 20:42
-Ìí¼ÓÁËOPTICÑ¡Ïî£¬ÐèÒªÐÞ¸ÄÈý´¦£¬·Ö±ðÊÇtypes.hÖÐµÄenum box ¡¢MuiltiwillÖÐµÄconst char boxnames[]ºÍconst uint8_t boxids[]¡£
+æ·»åŠ äº†OPTICé€‰é¡¹ï¼Œéœ€è¦ä¿®æ”¹ä¸‰å¤„ï¼Œåˆ†åˆ«æ˜¯types.hä¸­çš„enum box ã€Muiltiwillä¸­çš„const char boxnames[]å’Œconst uint8_t boxids[]ã€‚
 
 
 2017/11/18 13:42
-ÐÞÕýstoreWP()Á½´¦£¬º½µãÐ£ÑéºÍ
+ä¿®æ­£storeWP()ä¸¤å¤„ï¼Œèˆªç‚¹æ ¡éªŒå’Œ
 
 2017/11/19 14:29
-ÐÞÕýMSP_SET_NAV_CONFIG¡¢SP_NAV_CONFIGÁ½´¦µÄÊ×·¢±£Ö¤²»ÊÜ½á¹¹ÌåÄÚ´æ¶ÔÆëµÄÓ°Ïì
+ä¿®æ­£MSP_SET_NAV_CONFIGã€SP_NAV_CONFIGä¸¤å¤„çš„é¦–å‘ä¿è¯ä¸å—ç»“æž„ä½“å†…å­˜å¯¹é½çš„å½±å“
 
 2017/12/27 9:32
 
-GPS¶¨µãÎÊÌâÔ¤¼ÆÔÚGPS.CÖÐ818ÐÐ¸½½ü£¬ÒÑÑéÖ¤×ø±êÏµ×ª»»ÎÞÎÊÌâ£¬¿ÉÄÜÎÊÌâ³öÏÖÔÚÖ¸Õë´¦
+GPSå®šç‚¹é—®é¢˜é¢„è®¡åœ¨GPS.Cä¸­818è¡Œé™„è¿‘ï¼Œå·²éªŒè¯åæ ‡ç³»è½¬æ¢æ— é—®é¢˜ï¼Œå¯èƒ½é—®é¢˜å‡ºçŽ°åœ¨æŒ‡é’ˆå¤„
 
-Õâ¸ö°æ±¾»¹ÓÐºÜ¶àÐ¡Ã«²¡£¬Çë¸÷Î»¶à¶àÌá³ö½¨Òé£¬Ð»Ð»
+è¿™ä¸ªç‰ˆæœ¬è¿˜æœ‰å¾ˆå¤šå°æ¯›ç—…ï¼Œè¯·å„ä½å¤šå¤šæå‡ºå»ºè®®ï¼Œè°¢è°¢
 
 2017
 PB3 TRI
 PB4 echo
 
-20210302²âÊÔ¸ü¸Ä
+20210302æµ‹è¯•æ›´æ”¹

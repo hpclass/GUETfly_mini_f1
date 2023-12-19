@@ -1,15 +1,15 @@
 #include "stm32f10x.h"
 #include "DJI_Guidance_usat.h"
 /*
-¹ğÁÖµç×Ó¿Æ¼¼´óÑ§--»ÆÅô
-ÓÚ2018-7-21
+æ¡‚æ—ç”µå­ç§‘æŠ€å¤§å­¦--é»„é¹
+äº2018-7-21
 
 */
-obstacle_distance DJI_Guidance_obstacle_distance;//ÕÏ°­¾àÀë
-ultrasonic_data DJI_Guidance_ultrasonic;//5Â·¾àÀë
-velocity DJI_Guidance_vo;//3Â·ËÙ¶È£¬µ¥Î»mm
-protocal_sdk_uart_header DJI_Guidance_head;//Ğ­ÒéÍ·
-soc2pc_vo_can_output output;//ÁÙÊ±»º´æÇø£¬Í¨ÓÃ»º´æÇø
+obstacle_distance DJI_Guidance_obstacle_distance;//éšœç¢è·ç¦»
+ultrasonic_data DJI_Guidance_ultrasonic;//5è·¯è·ç¦»
+velocity DJI_Guidance_vo;//3è·¯é€Ÿåº¦ï¼Œå•ä½mm
+protocal_sdk_uart_header DJI_Guidance_head;//åè®®å¤´
+soc2pc_vo_can_output output;//ä¸´æ—¶ç¼“å­˜åŒºï¼Œé€šç”¨ç¼“å­˜åŒº
 uint8_t DJI_Guidance_flag_alt;
 uint8_t DJI_Guidance_flag_vel;
 //101110
@@ -63,12 +63,12 @@ const uint16_t wCRC_Table[256] =
 const uint16_t CRC_INIT = 0x3692; //0x7000;	 //dji naza
 
 static uint8_t DJI_UART_temp_buf[256];
-uint16_t CRC16_(uint16_t wCRC,uint8_t chData)//CRC16¶Ïµã¼ÆËã,Ã¿´Î¼ÆËãÒ»¸ö×Ö½Ú
+uint16_t CRC16_(uint16_t wCRC,uint8_t chData)//CRC16æ–­ç‚¹è®¡ç®—,æ¯æ¬¡è®¡ç®—ä¸€ä¸ªå­—èŠ‚
 {
     (wCRC) = ((uint16_t)(wCRC) >> 8)  ^ wCRC_Table[((uint16_t)(wCRC) ^ (uint16_t)(chData)) & 0x00ff];
     return (wCRC);
 }
-void DJI_Analysis_vel()//½âÎöÈıÖáËÙ¶È
+void DJI_Analysis_vel()//è§£æä¸‰è½´é€Ÿåº¦
 {
     //memcpy( &output,DJI_UART_temp_buf, sizeof(DJI_Guidance_vo) );
     //DJI_Guidance_vo.frame_index;
@@ -78,7 +78,7 @@ void DJI_Analysis_vel()//½âÎöÈıÖáËÙ¶È
     DJI_Guidance_vo.vz=DJI_UART_temp_buf[7]<<8|DJI_UART_temp_buf[6];
     DJI_Guidance_flag_vel=1;
 }
-void DJI_Analysis_distance()//½âÎöÎåÏò¾àÀë
+void DJI_Analysis_distance()//è§£æäº”å‘è·ç¦»
 {
     uint8_t d;
     for ( d = 0; d < CAMERA_PAIR_NUM; ++d )
@@ -88,7 +88,7 @@ void DJI_Analysis_distance()//½âÎöÎåÏò¾àÀë
     }
     DJI_Guidance_flag_alt=1;
 }
-void DJI_Analysis_obstacle_distance()//½âÎöÕÏ°­¾àÀë
+void DJI_Analysis_obstacle_distance()//è§£æéšœç¢è·ç¦»
 {
     //memcpy( &output,DJI_UART_temp_buf, sizeof(DJI_Guidance_obstacle_distance) );
     uint8_t d;
@@ -101,89 +101,89 @@ void DJI_Analysis_obstacle_distance()//½âÎöÕÏ°­¾àÀë
 
 void DJI_Guidance_uart_protocl(uint8_t c)
 {
-    static uint16_t size_len=0,step_flag=0,CRC16=0xffff;//×î´ó×Ö½Ú¿É´ï1007
+    static uint16_t size_len=0,step_flag=0,CRC16=0xffff;//æœ€å¤§å­—èŠ‚å¯è¾¾1007
     static uint32_t CRC32=0xffffffff;
     static uint8_t cmd_id;//	e_image: 0x00; e_imu: 0x01; e_ultrasonic: 0x02; e_velocity: 0x03; e_obstacle_distance: 0x04
-    if(step_flag==0&&c==0xaa)//Ğ­ÒéÍ·
+    if(step_flag==0&&c==0xaa)//åè®®å¤´
     {
-        CRC16=CRC_INIT;//³õÊ¼Öµ
+        CRC16=CRC_INIT;//åˆå§‹å€¼
         CRC32=0xffffffff;
-        CRC16=CRC16_(CRC16,c);//¼ÆËãCRC
+        CRC16=CRC16_(CRC16,c);//è®¡ç®—CRC
         size_len=0;
         step_flag++;
-    } else if(step_flag==1)//80  ¸ß2Î»ÊôÓÚ³¤¶ÈµÄµÍ¶şÎ»
+    } else if(step_flag==1)//80  é«˜2ä½å±äºé•¿åº¦çš„ä½äºŒä½
     {
-        DJI_Guidance_head.m_length=0x0003&(c>>6);//È¡¸ß°ËÎ»×öµÍ¶şÎ»,Í¬Ê±ÇåÁã
-        DJI_Guidance_head.m_version=0x3f&c;//È¡µÍ°ËÎ»
-        CRC16=CRC16_(CRC16,c);//¼ÆËãCRC
+        DJI_Guidance_head.m_length=0x0003&(c>>6);//å–é«˜å…«ä½åšä½äºŒä½,åŒæ—¶æ¸…é›¶
+        DJI_Guidance_head.m_version=0x3f&c;//å–ä½å…«ä½
+        CRC16=CRC16_(CRC16,c);//è®¡ç®—CRC
         step_flag++;
-    } else if(step_flag==2) { //0bLENµÄ3-10Î»
-        DJI_Guidance_head.m_length|=0xffc&(c<<2);//8+2Î»
-        CRC16=CRC16_(CRC16,c);//¼ÆËãCRC
+    } else if(step_flag==2) { //0bLENçš„3-10ä½
+        DJI_Guidance_head.m_length|=0xffc&(c<<2);//8+2ä½
+        CRC16=CRC16_(CRC16,c);//è®¡ç®—CRC
         step_flag++;
-    } else if(step_flag>=3&&step_flag<=7) { //Ìø¹ıRES
-        CRC16=CRC16_(CRC16,c);//¼ÆËãCRC
+    } else if(step_flag>=3&&step_flag<=7) { //è·³è¿‡RES
+        CRC16=CRC16_(CRC16,c);//è®¡ç®—CRC
         step_flag++;
     } else if(step_flag==8)
     {
-        CRC16=CRC16_(CRC16,c);//¼ÆËãCRC
+        CRC16=CRC16_(CRC16,c);//è®¡ç®—CRC
         DJI_Guidance_head.m_seq_num=0x00ff&c;
         step_flag++;
     } else if(step_flag==9)
     {
-        CRC16=CRC16_(CRC16,c);//¼ÆËãCRC
+        CRC16=CRC16_(CRC16,c);//è®¡ç®—CRC
         DJI_Guidance_head.m_seq_num|=0xff00&c;
         step_flag++;
     } else if(step_flag==10)
     {
-        CRC16=CRC16_(CRC16,c);//¼ÆËãCRC
+        CRC16=CRC16_(CRC16,c);//è®¡ç®—CRC
         DJI_Guidance_head.m_header_checksum=0xff00&(c<<8);
         step_flag++;
     } else if(step_flag==11)
     {
-        CRC16=CRC16_(CRC16,c);//¼ÆËãCRC
+        CRC16=CRC16_(CRC16,c);//è®¡ç®—CRC
         DJI_Guidance_head.m_header_checksum|=0x00ff&c;
         if(CRC16!=0)//RCR16 error
             step_flag=0;
         else
             step_flag++;
-    } else if(step_flag>=12&&step_flag<=DJI_Guidance_head.m_length-5)//½ÓÊÕÊı¾İ
+    } else if(step_flag>=12&&step_flag<=DJI_Guidance_head.m_length-5)//æ¥æ”¶æ•°æ®
     {
-        //½ÓÊÕÊı¾İÖ¡
+        //æ¥æ”¶æ•°æ®å¸§
 
-        if(step_flag==12&&c!=0)step_flag=0;//Êı¾İµÚÒ»¸ö×Ö½ÚÎª0£¬¹Ì¶¨
+        if(step_flag==12&&c!=0)step_flag=0;//æ•°æ®ç¬¬ä¸€ä¸ªå­—èŠ‚ä¸º0ï¼Œå›ºå®š
         else if(step_flag==13)
             cmd_id=c;
         else {
             if(size_len==0) {
                 if(cmd_id==e_velocity) {
                     size_len=sizeof(DJI_Guidance_vo);
-                } else if(cmd_id==e_obstacle_distance) { //ÕÏ°­¾àÀë
+                } else if(cmd_id==e_obstacle_distance) { //éšœç¢è·ç¦»
                     size_len=sizeof(DJI_Guidance_obstacle_distance);
-                } else if(cmd_id==e_ultrasonic) { //³¬Éù²¨¾àÀë
+                } else if(cmd_id==e_ultrasonic) { //è¶…å£°æ³¢è·ç¦»
                     size_len=sizeof(DJI_Guidance_ultrasonic);
                 } else {
                     size_len=0;
                 }
             }
-            //¼ÆËãµÃµ½Êı¾İ³¤¶È£¬¿ªÊ¼¿½±´Êı¾İµ½»º´æÇø
+            //è®¡ç®—å¾—åˆ°æ•°æ®é•¿åº¦ï¼Œå¼€å§‹æ‹·è´æ•°æ®åˆ°ç¼“å­˜åŒº
             if(size_len>step_flag-14)
-                DJI_UART_temp_buf[step_flag-14]=c;//½«ĞèÒªµÄÊı¾İ·ÅÈë»º´æÖĞ
+                DJI_UART_temp_buf[step_flag-14]=c;//å°†éœ€è¦çš„æ•°æ®æ”¾å…¥ç¼“å­˜ä¸­
             else
                 1==1;
 
         }
         step_flag++;
-    } else if(step_flag==DJI_Guidance_head.m_length-4) { //Ğ£ÑéÂë
+    } else if(step_flag==DJI_Guidance_head.m_length-4) { //æ ¡éªŒç 
         DJI_Guidance_head.m_data_checksum=0x000000ff&(c<<0);
         step_flag++;
-    } else if(step_flag==DJI_Guidance_head.m_length-3) { //Ğ£ÑéÂë
+    } else if(step_flag==DJI_Guidance_head.m_length-3) { //æ ¡éªŒç 
         DJI_Guidance_head.m_data_checksum|=0x0000ff00&(c<<8);
         step_flag++;
-    } else if(step_flag==DJI_Guidance_head.m_length-2) { //Ğ£ÑéÂë
+    } else if(step_flag==DJI_Guidance_head.m_length-2) { //æ ¡éªŒç 
         DJI_Guidance_head.m_data_checksum|=0x00ff0000&(c<<16);
         step_flag++;
-    } else if(step_flag==DJI_Guidance_head.m_length-1) { //Ğ£ÑéÂë
+    } else if(step_flag==DJI_Guidance_head.m_length-1) { //æ ¡éªŒç 
         DJI_Guidance_head.m_data_checksum|=0xff000000&(c<<24);
         switch(cmd_id)
         {
@@ -200,7 +200,7 @@ void DJI_Guidance_uart_protocl(uint8_t c)
         }
         step_flag=0;
     } else {
-        step_flag=0;//½ÓÊÕÍê³É
+        step_flag=0;//æ¥æ”¶å®Œæˆ
     }
 }
 

@@ -149,7 +149,7 @@ void writeServos() {
 //        servo[i]=map(servo[i],1000,2000,100,200);
 //    }
 
-//    //PC6¡¢7¡¢8¡¢9
+//    //PC6ã€7ã€8ã€9
 //    TIM8->CCR4=servo[0];//PC9
 //    TIM8->CCR3=servo[1];//PC8
 //    TIM8->CCR2=servo[2];//PC7
@@ -160,7 +160,7 @@ void writeServos() {
 //    TIM4->CCR3=servo[5];//PD13
 //    TIM4->CCR2=servo[6];//PD14
 //    TIM4->CCR1=servo[7];//PD15
-    //    //PC6¡¢7¡¢8¡¢9
+    //    //PC6ã€7ã€8ã€9
 	#if defined(GUET_FLY_V1)
     TIM8->CCR4=servo[0];//PC9
     TIM8->CCR3=servo[1];//PC8
@@ -177,8 +177,8 @@ void writeServos() {
     TIM4->CCR2=servo[4];//PD13
     TIM4->CCR3=servo[5];//PD14
     TIM4->CCR4=servo[6];//PD15
-		TIM3->CCR3=servo[0];//Í¶µ¯Í¨µÀ1
-		TIM3->CCR4=servo[1];//Í¶µ¯Í¨µÀ2
+		TIM3->CCR3=servo[0];//æŠ•å¼¹é€šé“1
+		TIM3->CCR4=servo[1];//æŠ•å¼¹é€šé“2
 		#else
 		TIM4->CCR4=servo[2];//PD12
     TIM4->CCR3=servo[5];//PD13
@@ -218,12 +218,12 @@ void initOutput() {
     uint8_t axis=0;
     for(axis=0; axis<RC_CHANS; axis++)
         rcData[axis]=1500;
-   // TIM8_PWM_Init(19999,72-1);//¸ß¼¶¶¨Ê±Æ÷ PC6¡¢7¡¢8¡¢9 400Hz,Èç¹ûĞèÒª50HzĞŞ¸Ä72Îª720-1
+   // TIM8_PWM_Init(19999,72-1);//é«˜çº§å®šæ—¶å™¨ PC6ã€7ã€8ã€9 400Hz,å¦‚æœéœ€è¦50Hzä¿®æ”¹72ä¸º720-1
     //TIM2_PWM_Init(1999,720);//PA0,1,2,3
     TIM3_PWM_Init(19999,72-1); //400Hz (0-2000) PA6,7,PB0,1
     TIM4_PWM_Init(19999,72-1);//PD12,13,14,15
     /****************            mark all PWM pins as Output             ******************/
-// TIM3_PWM_Init(999,143); //¡¢¡¢³õÊ¼»¯PWM
+// TIM3_PWM_Init(999,143); //ã€ã€åˆå§‹åŒ–PWM
 
     /********  special version of MultiWii to calibrate all attached ESCs ************/
 #if defined(ESC_CALIB_CANNOT_FLY)
@@ -438,19 +438,19 @@ void mixTable() {
     }
 		int add_out_of_c[2]={0,0};
 		
-		if(servo[3]>500)//³¬³ö·¶Î§
+		if(servo[3]>500)//è¶…å‡ºèŒƒå›´
 		{
 			add_out_of_c[0]=servo[3]-500;
-		}else if(servo[3]<-500)//³¬³ö·¶Î§
+		}else if(servo[3]<-500)//è¶…å‡ºèŒƒå›´
 		{
 			add_out_of_c[0]=servo[3]+500;
 		}
 		
 		
-		if(servo[4]>500)//³¬³ö·¶Î§
+		if(servo[4]>500)//è¶…å‡ºèŒƒå›´
 		{
 			add_out_of_c[1]=servo[4]-500;
-		}else if(servo[4]<-500)//³¬³ö·¶Î§
+		}else if(servo[4]<-500)//è¶…å‡ºèŒƒå›´
 		{
 			add_out_of_c[1]=servo[4]+500;
 		}
@@ -483,27 +483,27 @@ void mixTable() {
     int temp_thr_r=0;
     int temp_thr__r=0;
     if(rcCommand[YAW]) {
-        temp_thr_l=servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_);//»ñÈ¡ÓÍÃÅ²î¶¯²¹³¥
+        temp_thr_l=servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_);//è·å–æ²¹é—¨å·®åŠ¨è¡¥å¿
         temp_thr_r=servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_);
         if(MINTHROTTLE>temp_thr_l)
         {
-            //×ó·¢¶¯»úĞ¡ÓÚ×îĞ¡ÓÍÃÅ
+            //å·¦å‘åŠ¨æœºå°äºæœ€å°æ²¹é—¨
             motor[0] = constrain(servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
             motor[1] = constrain((MINTHROTTLE-temp_thr_l)+servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
         } else if(MAXTHROTTLE<temp_thr_l)
         {
-            //×ó·¢¶¯»ú´óÓÚ×î´óÓÍÃÅ
+            //å·¦å‘åŠ¨æœºå¤§äºæœ€å¤§æ²¹é—¨
             motor[0] = constrain(servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
             motor[1] = constrain(servo[7]-(temp_thr_l-MAXTHROTTLE)-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
         } else if(MINTHROTTLE>temp_thr_r)
         {
-            //ÓÒ·¢¶¯»úĞ¡ÓÚ×îĞ¡ÓÍÃÅ
+            //å³å‘åŠ¨æœºå°äºæœ€å°æ²¹é—¨
             motor[0] = constrain(MINTHROTTLE-temp_thr_r+servo[7]+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
             motor[1] = constrain(servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
 
         } else if(MAXTHROTTLE<temp_thr_r)
         {
-            //ÓÒ·¢¶¯»ú´óÓÚ×î´óÓÍÃÅ
+            //å³å‘åŠ¨æœºå¤§äºæœ€å¤§æ²¹é—¨
             motor[0] = constrain(servo[7]-(temp_thr_r-MAXTHROTTLE)+constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
             motor[1] = constrain(servo[7]-constrain(rcCommand[YAW],-DIFF_MOTOR_,+DIFF_MOTOR_),MINTHROTTLE,MAXTHROTTLE);
 
@@ -611,8 +611,8 @@ void mixTable() {
       servo[i]  = ((int32_t)conf.servoConf[i].rate * servo[i])/100L;  // servo rates
       servo[i] += get_middle(i);
     }
-//		debug[2] = servo[0];   //¸©Ñö
-//		debug[3] = servo[5];   //ºá¹ö
+//		debug[2] = servo[0];   //ä¿¯ä»°
+//		debug[3] = servo[5];   //æ¨ªæ»š
 #elif defined( SINGLECOPTER )
     /***************************          Single & DualCopter          ******************************/
     // Singlecopter

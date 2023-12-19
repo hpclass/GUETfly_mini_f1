@@ -8,9 +8,9 @@
 * Author        : whq
 * Mode          : Thumb2
 * Toolchain     : 
-* Description   : ¶ÓÁĞ²Ù×÷
+* Description   : é˜Ÿåˆ—æ“ä½œ
 *                
-* History       : 2014.11.29   ĞŞÕı´æÈë¶ÓÁĞÊ±£¬¿ÉÄÜÔì³É¶Á¶ÓÁĞÊı¾İ³¤¶ÈÒì³£
+* History       : 2014.11.29   ä¿®æ­£å­˜å…¥é˜Ÿåˆ—æ—¶ï¼Œå¯èƒ½é€ æˆè¯»é˜Ÿåˆ—æ•°æ®é•¿åº¦å¼‚å¸¸
 				
 * Date          : 2013.07.22
 *******************************************************************************/
@@ -20,10 +20,10 @@
 #include "Queue.h"
 /*******************************************************************************
 * Function Name : uint32_t QUEUE_PacketCreate(QUEUE8_t *pQ8, uint8_t *pBuf, uint32_t lenSize)
-* Description   : ¶ÓÁĞ½¨Á¢
-* Input         :   pQ8:    ¶ÓÁĞ
-                    pBuf:   ¶ÓÁĞ»º³åÇøµØÖ·
-                    bufSize:¶ÓÁĞ»º³åÇø´óĞ¡
+* Description   : é˜Ÿåˆ—å»ºç«‹
+* Input         :   pQ8:    é˜Ÿåˆ—
+                    pBuf:   é˜Ÿåˆ—ç¼“å†²åŒºåœ°å€
+                    bufSize:é˜Ÿåˆ—ç¼“å†²åŒºå¤§å°
 * Output        : 
 * Other         : 
 * Date          : 2013.08.29
@@ -44,17 +44,18 @@ uint32_t QUEUE_PacketCreate(QUEUE8_t *pQ8, uint8_t *pBuf, uint32_t bufSize)
 
 /*******************************************************************************
 * Function Name : uint32_t QUEUE_PacketIn(QUEUE8_t *pQ8, uint8_t *pData, uint32_t len)
-* Description   : Êı¾İÔØÈë¶ÓÁĞ
-* Input         :   pQ8:    ¶ÓÁĞ
-                    pData:  Òª½ø¶ÓÁĞµÄÊı¾İ
-                    len:    Êı¾İ³¤¶È
+* Description   : æ•°æ®è½½å…¥é˜Ÿåˆ—
+* Input         :   pQ8:    é˜Ÿåˆ—
+                    pData:  è¦è¿›é˜Ÿåˆ—çš„æ•°æ®
+                    len:    æ•°æ®é•¿åº¦
 * Output        : 
 * Other         : 
 * Date          : 2013.08.29
 *******************************************************************************/
 uint32_t QUEUE_PacketIn(QUEUE8_t *pQ8, uint8_t *pData, uint32_t len)
 {
-    volatile uint8_t    *pEnd   = NULL;    
+    volatile uint8_t    *pEnd   = NULL;
+    
     uint32_t            index   = 0;
     
     ASSERT_PARAM(pData);
@@ -86,10 +87,10 @@ uint32_t QUEUE_PacketIn(QUEUE8_t *pQ8, uint8_t *pData, uint32_t len)
 
 /*******************************************************************************
 * Function Name : uint32_t QUEUE_PacketOut(QUEUE8_t *pQ8, uint8_t *pData, uint32_t dataLen)
-* Description   : ¶ÓÁĞÖĞÈ¡Êı¾İ
-* Input         :   pQ8:    ¶ÓÁĞ
-                    pData:  »º³åÇø
-                    dataLen:»º³åÇø´óĞ¡
+* Description   : é˜Ÿåˆ—ä¸­å–æ•°æ®
+* Input         :   pQ8:    é˜Ÿåˆ—
+                    pData:  ç¼“å†²åŒº
+                    dataLen:ç¼“å†²åŒºå¤§å°
 * Output        : 
 * Other         : 
 * Date          : 2013.08.29
@@ -118,10 +119,10 @@ uint32_t QUEUE_PacketOut(QUEUE8_t *pQ8, uint8_t *pData, uint32_t dataLen)
 
 /*******************************************************************************
 * Function Name : uint32_t QUEUE_PacketLengthGet(QUEUE8_TYPE *pQ8)
-* Description   : ¶ÓÁĞÖĞµÄÊı¾İ³¤¶È
-* Input         :   pQ8:    ¶ÓÁĞ
-                    pData:  »º³åÇø
-                    dataLen:»º³åÇø´óĞ¡
+* Description   : é˜Ÿåˆ—ä¸­çš„æ•°æ®é•¿åº¦
+* Input         :   pQ8:    é˜Ÿåˆ—
+                    pData:  ç¼“å†²åŒº
+                    dataLen:ç¼“å†²åŒºå¤§å°
 * Output        : 
 * Other         : 
 * Date          : 2013.08.29
@@ -153,12 +154,12 @@ uint32_t QUEUE_PacketLengthGet(QUEUE8_t *pQ8)
 
 /*******************************************************************************
 * Function Name : uint32_t QUEUE_PacketStartEndDifferentCharSplit(QUEUE8_t *pQ8, uint8_t startChar, uint8_t endChar, uint8_t *pData, uint32_t dataLen)
-* Description   : ÒÔÆğÊ¼·ûºÍ½áÊø·ûÈ¡¶ÓÁĞÖĞµÄÊı¾İ (È¡³öµÄÊı¾İ °üÀ¨ÆğÊ¼·û ºÍ·Ö¸ô·û)
-* Input         :   pQ8:        ¶ÓÁĞ
-                    startChar:  ÆğÊ¼·û
-                    endChar:    ½áÊø·û
-                    pData:      »º³åÇø
-                    dataLen:    »º³åÇø´óĞ¡
+* Description   : ä»¥èµ·å§‹ç¬¦å’Œç»“æŸç¬¦å–é˜Ÿåˆ—ä¸­çš„æ•°æ® (å–å‡ºçš„æ•°æ® åŒ…æ‹¬èµ·å§‹ç¬¦ å’Œåˆ†éš”ç¬¦)
+* Input         :   pQ8:        é˜Ÿåˆ—
+                    startChar:  èµ·å§‹ç¬¦
+                    endChar:    ç»“æŸç¬¦
+                    pData:      ç¼“å†²åŒº
+                    dataLen:    ç¼“å†²åŒºå¤§å°
 * Output        : 
 * Other         : 
 * Date          : 2013.08.29
@@ -179,30 +180,30 @@ uint32_t QUEUE_PacketStartEndDifferentCharSplit(QUEUE8_t *pQ8, uint8_t startChar
     pStart      = pQ8->pStart;
     count       = pQ8->bufSize;
     
-    while ((pStart != pQ8->pEnd) && count--)        //²éÕÒÆğÊ¼×Ö·û
+    while ((pStart != pQ8->pEnd) && count--)        //æŸ¥æ‰¾èµ·å§‹å­—ç¬¦
     {
         if (startChar == *pStart) break;
         if (++pStart >= pQ8->pBuf + pQ8->bufSize) pStart = pQ8->pBuf;
     }
 
-    if (pStart == pQ8->pEnd) return 0;              //Î´ÕÒµ½ÆğÊ¼·û
+    if (pStart == pQ8->pEnd) return 0;              //æœªæ‰¾åˆ°èµ·å§‹ç¬¦
     if (count == -1) return 0;
     pEnd = pStart;
     if (++pEnd >= pQ8->pBuf + pQ8->bufSize) pEnd = pQ8->pBuf;
 
-    while ((pEnd != pQ8->pEnd) && count--)          //²éÕÒ½áÊø×Ö·û
+    while ((pEnd != pQ8->pEnd) && count--)          //æŸ¥æ‰¾ç»“æŸå­—ç¬¦
     {
         if (endChar == *pEnd) break;
         if (++pEnd >= pQ8->pBuf + pQ8->bufSize) pEnd = pQ8->pBuf;
     }
     
-    if (pEnd == pQ8->pEnd) return 0;                //Î´ÕÒ½áÊø·û
+    if (pEnd == pQ8->pEnd) return 0;                //æœªæ‰¾ç»“æŸç¬¦
     if (count == -1) return 0;
     if (++pEnd >= pQ8->pBuf + pQ8->bufSize) pEnd = pQ8->pBuf;
     
     count   = pQ8->bufSize - count;   
     index   = 0;
-    //»ñÈ¡´ÓÆğÊ¼×Ö·ûµ½½áÊø×Ö·ûµÄÊı¾İ
+    //è·å–ä»èµ·å§‹å­—ç¬¦åˆ°ç»“æŸå­—ç¬¦çš„æ•°æ®
     while ((pStart != pEnd) && (index < dataLen) && (index < pQ8->bufSize) && count--)
     {
         pData[index++] = *pStart++;
@@ -215,12 +216,12 @@ uint32_t QUEUE_PacketStartEndDifferentCharSplit(QUEUE8_t *pQ8, uint8_t startChar
 
 /*******************************************************************************
 * Function Name : uint32_t QUEUE_PacketStartEndCharSplit(QUEUE8_t *pQ8, uint8_t splitChar, uint8_t *pData, uint32_t dataLen)
-* Description   : ÌáÈ¡Ê×Î²·Ö¸ô·ûÄÚµÄÊı¾İ(°üÀ¨·Ö¸ô·û)
-* Input         :   pQ8:        ¶ÓÁĞ
-                    startChar:  ÆğÊ¼·û
-                    endChar:    ½áÊø·û
-                    pData:      »º³åÇø
-                    dataLen:    »º³åÇø´óĞ¡
+* Description   : æå–é¦–å°¾åˆ†éš”ç¬¦å†…çš„æ•°æ®(åŒ…æ‹¬åˆ†éš”ç¬¦)
+* Input         :   pQ8:        é˜Ÿåˆ—
+                    startChar:  èµ·å§‹ç¬¦
+                    endChar:    ç»“æŸç¬¦
+                    pData:      ç¼“å†²åŒº
+                    dataLen:    ç¼“å†²åŒºå¤§å°
 * Output        : 
 * Other         : 
 * Date          : 2013.08.30
@@ -241,37 +242,37 @@ uint32_t QUEUE_PacketStartEndCharSplit(QUEUE8_t *pQ8, uint8_t splitChar, uint8_t
     pStart      = pQ8->pStart;
     count       = pQ8->bufSize;
     
-    while ((pStart != pQ8->pEnd) && count--)        //²éÕÒÆğÊ¼×Ö·û
+    while ((pStart != pQ8->pEnd) && count--)        //æŸ¥æ‰¾èµ·å§‹å­—ç¬¦
     {
         if (splitChar == *pStart) break;
         if (++pStart >= pQ8->pBuf + pQ8->bufSize) pStart = pQ8->pBuf;
     }
 
-    if (pStart == pQ8->pEnd) return 0;              //Î´ÕÒµ½ÆğÊ¼·û
+    if (pStart == pQ8->pEnd) return 0;              //æœªæ‰¾åˆ°èµ·å§‹ç¬¦
     if (count == -1) return 0;
     pEnd = pStart;
     if (++pEnd >= pQ8->pBuf + pQ8->bufSize) pEnd = pQ8->pBuf;
 
-    while ((pEnd != pQ8->pEnd) && count--)          //²éÕÒ½áÊø×Ö·û
+    while ((pEnd != pQ8->pEnd) && count--)          //æŸ¥æ‰¾ç»“æŸå­—ç¬¦
     {
         if (splitChar == *pEnd) break;
         if (++pEnd >= pQ8->pBuf + pQ8->bufSize) pEnd = pQ8->pBuf;
     }
     
-    if (pEnd == pQ8->pEnd) return 0;                //Î´ÕÒ½áÊø·û
+    if (pEnd == pQ8->pEnd) return 0;                //æœªæ‰¾ç»“æŸç¬¦
     if (count == -1) return 0;
     if (++pEnd >= pQ8->pBuf + pQ8->bufSize) pEnd = pQ8->pBuf;
     
     count   = pQ8->bufSize - count;   
     index   = 0;
-    //»ñÈ¡´ÓÆğÊ¼×Ö·ûµ½½áÊø×Ö·ûµÄÊı¾İ
+    //è·å–ä»èµ·å§‹å­—ç¬¦åˆ°ç»“æŸå­—ç¬¦çš„æ•°æ®
     while ((pStart != pEnd) && (index < dataLen) && (index < pQ8->bufSize) && count--)
     {
         pData[index++] = *pStart++;
         if (pStart >= pQ8->pBuf + pQ8->bufSize) pStart = pQ8->pBuf;
     }
 
-    //Èç¹ûÈ¡³öµÄÊı¾İÖ»°üÀ¨·Ö¸ô·û£¬ÓĞ¿ÉÄÜÊÇÉÏ´Î½áÊø·ûºÍÏÂ´ÎÆğÊ¼·û£¬Òò´Ë·ÅÆúÉÏ´Î½áÊø·û¡£
+    //å¦‚æœå–å‡ºçš„æ•°æ®åªåŒ…æ‹¬åˆ†éš”ç¬¦ï¼Œæœ‰å¯èƒ½æ˜¯ä¸Šæ¬¡ç»“æŸç¬¦å’Œä¸‹æ¬¡èµ·å§‹ç¬¦ï¼Œå› æ­¤æ”¾å¼ƒä¸Šæ¬¡ç»“æŸç¬¦ã€‚
     if (index <= 2)                                  
     {
         index = 0;
@@ -284,7 +285,7 @@ uint32_t QUEUE_PacketStartEndCharSplit(QUEUE8_t *pQ8, uint8_t splitChar, uint8_t
 
 /*******************************************************************************
 * Function Name : uint32_t QUEUE_PacketCharSplit(QUEUE8_t *pQ8, uint8_t splitChar, uint8_t *pData, uint32_t dataLen)
-* Description   : ÌáÈ¡µ¥½áÊø·Ö¸ô·ûµÄÊı¾İ (°üÀ¨·Ö¸ô·û)
+* Description   : æå–å•ç»“æŸåˆ†éš”ç¬¦çš„æ•°æ® (åŒ…æ‹¬åˆ†éš”ç¬¦)
 * Input         : 
 * Output        : 
 * Other         : 
@@ -306,13 +307,13 @@ uint32_t QUEUE_PacketCharSplit(QUEUE8_t *pQ8, uint8_t splitChar, uint8_t *pData,
     pStart      = pQ8->pStart;
     count       = pQ8->bufSize;
 
-    while ((pStart != pQ8->pEnd) && count--)        //²éÕÒÆğÊ¼×Ö·û
+    while ((pStart != pQ8->pEnd) && count--)        //æŸ¥æ‰¾èµ·å§‹å­—ç¬¦
     {
         if (splitChar == *pStart) break;
         if (++pStart >= pQ8->pBuf + pQ8->bufSize) pStart = pQ8->pBuf;
     }
 
-    if (pStart == pQ8->pEnd) return 0;              //Î´ÕÒµ½ÆğÊ¼·û
+    if (pStart == pQ8->pEnd) return 0;              //æœªæ‰¾åˆ°èµ·å§‹ç¬¦
     if (count == -1) return 0;
     pEnd = pStart;
     if (++pEnd >= pQ8->pBuf + pQ8->bufSize) pEnd = pQ8->pBuf;
@@ -320,7 +321,7 @@ uint32_t QUEUE_PacketCharSplit(QUEUE8_t *pQ8, uint8_t splitChar, uint8_t *pData,
     pStart      = pQ8->pStart;
     count       = pQ8->bufSize;
     index       = 0;
-    while ((pStart != pEnd) && (index < dataLen) && count--)        //²éÕÒÆğÊ¼×Ö·û
+    while ((pStart != pEnd) && (index < dataLen) && count--)        //æŸ¥æ‰¾èµ·å§‹å­—ç¬¦
     {
         pData[index++] = *pStart;
         if (++pStart >= pQ8->pBuf + pQ8->bufSize) pStart = pQ8->pBuf;
@@ -332,7 +333,7 @@ uint32_t QUEUE_PacketCharSplit(QUEUE8_t *pQ8, uint8_t splitChar, uint8_t *pData,
 
 /*******************************************************************************
 * Function Name :QUEUE_PacketDoubleEndCharSplit
-* Description   :ÌáÈ¡Ë«½áÊø·Ö¸ô·ûµÄÊı¾İ (°üÀ¨·Ö¸ô·û)
+* Description   :æå–åŒç»“æŸåˆ†éš”ç¬¦çš„æ•°æ® (åŒ…æ‹¬åˆ†éš”ç¬¦)
 * Input         :QUEUE8_t * pQ8
 * Input         :uint8_t splitChar1
 * Input         :uint8_t splitChar2
@@ -359,7 +360,7 @@ uint32_t QUEUE_PacketDoubleEndCharSplit(QUEUE8_t *pQ8, uint8_t splitChar1, uint8
     pStart      = pQ8->pStart;
     count       = pQ8->bufSize;
 
-    while ((pStart != pQ8->pEnd) && count--)        //²éÕÒÆğÊ¼×Ö·û
+    while ((pStart != pQ8->pEnd) && count--)        //æŸ¥æ‰¾èµ·å§‹å­—ç¬¦
     {
         if ((splitChar1 == lastChar) && (splitChar2 == *pStart)) break;
 
@@ -368,7 +369,7 @@ uint32_t QUEUE_PacketDoubleEndCharSplit(QUEUE8_t *pQ8, uint8_t splitChar1, uint8
         if (++pStart >= pQ8->pBuf + pQ8->bufSize) pStart = pQ8->pBuf;
     }
 
-    if (pStart == pQ8->pEnd) return 0;              //Î´ÕÒµ½ÆğÊ¼·û
+    if (pStart == pQ8->pEnd) return 0;              //æœªæ‰¾åˆ°èµ·å§‹ç¬¦
     if (count == -1) return 0;
     pEnd = pStart;
     if (++pEnd >= pQ8->pBuf + pQ8->bufSize) pEnd = pQ8->pBuf;
@@ -376,7 +377,7 @@ uint32_t QUEUE_PacketDoubleEndCharSplit(QUEUE8_t *pQ8, uint8_t splitChar1, uint8
     pStart      = pQ8->pStart;
     count       = pQ8->bufSize;
     index       = 0;
-    while ((pStart != pEnd) && (index < dataLen) && count--)        //²éÕÒÆğÊ¼×Ö·û
+    while ((pStart != pEnd) && (index < dataLen) && count--)        //æŸ¥æ‰¾èµ·å§‹å­—ç¬¦
     {
         pData[index++] = *pStart;
         if (++pStart >= pQ8->pBuf + pQ8->bufSize) pStart = pQ8->pBuf;
@@ -392,12 +393,12 @@ uint32_t QUEUE_PacketDoubleEndCharSplit(QUEUE8_t *pQ8, uint8_t splitChar1, uint8
 
 /*******************************************************************************
 * Function Name : uint32_t QUEUE_PacketCreate(QUEUE_STRUCT_t *pQueue, uint8_t *pBuf, uint32_t bufSize)
-* Description   : ½á¹¹Ìå¶ÓÁĞ
-* Input         :   pQueue:     ¶ÓÁĞÃû
-                    pBuf:       ¶ÓÁĞ»º³åÇø
-                    bufSize:    »»³åÇø´óĞ¡(×Ö½Ú)
-                    blkSize:    µ¥½á¹¹Ìå´óĞ¡(×Ö½Ú)
-* Output        : 0: ³É¹¦
+* Description   : ç»“æ„ä½“é˜Ÿåˆ—
+* Input         :   pQueue:     é˜Ÿåˆ—å
+                    pBuf:       é˜Ÿåˆ—ç¼“å†²åŒº
+                    bufSize:    æ¢å†²åŒºå¤§å°(å­—èŠ‚)
+                    blkSize:    å•ç»“æ„ä½“å¤§å°(å­—èŠ‚)
+* Output        : 0: æˆåŠŸ
 * Other         : 
 * Date          : 2014.08.13
 *******************************************************************************/
@@ -418,11 +419,11 @@ uint32_t QUEUE_StructCreate(QUEUE_STRUCT_t *pQueue, void *pBuf, uint32_t bufSize
 
 /*******************************************************************************
 * Function Name : uint32_t QUEUE_StructIn(QUEUE_STRUCT_t *pQueue, void *pData, uint16_t blkCount)
-* Description   : ½á¹¹Ìå¶ÓÁĞÈëÕ» »º³åÇøÖĞÈç¹ûÂúÔò²»ÔØÈë
-* Input         :   pQueue:     ¶ÓÁĞÃû
-                    pData:      ×¼±¸ÈëÕ»µÄÊı¾İ
-                    blkCount:   ×¼±¸ÈëÕ»µÄ½á¹¹Ìå¸öÊı(µ¥Î»:½á¹¹Ìå¸öÊı)
-* Output        : ³É¹¦ÈëÕ»½á¹¹ÌåµÄ¸öÊı
+* Description   : ç»“æ„ä½“é˜Ÿåˆ—å…¥æ ˆ ç¼“å†²åŒºä¸­å¦‚æœæ»¡åˆ™ä¸è½½å…¥
+* Input         :   pQueue:     é˜Ÿåˆ—å
+                    pData:      å‡†å¤‡å…¥æ ˆçš„æ•°æ®
+                    blkCount:   å‡†å¤‡å…¥æ ˆçš„ç»“æ„ä½“ä¸ªæ•°(å•ä½:ç»“æ„ä½“ä¸ªæ•°)
+* Output        : æˆåŠŸå…¥æ ˆç»“æ„ä½“çš„ä¸ªæ•°
 * Other         : 
 * Date          : 2014.08.14
 *******************************************************************************/
@@ -438,13 +439,13 @@ uint32_t QUEUE_StructIn(QUEUE_STRUCT_t *pQueue, void *pData, uint32_t blkCount)
     end = pQueue->end;
     for (i = 0; i < blkCount; i++)
     {
-        //ÔÙ×°Ò»×éÊı¾İºó£¬Ö¸ÕëÊÇ·ñÖ¸ÏòÕ»Î²
+        //å†è£…ä¸€ç»„æ•°æ®åï¼ŒæŒ‡é’ˆæ˜¯å¦æŒ‡å‘æ ˆå°¾
         if (++end >= pQueue->sumCount)      
         {
             end = 0;
         }
         
-        //»º³åÇøÌîÂú Ö±½ÓÍË³ö
+        //ç¼“å†²åŒºå¡«æ»¡ ç›´æ¥é€€å‡º
         if (end == pQueue->start)   
         {
             break; 
@@ -461,11 +462,11 @@ uint32_t QUEUE_StructIn(QUEUE_STRUCT_t *pQueue, void *pData, uint32_t blkCount)
 
 /*******************************************************************************
 * Function Name : uint32_t QUEUE_StructOut(QUEUE_STRUCT_t *pQueue, void *pData, uint16_t blkCount)
-* Description   : ½á¹¹Ìå¶ÓÁĞ³öÕ»
-* Input         :   pQueue:     ¶ÓÁĞÃû
-                    pData:      ×¼±¸³öÕ»µÄÊı¾İ»º³åÇø
-                    blkCount:   ´æ·Å³öÕ»½á¹¹ÌåµÄ×î´ó¸öÊı(µ¥Î»:½á¹¹Ìå¸öÊı)
-* Output        : ³É¹¦³öÕ»½á¹¹ÌåµÄ¸öÊı
+* Description   : ç»“æ„ä½“é˜Ÿåˆ—å‡ºæ ˆ
+* Input         :   pQueue:     é˜Ÿåˆ—å
+                    pData:      å‡†å¤‡å‡ºæ ˆçš„æ•°æ®ç¼“å†²åŒº
+                    blkCount:   å­˜æ”¾å‡ºæ ˆç»“æ„ä½“çš„æœ€å¤§ä¸ªæ•°(å•ä½:ç»“æ„ä½“ä¸ªæ•°)
+* Output        : æˆåŠŸå‡ºæ ˆç»“æ„ä½“çš„ä¸ªæ•°
 * Other         : 
 * Date          : 2014.08.14
 *******************************************************************************/
@@ -494,7 +495,7 @@ uint32_t QUEUE_StructOut(QUEUE_STRUCT_t *pQueue, void *pData, uint32_t blkCount)
 
 /*******************************************************************************
 * Function Name : uint32_t QUEUE_StructCountGet(QUEUE_STRUCT_t *pQueue)
-* Description   : »ñÈ¡½á¹¹Ìå¶ÓÁĞÖĞµÄ¸öÊı(½á¹¹Ìå¸öÊı)
+* Description   : è·å–ç»“æ„ä½“é˜Ÿåˆ—ä¸­çš„ä¸ªæ•°(ç»“æ„ä½“ä¸ªæ•°)
 * Input         : 
 * Output        : 
 * Other         : 
@@ -526,7 +527,7 @@ uint32_t QUEUE_StructCountGet(QUEUE_STRUCT_t *pQueue)
 
 /*******************************************************************************
 * Function Name : void ASSERT_FAILED(uint8_t* file, uint32_t line)
-* Description   : Òì³£
+* Description   : å¼‚å¸¸
 * Input         : 
 * Output        : 
 * Other         : 
@@ -536,7 +537,7 @@ void ASSERT_FAILED(uint8_t* file, uint32_t line)
 {
     uint8_t flg = 1;
 
-    printf("wrong information ÎÄ¼ş:%s µÚ%dĞĞ\r\n", file, line);
+    printf("wrong information æ–‡ä»¶:%s ç¬¬%dè¡Œ\r\n", file, line);
     while (flg);
 }
 

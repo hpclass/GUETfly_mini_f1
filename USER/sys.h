@@ -2,29 +2,29 @@
 #define __SYS_H
 #include "stm32f10x.h"
 //////////////////////////////////////////////////////////////////////////////////
-//������ֻ��ѧϰʹ�ã�δ���������ɣ��������������κ���;
-//ALIENTEK STM32������
-//����ԭ��@ALIENTEK
-//������̳:www.openedv.com
-//�޸�����:2012/8/18
-//�汾��V1.7
-//��Ȩ���У�����ؾ���
-//Copyright(C) �������������ӿƼ����޹�˾ 2009-2019
+//本程序只供学习使用，未经作者许可，不得用于其它任何用途
+//ALIENTEK STM32开发板
+//正点原子@ALIENTEK
+//技术论坛:www.openedv.com
+//修改日期:2012/8/18
+//版本：V1.7
+//版权所有，盗版必究。
+//Copyright(C) 广州市星翼电子科技有限公司 2009-2019
 //All rights reserved
 //////////////////////////////////////////////////////////////////////////////////
 
-//0,��֧��ucos
-//1,֧��ucos
-#define SYSTEM_SUPPORT_UCOS		0		//����ϵͳ�ļ����Ƿ�֧��UCOS
+//0,不支持ucos
+//1,支持ucos
+#define SYSTEM_SUPPORT_UCOS		0		//定义系统文件夹是否支持UCOS
 
 
-//λ������,ʵ��51���Ƶ�GPIO���ƹ���
-//����ʵ��˼��,�ο�<<CM3Ȩ��ָ��>>������(87ҳ~92ҳ).
-//IO�ڲ����궨��
+//位带操作,实现51类似的GPIO控制功能
+//具体实现思想,参考<<CM3权威指南>>第五章(87页~92页).
+//IO口操作宏定义
 #define BITBAND(addr, bitnum) ((addr & 0xF0000000)+0x2000000+((addr &0xFFFFF)<<5)+(bitnum<<2))
 #define MEM_ADDR(addr)  *((volatile unsigned long  *)(addr))
 #define BIT_ADDR(addr, bitnum)   MEM_ADDR(BITBAND(addr, bitnum))
-//IO�ڵ�ַӳ��
+//IO口地址映射
 #define GPIOA_ODR_Addr    (GPIOA_BASE+12) //0x4001080C 
 #define GPIOB_ODR_Addr    (GPIOB_BASE+12) //0x40010C0C 
 #define GPIOC_ODR_Addr    (GPIOC_BASE+12) //0x4001100C 
@@ -41,44 +41,44 @@
 #define GPIOF_IDR_Addr    (GPIOF_BASE+8) //0x40011A08 
 #define GPIOG_IDR_Addr    (GPIOG_BASE+8) //0x40011E08 
 
-//IO�ڲ���,ֻ�Ե�һ��IO��!
-//ȷ��n��ֵС��16!
-#define PAout(n)   BIT_ADDR(GPIOA_ODR_Addr,n)  //��� 
-#define PAin(n)    BIT_ADDR(GPIOA_IDR_Addr,n)  //���� 
+//IO口操作,只对单一的IO口!
+//确保n的值小于16!
+#define PAout(n)   BIT_ADDR(GPIOA_ODR_Addr,n)  //输出 
+#define PAin(n)    BIT_ADDR(GPIOA_IDR_Addr,n)  //输入 
 
-#define PBout(n)   BIT_ADDR(GPIOB_ODR_Addr,n)  //��� 
-#define PBin(n)    BIT_ADDR(GPIOB_IDR_Addr,n)  //���� 
+#define PBout(n)   BIT_ADDR(GPIOB_ODR_Addr,n)  //输出 
+#define PBin(n)    BIT_ADDR(GPIOB_IDR_Addr,n)  //输入 
 
-#define PCout(n)   BIT_ADDR(GPIOC_ODR_Addr,n)  //��� 
-#define PCin(n)    BIT_ADDR(GPIOC_IDR_Addr,n)  //���� 
+#define PCout(n)   BIT_ADDR(GPIOC_ODR_Addr,n)  //输出 
+#define PCin(n)    BIT_ADDR(GPIOC_IDR_Addr,n)  //输入 
 
-#define PDout(n)   BIT_ADDR(GPIOD_ODR_Addr,n)  //��� 
-#define PDin(n)    BIT_ADDR(GPIOD_IDR_Addr,n)  //���� 
+#define PDout(n)   BIT_ADDR(GPIOD_ODR_Addr,n)  //输出 
+#define PDin(n)    BIT_ADDR(GPIOD_IDR_Addr,n)  //输入 
 
-#define PEout(n)   BIT_ADDR(GPIOE_ODR_Addr,n)  //��� 
-#define PEin(n)    BIT_ADDR(GPIOE_IDR_Addr,n)  //����
+#define PEout(n)   BIT_ADDR(GPIOE_ODR_Addr,n)  //输出 
+#define PEin(n)    BIT_ADDR(GPIOE_IDR_Addr,n)  //输入
 
-#define PFout(n)   BIT_ADDR(GPIOF_ODR_Addr,n)  //��� 
-#define PFin(n)    BIT_ADDR(GPIOF_IDR_Addr,n)  //����
+#define PFout(n)   BIT_ADDR(GPIOF_ODR_Addr,n)  //输出 
+#define PFin(n)    BIT_ADDR(GPIOF_IDR_Addr,n)  //输入
 
-#define PGout(n)   BIT_ADDR(GPIOG_ODR_Addr,n)  //��� 
-#define PGin(n)    BIT_ADDR(GPIOG_IDR_Addr,n)  //����
+#define PGout(n)   BIT_ADDR(GPIOG_ODR_Addr,n)  //输出 
+#define PGin(n)    BIT_ADDR(GPIOG_IDR_Addr,n)  //输入
 
-//JTAGģʽ���ö���
+//JTAG模式设置定义
 #define JTAG_SWD_DISABLE   0X02
 #define SWD_ENABLE         0X01
 #define JTAG_SWD_ENABLE    0X00
 
 void NVIC_Configuration(void);
 /////////////////////////////////////////////////////////////////
-//void BKP_Write(u8 reg,u16 dat);	//д��󱸼Ĵ���
-void Stm32_Clock_Init(u8 PLL);  //ʱ�ӳ�ʼ��
-void Sys_Soft_Reset(void);      //ϵͳ����λ
-void Sys_Standby(void);         //����ģʽ
-void MY_NVIC_SetVectorTable(u32 NVIC_VectTab, u32 Offset);//����ƫ�Ƶ�ַ
-void MY_NVIC_PriorityGroupConfig(u8 NVIC_Group);//����NVIC����
-void MY_NVIC_Init(u8 NVIC_PreemptionPriority,u8 NVIC_SubPriority,u8 NVIC_Channel,u8 NVIC_Group);//�����ж�
-void Ex_NVIC_Config(u8 GPIOx,u8 BITx,u8 TRIM);//�ⲿ�ж����ú���(ֻ��GPIOA~G)
+//void BKP_Write(u8 reg,u16 dat);	//写入后备寄存器
+void Stm32_Clock_Init(u8 PLL);  //时钟初始化
+void Sys_Soft_Reset(void);      //系统软复位
+void Sys_Standby(void);         //待机模式
+void MY_NVIC_SetVectorTable(u32 NVIC_VectTab, u32 Offset);//设置偏移地址
+void MY_NVIC_PriorityGroupConfig(u8 NVIC_Group);//设置NVIC分组
+void MY_NVIC_Init(u8 NVIC_PreemptionPriority,u8 NVIC_SubPriority,u8 NVIC_Channel,u8 NVIC_Group);//设置中断
+void Ex_NVIC_Config(u8 GPIOx,u8 BITx,u8 TRIM);//外部中断配置函数(只对GPIOA~G)
 void JTAG_Set(u8 mode);
 
 

@@ -3,15 +3,15 @@
 #define __KALMAN_FILTER_H_
 
 #define Pi 	3.141592654
-//¿¨¶ûÂüÔëÉù²ÎÊı
+//å¡å°”æ›¼å™ªå£°å‚æ•°
 #define dt           0.012
 #define R_angle      0.5
 #define Q_angle      0.0001
-#define Q_gyro       0.0001//Ô½´óÔ½ÖÍºó
+#define Q_gyro       0.0001//è¶Šå¤§è¶Šæ»å
 
-//ÒıÓÃÍâ²¿±äÁ¿
-extern short aacx, aacy, aacz;		//¼ÓËÙ¶È´«¸ĞÆ÷Ô­Ê¼Êı¾İ
-extern short gyrox, gyroy, gyroz;	//ÍÓÂİÒÇÔ­Ê¼Êı¾İ
+//å¼•ç”¨å¤–éƒ¨å˜é‡
+extern short aacx, aacy, aacz;		//åŠ é€Ÿåº¦ä¼ æ„Ÿå™¨åŸå§‹æ•°æ®
+extern short gyrox, gyroy, gyroz;	//é™€èºä»ªåŸå§‹æ•°æ®
 
 double KalmanFilter(const double ResrcData, double ProcessNiose_Q, double MeasureNoise_R);
 void Angle_Calcu(void);

@@ -16,12 +16,12 @@ uint8_t calculate_sum(uint8_t *cb, uint8_t siz) {
         sum += *(cb++);  // calculate checksum (without checksum byte)
     return sum;
 }
-/*  extern void eeprom_read_block (void *buf, const void *addr, size_t n);//¶ÁÈ¡ÓÉÖ¸¶¨µØÖ·¿ªÊ¼µÄÖ¸¶¨³¤¶ÈµÄEEPROMÊı¾İ
-    extern void eeprom_write_byte (uint8_t *addr, uint8_t val);//ÏòÖ¸¶¨µØÖ·Ğ´ÈëÒ»¸ö×Ö½Ú8bitµÄEEPROMÊı¾İ
-    extern void eeprom_write_word (uint16_t *addr, uint16_t val);//ÏòÖ¸¶¨µØÖ·Ğ´ÈëÒ»¸ö×Ö16bitµÄEEPROMÊı¾İ
+/*  extern void eeprom_read_block (void *buf, const void *addr, size_t n);//è¯»å–ç”±æŒ‡å®šåœ°å€å¼€å§‹çš„æŒ‡å®šé•¿åº¦çš„EEPROMæ•°æ®
+    extern void eeprom_write_byte (uint8_t *addr, uint8_t val);//å‘æŒ‡å®šåœ°å€å†™å…¥ä¸€ä¸ªå­—èŠ‚8bitçš„EEPROMæ•°æ®
+    extern void eeprom_write_word (uint16_t *addr, uint16_t val);//å‘æŒ‡å®šåœ°å€å†™å…¥ä¸€ä¸ªå­—16bitçš„EEPROMæ•°æ®
 		extern void eeprom_write_block (const void *buf, void *addr, size_t n);
 */
-//stm32 ×¢Òâ£¡sizeof(global_conf)-1£¬-1±ØÒª£¬·ñÔò½«Ê§°Ü
+//stm32 æ³¨æ„ï¼sizeof(global_conf)-1ï¼Œ-1å¿…è¦ï¼Œå¦åˆ™å°†å¤±è´¥
 void readGlobalSet() {
     eeprom_read_block((void*)&global_conf, (void*)0, sizeof(global_conf));
     if(calculate_sum((uint8_t*)&global_conf, sizeof(global_conf)-1) != global_conf.checksum) {
@@ -342,21 +342,21 @@ void loadGPSdefaults(void) {
     GPS_conf.fence                   = FENCE_DISTANCE;
     GPS_conf.land_speed              = LAND_SPEED;
     GPS_conf.max_wp_number           = getMaxWPNumber();
-		//CADCÌí¼Ó·½±ãµØÃæÕ¾ĞŞ¸Ä¶æ»ú»ú¹¹
-		GPS_conf.dorp_servor_open				 = DORP_SERVOR_OPEN;	//Í¶·Å²Ö¿ªÆô¶æÁ¿
-		GPS_conf.dorp_servor_close			 = DORP_SERVOR_CLOSE;  //Í¶·Å²Ö¹Ø±Õ¶æÁ¿
-		GPS_conf.dorp_delay_ms					 = DORP_DELAY_MS;			//Í¶·ÅÑÓ³Ù£¬ÕıÊıÑÓ³Ù£¬¸ºÊıÌáÇ°
+		//CADCæ·»åŠ æ–¹ä¾¿åœ°é¢ç«™ä¿®æ”¹èˆµæœºæœºæ„
+		GPS_conf.dorp_servor_open				 = DORP_SERVOR_OPEN;	//æŠ•æ”¾ä»“å¼€å¯èˆµé‡
+		GPS_conf.dorp_servor_close			 = DORP_SERVOR_CLOSE;  //æŠ•æ”¾ä»“å…³é—­èˆµé‡
+		GPS_conf.dorp_delay_ms					 = DORP_DELAY_MS;			//æŠ•æ”¾å»¶è¿Ÿï¼Œæ­£æ•°å»¶è¿Ÿï¼Œè´Ÿæ•°æå‰
     writeGPSconf();	
 }
-#if !defined(USE_EX_EEPROM) //½«º½µãĞÅÏ¢´æµ½buffÖĞ£¬ÂúÒ»Ò³ÔÙĞ´Èëbuff
-static u8 msp_wp_buff[7112]= {0}; //ÓÃÓÚ»º´æº½µãĞÅÏ¢
-static u16 msp_wp_buff_num=0;//¼ÇÂ¼º½µã¸öÊı,ËäÈ»º½µãÖ»ÓĞ254¸ö£¬µ«ÊÇÊ¡ÊÂÓÃu16
+#if !defined(USE_EX_EEPROM) //å°†èˆªç‚¹ä¿¡æ¯å­˜åˆ°buffä¸­ï¼Œæ»¡ä¸€é¡µå†å†™å…¥buff
+static u8 msp_wp_buff[7112]= {0}; //ç”¨äºç¼“å­˜èˆªç‚¹ä¿¡æ¯
+static u16 msp_wp_buff_num=0;//è®°å½•èˆªç‚¹ä¸ªæ•°,è™½ç„¶èˆªç‚¹åªæœ‰254ä¸ªï¼Œä½†æ˜¯çœäº‹ç”¨u16
 static u16 temp_i=7;
 static void buff_read_block(void *buf,void *addr, size_t n)
 {
 
-    u8 * pbuff=(u8*)buf;//ÄÚ´æÖĞµÄµØÖ·
-    u32 i=(u32)addr;//µØÖ·×ª»»³ÉÖ¸ÕëÏÂ±ê
+    u8 * pbuff=(u8*)buf;//å†…å­˜ä¸­çš„åœ°å€
+    u32 i=(u32)addr;//åœ°å€è½¬æ¢æˆæŒ‡é’ˆä¸‹æ ‡
     if(msp_wp_buff[0]!=1)
         //__breakpoint(0);
         1==1;
@@ -364,36 +364,36 @@ static void buff_read_block(void *buf,void *addr, size_t n)
     while(n--)
     {
         *pbuff=msp_wp_buff[i];
-        i++;//ÒÆ¶¯ÏÂ±ê
-        pbuff++;//ÒÆ¶¯Ö¸Õë
+        i++;//ç§»åŠ¨ä¸‹æ ‡
+        pbuff++;//ç§»åŠ¨æŒ‡é’ˆ
     }
     LED2_OFF
 }
 static void buff_write_block(void *buf,void *addr, size_t n)
 {
-    u8 *pbuff=(u8*)buf;//ÄÚ´æÖĞµÄµØÖ·
-    u32 i=(u32)addr;//µØÖ·×ª»»³ÉÖ¸ÕëÏÂ±ê
+    u8 *pbuff=(u8*)buf;//å†…å­˜ä¸­çš„åœ°å€
+    u32 i=(u32)addr;//åœ°å€è½¬æ¢æˆæŒ‡é’ˆä¸‹æ ‡
     LED1_ON
     while(n--)
     {
         msp_wp_buff[i]=*pbuff;
-        i++;//ÒÆ¶¯ÏÂ±ê
-        pbuff++;//ÒÆ¶¯Ö¸Õë
+        i++;//ç§»åŠ¨ä¸‹æ ‡
+        pbuff++;//ç§»åŠ¨æŒ‡é’ˆ
     }
     LED1_OFF
 
 }
 //Stores the WP data in the wp struct in the EEPROM
 void storeWP() {
-//flag=0xa5;//×îºó½Úµã
+//flag=0xa5;//æœ€åèŠ‚ç‚¹
     if(mission_step.number==temp_i)
         1==1;
     if(mission_step.number >254) return;
     msp_wp_buff_num=mission_step.number;
-    mission_step.checksum = calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3);//ÓÉÓÚSTM32µÄÄÚ´æ4×Ö½Ú¶ÔÆë£¬¸Ã½á¹¹Ìå»á¶à³öÈı¸ö×Ö½Ú
+    mission_step.checksum = calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3);//ç”±äºSTM32çš„å†…å­˜4å­—èŠ‚å¯¹é½ï¼Œè¯¥ç»“æ„ä½“ä¼šå¤šå‡ºä¸‰ä¸ªå­—èŠ‚
     buff_write_block((void*)&mission_step,(void*)(sizeof(mission_step)*(mission_step.number-1)),sizeof(mission_step));
 
-    //²»ÊÇ×îºóÒ»¸ö½Úµã£¬Ğ´Èë¶ÑÕ»ÖĞ
+    //ä¸æ˜¯æœ€åä¸€ä¸ªèŠ‚ç‚¹ï¼Œå†™å…¥å †æ ˆä¸­
 }
 
 // Read the given number of WP from the eeprom, supposedly we can use this during flight.
@@ -405,11 +405,11 @@ bool recallWP(uint8_t wp_number) {
     if (wp_number > 254) return false;
 //		if(wp_number==0x09)
 //			1==1;
-    if(msp_wp_buff_num)//½ÚµãÊı²»Îª0ÔÚÄÚ´æÖĞÓĞ¶ÁÊı
+    if(msp_wp_buff_num)//èŠ‚ç‚¹æ•°ä¸ä¸º0åœ¨å†…å­˜ä¸­æœ‰è¯»æ•°
     {
 
         buff_read_block((void*)&mission_step,(void*)(sizeof(mission_step)*(wp_number-1)),sizeof(mission_step));
-        if(mission_step.flag==0xa5)//×îºóÒ»¸ö½Úµã£¬Ğ´ÈëFLASHÖĞ
+        if(mission_step.flag==0xa5)//æœ€åä¸€ä¸ªèŠ‚ç‚¹ï¼Œå†™å…¥FLASHä¸­
         {
             eeprom_write_block((void*)msp_wp_buff,(void*)1024,sizeof(mission_step)*(msp_wp_buff_num));
             msp_wp_buff_num=0;
@@ -417,24 +417,24 @@ bool recallWP(uint8_t wp_number) {
     } else {
         eeprom_read_block((void*)&mission_step,(void*)(1024+(sizeof(mission_step)*(wp_number-1))), sizeof(mission_step));
     }
-    c=calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3); //ÓÉÓÚSTM32µÄÄÚ´æ4×Ö½Ú¶ÔÆë£¬¸Ã½á¹¹Ìå»á¶à³öÈı¸ö×Ö½Ú
+    c=calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3); //ç”±äºSTM32çš„å†…å­˜4å­—èŠ‚å¯¹é½ï¼Œè¯¥ç»“æ„ä½“ä¼šå¤šå‡ºä¸‰ä¸ªå­—èŠ‚
     if(c!= mission_step.checksum)
         return false;
     return true;
 
 }
 #else
-//#define USE_MSP_WP_TEMP  //ÆôÓÃº½µãÄÚ´æ»º´æ
+//#define USE_MSP_WP_TEMP  //å¯ç”¨èˆªç‚¹å†…å­˜ç¼“å­˜
 #if defined(USE_MSP_WP_TEMP)
 static u8 msp_wp_buff_last[28]= {0};
-static u8 msp_wp_buff[7112]= {0}; //ÓÃÓÚ»º´æº½µãĞÅÏ¢
-static u16 msp_wp_buff_num=0;//¼ÇÂ¼º½µã¸öÊı,ËäÈ»º½µãÖ»ÓĞ254¸ö£¬µ«ÊÇÊ¡ÊÂÓÃu16
+static u8 msp_wp_buff[7112]= {0}; //ç”¨äºç¼“å­˜èˆªç‚¹ä¿¡æ¯
+static u16 msp_wp_buff_num=0;//è®°å½•èˆªç‚¹ä¸ªæ•°,è™½ç„¶èˆªç‚¹åªæœ‰254ä¸ªï¼Œä½†æ˜¯çœäº‹ç”¨u16
 u8 temp_i=5;
 static void buff_read_block(void *buf,void *addr, size_t n)
 {
 
-    u8 * pbuff=(u8*)buf;//ÄÚ´æÖĞµÄµØÖ·
-    u32 i=(u32)addr;//µØÖ·×ª»»³ÉÖ¸ÕëÏÂ±ê
+    u8 * pbuff=(u8*)buf;//å†…å­˜ä¸­çš„åœ°å€
+    u32 i=(u32)addr;//åœ°å€è½¬æ¢æˆæŒ‡é’ˆä¸‹æ ‡
     if(msp_wp_buff[0]!=1)
         //__breakpoint(0);
         1==1;
@@ -442,23 +442,23 @@ static void buff_read_block(void *buf,void *addr, size_t n)
     while(n--)
     {
         *pbuff=msp_wp_buff[i];
-        i++;//ÒÆ¶¯ÏÂ±ê
-        pbuff++;//ÒÆ¶¯Ö¸Õë
+        i++;//ç§»åŠ¨ä¸‹æ ‡
+        pbuff++;//ç§»åŠ¨æŒ‡é’ˆ
     }
     LED2_OFF
 }
 static void buff_write_block(void *buf,void *addr, size_t n)
 {
-    u8 *pbuff=(u8*)buf;//ÄÚ´æÖĞµÄµØÖ·
+    u8 *pbuff=(u8*)buf;//å†…å­˜ä¸­çš„åœ°å€
     u8 *last_buff=msp_wp_buff_last;
-    u32 i=(u32)addr;//µØÖ·×ª»»³ÉÖ¸ÕëÏÂ±ê
+    u32 i=(u32)addr;//åœ°å€è½¬æ¢æˆæŒ‡é’ˆä¸‹æ ‡
     LED1_ON
     while(n--)
     {
 
         *last_buff=*(msp_wp_buff+i)=*pbuff;
-        i++;//ÒÆ¶¯ÏÂ±ê
-        pbuff++;//ÒÆ¶¯Ö¸Õë
+        i++;//ç§»åŠ¨ä¸‹æ ‡
+        pbuff++;//ç§»åŠ¨æŒ‡é’ˆ
         last_buff++;
     }
     LED1_OFF
@@ -468,16 +468,16 @@ static void buff_write_block(void *buf,void *addr, size_t n)
 //u8 last_cu_w=0;
 //Stores the WP data in the wp struct in the EEPROM
 void storeWP() {
-//flag=0xa5;//×îºó½Úµã
+//flag=0xa5;//æœ€åèŠ‚ç‚¹
 //    last_cu_w++;
 //    if(mission_step.number==temp_i)
 //        1==1;
     if(mission_step.number >254) return;
     msp_wp_buff_num=mission_step.number;
-    mission_step.checksum = calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3);//ÓÉÓÚSTM32µÄÄÚ´æ4×Ö½Ú¶ÔÆë£¬¸Ã½á¹¹Ìå»á¶à³öÈı¸ö×Ö½Ú
+    mission_step.checksum = calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3);//ç”±äºSTM32çš„å†…å­˜4å­—èŠ‚å¯¹é½ï¼Œè¯¥ç»“æ„ä½“ä¼šå¤šå‡ºä¸‰ä¸ªå­—èŠ‚
     buff_write_block((void*)&mission_step,(void*)(sizeof(mission_step)*(mission_step.number-1)),sizeof(mission_step));
-    //×îºóÒ»¸ö½Úµã£¬Ğ´Èë¶ÑÕ»ÖĞ
-    if(mission_step.flag==0xa5)//×îºóÒ»¸ö½Úµã£¬Ğ´ÈëFLASHÖĞ
+    //æœ€åä¸€ä¸ªèŠ‚ç‚¹ï¼Œå†™å…¥å †æ ˆä¸­
+    if(mission_step.flag==0xa5)//æœ€åä¸€ä¸ªèŠ‚ç‚¹ï¼Œå†™å…¥FLASHä¸­
     {
         eeprom_write_block((void*)msp_wp_buff,(void*)(PROFILES * sizeof(conf) + sizeof(global_conf) + sizeof(GPS_conf)),sizeof(mission_step)*(msp_wp_buff_num));
         msp_wp_buff_num=0;
@@ -495,14 +495,14 @@ bool recallWP(uint8_t wp_number) {
 //		if(wp_number==0x09)
 //			1==1;
 //    last_cun++;
-    if(msp_wp_buff_num)//½ÚµãÊı²»Îª0ÔÚÄÚ´æÖĞÓĞ¶ÁÊı
+    if(msp_wp_buff_num)//èŠ‚ç‚¹æ•°ä¸ä¸º0åœ¨å†…å­˜ä¸­æœ‰è¯»æ•°
     {
 
         //do{
         buff_read_block((void*)&mission_step,(void*)(sizeof(mission_step)*(wp_number-1)),sizeof(mission_step));
         //}while(mission_step.action==0&&mission_step.pos[0]==0&&mission_step.pos[1]==0);
 //			buff_read_block((void*)&mission_step,(void*)(sizeof(mission_step)*(wp_number-1)),sizeof(mission_step));
-//			wp_number	-=1;//Î´ÕÒ³öÔ­Òò£¬Ã»ÊÕµ½µÚÁù¸öµ«ÊÇµØÃæÕ¾ÒªÇó²éÑ¯µÚÁù¸ö
+//			wp_number	-=1;//æœªæ‰¾å‡ºåŸå› ï¼Œæ²¡æ”¶åˆ°ç¬¬å…­ä¸ªä½†æ˜¯åœ°é¢ç«™è¦æ±‚æŸ¥è¯¢ç¬¬å…­ä¸ª
 //		if(mission_step.action==0&&mission_step.pos[0]==0&&mission_step.pos[1]==0)
 //			buff_read_block((void*)&mission_step,(void*)(sizeof(mission_step)*(wp_number-1)),sizeof(mission_step));
 
@@ -510,7 +510,7 @@ bool recallWP(uint8_t wp_number) {
         eeprom_read_block((void*)&mission_step,(void*)(PROFILES * sizeof(conf) + sizeof(global_conf)+sizeof(GPS_conf)+(sizeof(mission_step)*(wp_number-1))), sizeof(mission_step));
     }
 
-    c=calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3); //ÓÉÓÚSTM32µÄÄÚ´æ4×Ö½Ú¶ÔÆë£¬¸Ã½á¹¹Ìå»á¶à³öÈı¸ö×Ö½Ú
+    c=calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3); //ç”±äºSTM32çš„å†…å­˜4å­—èŠ‚å¯¹é½ï¼Œè¯¥ç»“æ„ä½“ä¼šå¤šå‡ºä¸‰ä¸ªå­—èŠ‚
 
     if(c!= mission_step.checksum)
         return false;
@@ -526,7 +526,7 @@ u16 addr_1=(u16) sizeof(mission_step);
 void storeWP() {
 	
     if(mission_step.number >254) return;
-    mission_step.checksum = calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3);//ÓÉÓÚSTM32µÄÄÚ´æ4×Ö½Ú¶ÔÆë£¬¸Ã½á¹¹Ìå»á¶à³öÈı¸ö×Ö½Ú
+    mission_step.checksum = calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3);//ç”±äºSTM32çš„å†…å­˜4å­—èŠ‚å¯¹é½ï¼Œè¯¥ç»“æ„ä½“ä¼šå¤šå‡ºä¸‰ä¸ªå­—èŠ‚
     eeprom_write_block((void*)&mission_step,(void*)(WP_ADDR_START +(sizeof(mission_step)*(mission_step.number-1))),sizeof(mission_step));
 
 }
@@ -537,7 +537,7 @@ void storeWP() {
 bool recallWP(uint8_t wp_number) {
     if (wp_number > 254) return false;
     eeprom_read_block((void*)&mission_step,(void*)(WP_ADDR_START +(sizeof(mission_step)*(wp_number-1))), sizeof(mission_step));
-    //c=calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3); //ÓÉÓÚSTM32µÄÄÚ´æ4×Ö½Ú¶ÔÆë£¬¸Ã½á¹¹Ìå»á¶à³öÈı¸ö×Ö½Ú
+    //c=calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3); //ç”±äºSTM32çš„å†…å­˜4å­—èŠ‚å¯¹é½ï¼Œè¯¥ç»“æ„ä½“ä¼šå¤šå‡ºä¸‰ä¸ªå­—èŠ‚
     if(mission_step.checksum!=calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3))
         return false;
     return true;
@@ -556,7 +556,7 @@ bool recallWP(uint8_t wp_number) {
 ////Stores the WP data in the wp struct in the EEPROM
 //void storeWP() {
 //    if (mission_step.number >254) return;
-//    mission_step.checksum = calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3);//ÓÉÓÚSTM32µÄÄÚ´æ4×Ö½Ú¶ÔÆë£¬¸Ã½á¹¹Ìå»á¶à³öÈı¸ö×Ö½Ú
+//    mission_step.checksum = calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3);//ç”±äºSTM32çš„å†…å­˜4å­—èŠ‚å¯¹é½ï¼Œè¯¥ç»“æ„ä½“ä¼šå¤šå‡ºä¸‰ä¸ªå­—èŠ‚
 //    eeprom_write_block((void*)&mission_step,(void*)(PROFILES * sizeof(conf) + sizeof(global_conf) + sizeof(GPS_conf) +(sizeof(mission_step)*mission_step.number)),sizeof(mission_step)-2);
 //}
 
@@ -566,7 +566,7 @@ bool recallWP(uint8_t wp_number) {
 //    u8 c=0;
 //    if (wp_number > 254) return false;
 //    eeprom_read_block((void*)&mission_step,(void*)(PROFILES * sizeof(conf) + sizeof(global_conf)+sizeof(GPS_conf)+(sizeof(mission_step)*wp_number)), sizeof(mission_step)-2);
-//    c=calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3); //ÓÉÓÚSTM32µÄÄÚ´æ4×Ö½Ú¶ÔÆë£¬¸Ã½á¹¹Ìå»á¶à³öÈı¸ö×Ö½Ú
+//    c=calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3); //ç”±äºSTM32çš„å†…å­˜4å­—èŠ‚å¯¹é½ï¼Œè¯¥ç»“æ„ä½“ä¼šå¤šå‡ºä¸‰ä¸ªå­—èŠ‚
 //    if(c!= mission_step.checksum)
 //			return false;
 //    return true;

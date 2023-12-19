@@ -5,7 +5,7 @@
 #include "EEPROM.h"
 
 
-#if !defined(USE_EX_EEPROM)//²»Ê¹ÓÃÍâÖÃEEPROM¶øÊ¹ÓÃSTM32µÄflash
+#if !defined(USE_EX_EEPROM)//ä¸ä½¿ç”¨å¤–ç½®EEPROMè€Œä½¿ç”¨STM32çš„flash
 volatile FLASH_Status FLASHStatus;
 ErrorStatus HSEStartUpStatus;
 
@@ -18,30 +18,30 @@ ErrorStatus HSEStartUpStatus;
 #define FLASH_PAGE_SIZE                 ((uint16_t)0x400)
 #define FLASH_WRITE_ADDR                (u32)(0x08000000 + (uint32_t)FLASH_PAGE_SIZE * (FLASH_PAGE_COUNT - 1))       // use the last KB for storage
 #if defined(GUET_FLY_V1)
-#define STM32_FLASH_SIZE 512 	 		//ËùÑ¡STM32µÄFLASHÈİÁ¿´óĞ¡(µ¥Î»ÎªK)
+#define STM32_FLASH_SIZE 512 	 		//æ‰€é€‰STM32çš„FLASHå®¹é‡å¤§å°(å•ä½ä¸ºK)
 #elif defined(GUET_FLY_MINI_V1)
-#define STM32_FLASH_SIZE 64 	 		//ËùÑ¡STM32µÄFLASHÈİÁ¿´óĞ¡(µ¥Î»ÎªK)
+#define STM32_FLASH_SIZE 64 	 		//æ‰€é€‰STM32çš„FLASHå®¹é‡å¤§å°(å•ä½ä¸ºK)
 #else
-#define STM32_FLASH_SIZE 64 	 		//0ËùÑ¡STM32µÄFLASHÈİÁ¿´óĞ¡(µ¥Î»ÎªK)
+#define STM32_FLASH_SIZE 64 	 		//0æ‰€é€‰STM32çš„FLASHå®¹é‡å¤§å°(å•ä½ä¸ºK)
 #endif
 
-#define STM32_FLASH_BASE 0x08000000 	//STM32 FLASHµÄÆğÊ¼µØÖ·
+#define STM32_FLASH_BASE 0x08000000 	//STM32 FLASHçš„èµ·å§‹åœ°å€
 
 
 #if STM32_FLASH_SIZE<256
-#define STM_SECTOR_SIZE 1024 //×Ö½Ú
+#define STM_SECTOR_SIZE 1024 //å­—èŠ‚
 #else
 #define STM_SECTOR_SIZE	2048
 #endif
 
 
-#define FLASH_EEPROM_BASS_ADDR STM32_FLASH_BASE+1024*(STM32_FLASH_SIZE-USE_FLASH_SIZE)  //Ê¹ÓÃ×îºó1k
+#define FLASH_EEPROM_BASS_ADDR STM32_FLASH_BASE+1024*(STM32_FLASH_SIZE-USE_FLASH_SIZE)  //ä½¿ç”¨æœ€å1k
 /*******************************************************************************
 * Function Name  : Readflash
-* Description    : ¶ÁÊı¾İ£¬´ÓFLASHÖĞ¶Á³öĞèÒªµÄÊı¾İ
+* Description    : è¯»æ•°æ®ï¼Œä»FLASHä¸­è¯»å‡ºéœ€è¦çš„æ•°æ®
 *
 * Input          : None
-* Output         : DataÊä³öÒªÈ¡³öµÄÊı¾İ
+* Output         : Dataè¾“å‡ºè¦å–å‡ºçš„æ•°æ®
 * Return         : None
 *******************************************************************************/
 
@@ -50,7 +50,7 @@ void Readflash(u32 *p,u8 start,u8 end) //
 {
     int j = start;
     // FlashAddress = FLASH_WRITE_ADDR+4*start;
-    //¶ÁÊı¾İ
+    //è¯»æ•°æ®
     u32 FlashAddress =STM32_FLASH_BASE+1024*(STM32_FLASH_SIZE-1);
     while(j<end)
     {
@@ -59,42 +59,42 @@ void Readflash(u32 *p,u8 start,u8 end) //
     }
 }
 
-//¶ÁÈ¡Ö¸¶¨µØÖ·µÄ°ë×Ö(16Î»Êı¾İ)
-//faddr:¶ÁµØÖ·(´ËµØÖ·±ØĞëÎª2µÄ±¶Êı!!)
-//·µ»ØÖµ:¶ÔÓ¦Êı¾İ.
+//è¯»å–æŒ‡å®šåœ°å€çš„åŠå­—(16ä½æ•°æ®)
+//faddr:è¯»åœ°å€(æ­¤åœ°å€å¿…é¡»ä¸º2çš„å€æ•°!!)
+//è¿”å›å€¼:å¯¹åº”æ•°æ®.
 
 u16 STMFLASH_ReadHalfWord(u32 faddr)
 {
     return *(vu16*)faddr;
 }
-//´ÓÖ¸¶¨µØÖ·¿ªÊ¼¶Á³öÖ¸¶¨³¤¶ÈµÄÊı¾İ
-//ReadAddr:ÆğÊ¼µØÖ·
-//pBuffer:Êı¾İÖ¸Õë
-//NumToWrite:°ë×Ö(16Î»)Êı
+//ä»æŒ‡å®šåœ°å€å¼€å§‹è¯»å‡ºæŒ‡å®šé•¿åº¦çš„æ•°æ®
+//ReadAddr:èµ·å§‹åœ°å€
+//pBuffer:æ•°æ®æŒ‡é’ˆ
+//NumToWrite:åŠå­—(16ä½)æ•°
 void STMFLASH_Read(u32 ReadAddr,u16 *pBuffer,u16 NumToRead)
 {
     u16 i;
     u16 temp_data=0,loop_times_=0;
     u8 *temp_P=0;
-    temp_P=(u8*)pBuffer;//×ª»»µØÖ·
+    temp_P=(u8*)pBuffer;//è½¬æ¢åœ°å€
     if(NumToRead%2!=0)
         loop_times_=NumToRead/2+1;
     else
         loop_times_=NumToRead/2;
-    if(ReadAddr%2!=0)//ÆæÊıµØÖ·
+    if(ReadAddr%2!=0)//å¥‡æ•°åœ°å€
     {
-        //µØÖ·ÊÇÆæÊı
+        //åœ°å€æ˜¯å¥‡æ•°
 
-        ReadAddr-=1;//ÏòÇ°Ò»¸ö×Ö½Ú
+        ReadAddr-=1;//å‘å‰ä¸€ä¸ªå­—èŠ‚
         temp_data=STMFLASH_ReadHalfWord(ReadAddr);
-        *temp_P=temp_data>>8;//È¡µÍ°ËÎ»
+        *temp_P=temp_data>>8;//å–ä½å…«ä½
         temp_P++;
         NumToRead--;
-        loop_times_--;//¼õÈ¥Ò»¸öË«×ÖÎ»ÖÃ
+        loop_times_--;//å‡å»ä¸€ä¸ªåŒå­—ä½ç½®
         ReadAddr+=2;
         for(i=0; i<(loop_times_); i++)
         {
-            temp_data=STMFLASH_ReadHalfWord(ReadAddr);//¶ÁÈ¡2¸ö×Ö½Ú.
+            temp_data=STMFLASH_ReadHalfWord(ReadAddr);//è¯»å–2ä¸ªå­—èŠ‚.
             *temp_P=temp_data;
             temp_P++;
             NumToRead--;
@@ -103,19 +103,19 @@ void STMFLASH_Read(u32 ReadAddr,u16 *pBuffer,u16 NumToRead)
             temp_P++;
             NumToRead--;
             if(NumToRead==0)return;
-            ReadAddr+=2;//Æ«ÒÆ2¸ö×Ö½Ú.
+            ReadAddr+=2;//åç§»2ä¸ªå­—èŠ‚.
         }
     } else {
         if(NumToRead%2==0) {
-            for(i=0; i<(loop_times_); i++)//Å¼Êı£¬¶ÔÆëÊ±°´16Î»¶ÁÈ¡
+            for(i=0; i<(loop_times_); i++)//å¶æ•°ï¼Œå¯¹é½æ—¶æŒ‰16ä½è¯»å–
             {
-                pBuffer[i]=STMFLASH_ReadHalfWord(ReadAddr);//¶ÁÈ¡2¸ö×Ö½Ú.
-                ReadAddr+=2;//Æ«ÒÆ2¸ö×Ö½Ú.
+                pBuffer[i]=STMFLASH_ReadHalfWord(ReadAddr);//è¯»å–2ä¸ªå­—èŠ‚.
+                ReadAddr+=2;//åç§»2ä¸ªå­—èŠ‚.
             }
-        } else { //ÆæÊı¶ÔÆë°´8Î»¶ÁÈ¡
-            for(i=0; i<(loop_times_); i++)//Å¼Êı£¬¶ÔÆëÊ±°´16Î»¶ÁÈ¡
+        } else { //å¥‡æ•°å¯¹é½æŒ‰8ä½è¯»å–
+            for(i=0; i<(loop_times_); i++)//å¶æ•°ï¼Œå¯¹é½æ—¶æŒ‰16ä½è¯»å–
             {
-                temp_data=STMFLASH_ReadHalfWord(ReadAddr);//¶ÁÈ¡2¸ö×Ö½Ú.
+                temp_data=STMFLASH_ReadHalfWord(ReadAddr);//è¯»å–2ä¸ªå­—èŠ‚.
                 *temp_P=temp_data;
                 temp_P++;
                 NumToRead--;
@@ -124,154 +124,154 @@ void STMFLASH_Read(u32 ReadAddr,u16 *pBuffer,u16 NumToRead)
                 temp_P++;
                 NumToRead--;
                 if(NumToRead==0)return;
-                ReadAddr+=2;//Æ«ÒÆ2¸ö×Ö½Ú.
+                ReadAddr+=2;//åç§»2ä¸ªå­—èŠ‚.
             }
         }
 
     }
 //    for(i=0; i<(NumToRead); i++)
 //    {
-//        pBuffer[i]=STMFLASH_ReadHalfWord(ReadAddr);//¶ÁÈ¡2¸ö×Ö½Ú.
-//        ReadAddr+=2;//Æ«ÒÆ2¸ö×Ö½Ú.
+//        pBuffer[i]=STMFLASH_ReadHalfWord(ReadAddr);//è¯»å–2ä¸ªå­—èŠ‚.
+//        ReadAddr+=2;//åç§»2ä¸ªå­—èŠ‚.
 //    }
 }
 /*******************************************************************************
 * Function Name  : Readflash
-* Description    : ¶ÁÊı¾İ£¬´ÓFLASHÖĞ¶Á³öĞèÒªµÄÊı¾İ
+* Description    : è¯»æ•°æ®ï¼Œä»FLASHä¸­è¯»å‡ºéœ€è¦çš„æ•°æ®
 *
 * Input          : None
-* Output         : DataÊä³öÒªÈ¡³öµÄÊı¾İ
+* Output         : Dataè¾“å‡ºè¦å–å‡ºçš„æ•°æ®
 * Return         : None
 *******************************************************************************/
 
 /*******************************************************************************
 * Function Name  : Readflash
-* Description    : ¶ÁÊı¾İ£¬´ÓFLASHÖĞ¶Á³öĞèÒªµÄÊı¾İ
+* Description    : è¯»æ•°æ®ï¼Œä»FLASHä¸­è¯»å‡ºéœ€è¦çš„æ•°æ®
 *
 * Input          : None
-* Output         : DataÊä³öÒªÈ¡³öµÄÊı¾İ
+* Output         : Dataè¾“å‡ºè¦å–å‡ºçš„æ•°æ®
 * Return         : None
 *******************************************************************************/
-//²»¼ì²éµÄĞ´Èë
-//WriteAddr:ÆğÊ¼µØÖ·
-//pBuffer:Êı¾İÖ¸Õë
-//NumToWrite:°ë×Ö(16Î»)Êı
+//ä¸æ£€æŸ¥çš„å†™å…¥
+//WriteAddr:èµ·å§‹åœ°å€
+//pBuffer:æ•°æ®æŒ‡é’ˆ
+//NumToWrite:åŠå­—(16ä½)æ•°
 void STMFLASH_Write_NoCheck(u32 WriteAddr,u16 *pBuffer,u16 NumToWrite)
 {
     u16 i;
     for(i=0; i<NumToWrite; i++)
     {
         FLASH_ProgramHalfWord(WriteAddr,pBuffer[i]);
-        WriteAddr+=2;//µØÖ·Ôö¼Ó2.
+        WriteAddr+=2;//åœ°å€å¢åŠ 2.
     }
 }
 void STMFLASH_Write_b(u32 WriteAddr,u16 *pBuffer,int32_t NumToWrite)
 {
-    u16 STMFLASH_BUF[STM_SECTOR_SIZE/2];//×î¶àÊÇ2K×Ö½Ú
-    u32 secpos;	   //ÉÈÇøµØÖ·
-    u16 secoff;	   //ÉÈÇøÄÚÆ«ÒÆµØÖ·(16Î»×Ö¼ÆËã)
-    u16 secremain; //ÉÈÇøÄÚÊ£ÓàµØÖ·(16Î»×Ö¼ÆËã)
+    u16 STMFLASH_BUF[STM_SECTOR_SIZE/2];//æœ€å¤šæ˜¯2Kå­—èŠ‚
+    u32 secpos;	   //æ‰‡åŒºåœ°å€
+    u16 secoff;	   //æ‰‡åŒºå†…åç§»åœ°å€(16ä½å­—è®¡ç®—)
+    u16 secremain; //æ‰‡åŒºå†…å‰©ä½™åœ°å€(16ä½å­—è®¡ç®—)
     u16 i;
-    u32 offaddr;   //È¥µô0X08000000ºóµÄµØÖ·
+    u32 offaddr;   //å»æ‰0X08000000åçš„åœ°å€
     if(NumToWrite%2!=0)
         NumToWrite=NumToWrite/2+1;
-    if(WriteAddr<STM32_FLASH_BASE||(WriteAddr>=(STM32_FLASH_BASE+1024*STM32_FLASH_SIZE)))return;//·Ç·¨µØÖ·
-    FLASH_Unlock();						//½âËø
-    offaddr=WriteAddr-STM32_FLASH_BASE;		//Êµ¼ÊÆ«ÒÆµØÖ·.
-    secpos=offaddr/STM_SECTOR_SIZE;			//ÉÈÇøµØÖ·  0~127 for STM32F103RBT6
-    secoff=(offaddr%STM_SECTOR_SIZE)/2;		//ÔÚÉÈÇøÄÚµÄÆ«ÒÆ(2¸ö×Ö½ÚÎª»ù±¾µ¥Î».)
-    secremain=STM_SECTOR_SIZE/2-secoff;		//ÉÈÇøÊ£Óà¿Õ¼ä´óĞ¡
-    if(NumToWrite<=secremain)secremain=NumToWrite;//²»´óÓÚ¸ÃÉÈÇø·¶Î§
-    while(1)//¿ÉÒÉ¹ÊÕÏ´úÂëÆ¬¶Î
+    if(WriteAddr<STM32_FLASH_BASE||(WriteAddr>=(STM32_FLASH_BASE+1024*STM32_FLASH_SIZE)))return;//éæ³•åœ°å€
+    FLASH_Unlock();						//è§£é”
+    offaddr=WriteAddr-STM32_FLASH_BASE;		//å®é™…åç§»åœ°å€.
+    secpos=offaddr/STM_SECTOR_SIZE;			//æ‰‡åŒºåœ°å€  0~127 for STM32F103RBT6
+    secoff=(offaddr%STM_SECTOR_SIZE)/2;		//åœ¨æ‰‡åŒºå†…çš„åç§»(2ä¸ªå­—èŠ‚ä¸ºåŸºæœ¬å•ä½.)
+    secremain=STM_SECTOR_SIZE/2-secoff;		//æ‰‡åŒºå‰©ä½™ç©ºé—´å¤§å°
+    if(NumToWrite<=secremain)secremain=NumToWrite;//ä¸å¤§äºè¯¥æ‰‡åŒºèŒƒå›´
+    while(1)//å¯ç–‘æ•…éšœä»£ç ç‰‡æ®µ
     {
-        STMFLASH_Read(secpos*STM_SECTOR_SIZE+STM32_FLASH_BASE,STMFLASH_BUF,STM_SECTOR_SIZE/2);//¶Á³öÕû¸öÉÈÇøµÄÄÚÈİ
-        for(i=0; i<secremain; i++) //Ğ£ÑéÊı¾İ
+        STMFLASH_Read(secpos*STM_SECTOR_SIZE+STM32_FLASH_BASE,STMFLASH_BUF,STM_SECTOR_SIZE/2);//è¯»å‡ºæ•´ä¸ªæ‰‡åŒºçš„å†…å®¹
+        for(i=0; i<secremain; i++) //æ ¡éªŒæ•°æ®
         {
-            if(STMFLASH_BUF[secoff+i]!=0XFFFF)break;//ĞèÒª²Á³ı
+            if(STMFLASH_BUF[secoff+i]!=0XFFFF)break;//éœ€è¦æ“¦é™¤
         }
-        if(i<secremain)//ĞèÒª²Á³ı
+        if(i<secremain)//éœ€è¦æ“¦é™¤
         {
-            FLASH_ErasePage(secpos*STM_SECTOR_SIZE+STM32_FLASH_BASE);//²Á³ıÕâ¸öÉÈÇø
-            for(i=0; i<secremain; i++) //¸´ÖÆ
+            FLASH_ErasePage(secpos*STM_SECTOR_SIZE+STM32_FLASH_BASE);//æ“¦é™¤è¿™ä¸ªæ‰‡åŒº
+            for(i=0; i<secremain; i++) //å¤åˆ¶
             {
                 STMFLASH_BUF[i+secoff]=pBuffer[i];
             }
-            STMFLASH_Write_NoCheck(secpos*STM_SECTOR_SIZE+STM32_FLASH_BASE,STMFLASH_BUF,STM_SECTOR_SIZE/2);//Ğ´ÈëÕû¸öÉÈÇø
+            STMFLASH_Write_NoCheck(secpos*STM_SECTOR_SIZE+STM32_FLASH_BASE,STMFLASH_BUF,STM_SECTOR_SIZE/2);//å†™å…¥æ•´ä¸ªæ‰‡åŒº
         } else {
-            STMFLASH_Write_NoCheck(WriteAddr,pBuffer,secremain);//Ğ´ÒÑ¾­²Á³ıÁËµÄ,Ö±½ÓĞ´ÈëÉÈÇøÊ£ÓàÇø¼ä.
+            STMFLASH_Write_NoCheck(WriteAddr,pBuffer,secremain);//å†™å·²ç»æ“¦é™¤äº†çš„,ç›´æ¥å†™å…¥æ‰‡åŒºå‰©ä½™åŒºé—´.
         }
-        if(NumToWrite==secremain)break;//Ğ´Èë½áÊøÁË
-        else//Ğ´ÈëÎ´½áÊø
+        if(NumToWrite==secremain)break;//å†™å…¥ç»“æŸäº†
+        else//å†™å…¥æœªç»“æŸ
         {
-            secpos++;				//ÉÈÇøµØÖ·Ôö1
-            secoff=0;				//Æ«ÒÆÎ»ÖÃÎª0
-            pBuffer+=secremain;  	//Ö¸ÕëÆ«ÒÆ
-            WriteAddr+=secremain;	//Ğ´µØÖ·Æ«ÒÆ
-            NumToWrite-=secremain;	//×Ö½Ú(16Î»)Êıµİ¼õ
+            secpos++;				//æ‰‡åŒºåœ°å€å¢1
+            secoff=0;				//åç§»ä½ç½®ä¸º0
+            pBuffer+=secremain;  	//æŒ‡é’ˆåç§»
+            WriteAddr+=secremain;	//å†™åœ°å€åç§»
+            NumToWrite-=secremain;	//å­—èŠ‚(16ä½)æ•°é€’å‡
             if(NumToWrite>(STM_SECTOR_SIZE/2))
-                secremain=STM_SECTOR_SIZE/2;//ÏÂÒ»¸öÉÈÇø»¹ÊÇĞ´²»Íê
+                secremain=STM_SECTOR_SIZE/2;//ä¸‹ä¸€ä¸ªæ‰‡åŒºè¿˜æ˜¯å†™ä¸å®Œ
             else
-                secremain=NumToWrite;//ÏÂÒ»¸öÉÈÇø¿ÉÒÔĞ´ÍêÁË
+                secremain=NumToWrite;//ä¸‹ä¸€ä¸ªæ‰‡åŒºå¯ä»¥å†™å®Œäº†
         }
     };
-    FLASH_Lock();//ÉÏËø
+    FLASH_Lock();//ä¸Šé”
 }
 
 void STMFLASH_Write(u32 WriteAddr,u16 *pBuffer,int32_t NumToWrite)
 {
-    u16 STMFLASH_BUF[STM_SECTOR_SIZE/2];//×î¶àÊÇ2K×Ö½Ú
-    u32 secpos;	   //ÉÈÇøµØÖ·
-    u16 secoff;	   //ÉÈÇøÄÚÆ«ÒÆµØÖ·(16Î»×Ö¼ÆËã)
-    u16 secremain; //ÉÈÇøÄÚÊ£ÓàµØÖ·(16Î»×Ö¼ÆËã)
+    u16 STMFLASH_BUF[STM_SECTOR_SIZE/2];//æœ€å¤šæ˜¯2Kå­—èŠ‚
+    u32 secpos;	   //æ‰‡åŒºåœ°å€
+    u16 secoff;	   //æ‰‡åŒºå†…åç§»åœ°å€(16ä½å­—è®¡ç®—)
+    u16 secremain; //æ‰‡åŒºå†…å‰©ä½™åœ°å€(16ä½å­—è®¡ç®—)
     u16 i;
-    u32 offaddr;   //È¥µô0X08000000ºóµÄµØÖ·
+    u32 offaddr;   //å»æ‰0X08000000åçš„åœ°å€
     if(NumToWrite%2!=0)
         NumToWrite=NumToWrite/2+1;
-    if(WriteAddr<STM32_FLASH_BASE||(WriteAddr>=(STM32_FLASH_BASE+1024*STM32_FLASH_SIZE)))return;//·Ç·¨µØÖ·
-    FLASH_Unlock();						//½âËø
-    offaddr=WriteAddr-STM32_FLASH_BASE;		//Êµ¼ÊÆ«ÒÆµØÖ·.
-    secpos=offaddr/STM_SECTOR_SIZE;			//ÉÈÇøµØÖ·  0~127 for STM32F103RBT6
-    secoff=(offaddr%STM_SECTOR_SIZE)/2;		//ÔÚÉÈÇøÄÚµÄÆ«ÒÆ(2¸ö×Ö½ÚÎª»ù±¾µ¥Î».)
-    secremain=STM_SECTOR_SIZE/2-secoff;		//ÉÈÇøÊ£Óà¿Õ¼ä´óĞ¡
+    if(WriteAddr<STM32_FLASH_BASE||(WriteAddr>=(STM32_FLASH_BASE+1024*STM32_FLASH_SIZE)))return;//éæ³•åœ°å€
+    FLASH_Unlock();						//è§£é”
+    offaddr=WriteAddr-STM32_FLASH_BASE;		//å®é™…åç§»åœ°å€.
+    secpos=offaddr/STM_SECTOR_SIZE;			//æ‰‡åŒºåœ°å€  0~127 for STM32F103RBT6
+    secoff=(offaddr%STM_SECTOR_SIZE)/2;		//åœ¨æ‰‡åŒºå†…çš„åç§»(2ä¸ªå­—èŠ‚ä¸ºåŸºæœ¬å•ä½.)
+    secremain=STM_SECTOR_SIZE/2-secoff;		//æ‰‡åŒºå‰©ä½™ç©ºé—´å¤§å°
 
 
     if(NumToWrite<=secremain)
-        secremain=NumToWrite;//²»´óÓÚ¸ÃÉÈÇø·¶Î§,Ò»¸öÉÈÇø¾Í¿ÉÒÔÍê³É
+        secremain=NumToWrite;//ä¸å¤§äºè¯¥æ‰‡åŒºèŒƒå›´,ä¸€ä¸ªæ‰‡åŒºå°±å¯ä»¥å®Œæˆ
 
-    while(1)//¿ÉÒÉ¹ÊÕÏ´úÂëÆ¬¶Î
+    while(1)//å¯ç–‘æ•…éšœä»£ç ç‰‡æ®µ
     {
-        STMFLASH_Read(secpos*STM_SECTOR_SIZE+STM32_FLASH_BASE,STMFLASH_BUF,STM_SECTOR_SIZE/2);//¶Á³öÕû¸öÉÈÇøµÄÄÚÈİ
-        for(i=0; i<secremain; i++) //Ğ£ÑéÊı¾İ
+        STMFLASH_Read(secpos*STM_SECTOR_SIZE+STM32_FLASH_BASE,STMFLASH_BUF,STM_SECTOR_SIZE/2);//è¯»å‡ºæ•´ä¸ªæ‰‡åŒºçš„å†…å®¹
+        for(i=0; i<secremain; i++) //æ ¡éªŒæ•°æ®
         {
-            if(STMFLASH_BUF[secoff+i]!=0XFFFF)break;//ĞèÒª²Á³ı
+            if(STMFLASH_BUF[secoff+i]!=0XFFFF)break;//éœ€è¦æ“¦é™¤
         }
-        if(i<secremain)//ĞèÒª²Á³ı
+        if(i<secremain)//éœ€è¦æ“¦é™¤
         {
-            FLASH_ErasePage(secpos*STM_SECTOR_SIZE+STM32_FLASH_BASE);//²Á³ıÕâ¸öÉÈÇø
-            for(i=0; i<secremain; i++) //¸´ÖÆ
+            FLASH_ErasePage(secpos*STM_SECTOR_SIZE+STM32_FLASH_BASE);//æ“¦é™¤è¿™ä¸ªæ‰‡åŒº
+            for(i=0; i<secremain; i++) //å¤åˆ¶
             {
                 STMFLASH_BUF[i+secoff]=pBuffer[i];
             }
-            STMFLASH_Write_NoCheck(secpos*STM_SECTOR_SIZE+STM32_FLASH_BASE,STMFLASH_BUF,STM_SECTOR_SIZE/2);//Ğ´ÈëÕû¸öÉÈÇø
+            STMFLASH_Write_NoCheck(secpos*STM_SECTOR_SIZE+STM32_FLASH_BASE,STMFLASH_BUF,STM_SECTOR_SIZE/2);//å†™å…¥æ•´ä¸ªæ‰‡åŒº
         } else {
-            STMFLASH_Write_NoCheck(WriteAddr,pBuffer,secremain);//Ğ´ÒÑ¾­²Á³ıÁËµÄ,Ö±½ÓĞ´ÈëÉÈÇøÊ£ÓàÇø¼ä.
+            STMFLASH_Write_NoCheck(WriteAddr,pBuffer,secremain);//å†™å·²ç»æ“¦é™¤äº†çš„,ç›´æ¥å†™å…¥æ‰‡åŒºå‰©ä½™åŒºé—´.
         }
-        if(NumToWrite==secremain)break;//Ğ´Èë½áÊøÁË
-        else//Ğ´ÈëÎ´½áÊø
+        if(NumToWrite==secremain)break;//å†™å…¥ç»“æŸäº†
+        else//å†™å…¥æœªç»“æŸ
         {
-            secpos++;				//ÉÈÇøµØÖ·Ôö1
-            secoff=0;				//Æ«ÒÆÎ»ÖÃÎª0
-            pBuffer+=secremain;  	//Ö¸ÕëÆ«ÒÆ
-            WriteAddr+=secremain;	//Ğ´µØÖ·Æ«ÒÆ
-            NumToWrite-=secremain;	//×Ö½Ú(16Î»)Êıµİ¼õ
+            secpos++;				//æ‰‡åŒºåœ°å€å¢1
+            secoff=0;				//åç§»ä½ç½®ä¸º0
+            pBuffer+=secremain;  	//æŒ‡é’ˆåç§»
+            WriteAddr+=secremain;	//å†™åœ°å€åç§»
+            NumToWrite-=secremain;	//å­—èŠ‚(16ä½)æ•°é€’å‡
             if(NumToWrite>(STM_SECTOR_SIZE/2))
-                secremain=STM_SECTOR_SIZE/2;//ÏÂÒ»¸öÉÈÇø»¹ÊÇĞ´²»Íê
+                secremain=STM_SECTOR_SIZE/2;//ä¸‹ä¸€ä¸ªæ‰‡åŒºè¿˜æ˜¯å†™ä¸å®Œ
             else
-                secremain=NumToWrite;//ÏÂÒ»¸öÉÈÇø¿ÉÒÔĞ´ÍêÁË
+                secremain=NumToWrite;//ä¸‹ä¸€ä¸ªæ‰‡åŒºå¯ä»¥å†™å®Œäº†
         }
         //			delay_ms(100);
     };
-    FLASH_Lock();//ÉÏËø
+    FLASH_Lock();//ä¸Šé”
 }
 void eeprom_write_block (void *buf, void *addr, size_t n)
 {
@@ -283,19 +283,19 @@ void eeprom_write_block (void *buf, void *addr, size_t n)
     STMFLASH_Write(FLASH_EEPROM_BASS_ADDR+(u32)addr_,(u16 *)buf,n);
     LED1_OFF
 }
-void eeprom_read_block (void *buf,void *addr, size_t n)//¶ÁÈ¡ÓÉÖ¸¶¨µØÖ·¿ªÊ¼µÄÖ¸¶¨³¤¶ÈµÄEEPROMÊı¾İ
+void eeprom_read_block (void *buf,void *addr, size_t n)//è¯»å–ç”±æŒ‡å®šåœ°å€å¼€å§‹çš„æŒ‡å®šé•¿åº¦çš„EEPROMæ•°æ®
 {
     u32 addr_=(u32)addr;
-    if((u32)addr_%2!=0)//²¹ÆëÅ¼ÊıµØÖ·
+    if((u32)addr_%2!=0)//è¡¥é½å¶æ•°åœ°å€
         addr_+=1;
     LED2_ON
-    STMFLASH_Read(FLASH_EEPROM_BASS_ADDR+(u32)addr_,(u16 *)buf,n);//¶Á³öflash
+    STMFLASH_Read(FLASH_EEPROM_BASS_ADDR+(u32)addr_,(u16 *)buf,n);//è¯»å‡ºflash
     LED2_OFF
 }
 
 #else
 /*******************************************
- Ä£ÄâIIC
+ æ¨¡æ‹ŸIIC
 PA4 ->SDA
 PA5 ->SCL
 *****************************************/
@@ -322,7 +322,7 @@ PA5 ->SCL
 #define EEPROM_SDA_read      GPIOB->IDR  & GPIO_Pin_13
 
 #endif
-//´óĞ¡¶¨Òå
+//å¤§å°å®šä¹‰
 
 
 
@@ -330,46 +330,46 @@ PA5 ->SCL
 void EEPROM_I2C_GPIO_Config(void)
 {
 	#if defined(GUET_FLY_V1)
-    RCC->APB2ENR|=1<<2;     //Ê¹ÄÜPORTAÊ±ÖÓ
-    GPIOA->CRL&=0XFF00FFFF; //ÇåÁãÏàÓ¦Î»
+    RCC->APB2ENR|=1<<2;     //ä½¿èƒ½PORTAæ—¶é’Ÿ
+    GPIOA->CRL&=0XFF00FFFF; //æ¸…é›¶ç›¸åº”ä½
     GPIOA->CRL|=0X00370000; //
     GPIOA->ODR= 0X000000C0;
 	#elif defined(GUET_FLY_MINI_V1)
-		RCC->APB2ENR|=1<<3;     //Ê¹ÄÜPORTBÊ±ÖÓ
-    GPIOB->CRH&=0XFF00FFFF; //ÇåÁãÏàÓ¦Î»
+		RCC->APB2ENR|=1<<3;     //ä½¿èƒ½PORTBæ—¶é’Ÿ
+    GPIOB->CRH&=0XFF00FFFF; //æ¸…é›¶ç›¸åº”ä½
     GPIOB->CRH|=0X00730000; //
     GPIOB->ODR= 0X00003000;
 	#endif
 }
-///////////IIC³õÊ¼»¯//////////////
+///////////IICåˆå§‹åŒ–//////////////
 
-////////////´ÖÂÔÑÓÊ±º¯Êı//////////
-void EEPROM_Delay_1us(u16 n)//Ô¼1us,1100k
+////////////ç²—ç•¥å»¶æ—¶å‡½æ•°//////////
+void EEPROM_Delay_1us(u16 n)//çº¦1us,1100k
 {
-    uint8_t i=6; //i=10ÑÓÊ±1.5us//ÕâÀï¿ÉÒÔÓÅ»¯ËÙ¶È £¬¾­²âÊÔ×îµÍµ½5»¹ÄÜĞ´Èë
+    uint8_t i=6; //i=10å»¶æ—¶1.5us//è¿™é‡Œå¯ä»¥ä¼˜åŒ–é€Ÿåº¦ ï¼Œç»æµ‹è¯•æœ€ä½åˆ°5è¿˜èƒ½å†™å…¥
     while(n--) {
         i=6;
         while(i--);
     }
 
 }
-////////IICÆô¶¯º¯Êı//////////
+////////IICå¯åŠ¨å‡½æ•°//////////
 void EEPROM_I2C_Start(void)
 {
     EEPROM_SDA_H;
     EEPROM_SCL_H;
     EEPROM_Delay_1us(1);
-    if(!EEPROM_SDA_read) return;//SDAÏßÎªµÍµçÆ½Ôò×ÜÏßÃ¦,ÍË³ö
+    if(!EEPROM_SDA_read) return;//SDAçº¿ä¸ºä½ç”µå¹³åˆ™æ€»çº¿å¿™,é€€å‡º
     EEPROM_SDA_L;
     EEPROM_Delay_1us(1);
-    if(EEPROM_SDA_read) return;//SDAÏßÎª¸ßµçÆ½Ôò×ÜÏß³ö´í,ÍË³ö
+    if(EEPROM_SDA_read) return;//SDAçº¿ä¸ºé«˜ç”µå¹³åˆ™æ€»çº¿å‡ºé”™,é€€å‡º
     EEPROM_SDA_L;
     EEPROM_Delay_1us(1);
     EEPROM_SCL_L;
     EEPROM_Delay_1us(1);
 }
 //**************************************
-//IICÍ£Ö¹ĞÅºÅ
+//IICåœæ­¢ä¿¡å·
 //**************************************
 void EEPROM_I2C_Stop(void)
 {
@@ -379,26 +379,26 @@ void EEPROM_I2C_Stop(void)
     EEPROM_SCL_H;
     EEPROM_Delay_1us(1);
     EEPROM_SDA_H;
-    EEPROM_Delay_1us(1);                 //ÑÓÊ±
+    EEPROM_Delay_1us(1);                 //å»¶æ—¶
 }
 //**************************************
-//IIC·¢ËÍÓ¦´ğĞÅºÅ
-//Èë¿Ú²ÎÊı:ack (0:ACK 1:NAK)
+//IICå‘é€åº”ç­”ä¿¡å·
+//å…¥å£å‚æ•°:ack (0:ACK 1:NAK)
 //**************************************
 void EEPROM_I2C_SendACK(u8 i)
 {
-    if(1==i)EEPROM_SDA_H;                  //Ğ´Ó¦´ğĞÅºÅ
+    if(1==i)EEPROM_SDA_H;                  //å†™åº”ç­”ä¿¡å·
     else EEPROM_SDA_L;
-    EEPROM_SCL_H;                    //À­¸ßÊ±ÖÓÏß
-    EEPROM_Delay_1us(1);                 //ÑÓÊ±
-    EEPROM_SCL_L ;                  //À­µÍÊ±ÖÓÏß
+    EEPROM_SCL_H;                    //æ‹‰é«˜æ—¶é’Ÿçº¿
+    EEPROM_Delay_1us(1);                 //å»¶æ—¶
+    EEPROM_SCL_L ;                  //æ‹‰ä½æ—¶é’Ÿçº¿
     EEPROM_Delay_1us(1);
 }
 //**************************************
-//IICµÈ´ıÓ¦´ğ
-//·µ»ØÖµ£ºack (1:ACK 0:NAK)
+//IICç­‰å¾…åº”ç­”
+//è¿”å›å€¼ï¼šack (1:ACK 0:NAK)
 //**************************************
-bool EEPROM_I2C_WaitAck(void) 	 //·µ»ØÎª:=1ÓĞACK,=0ÎŞACK
+bool EEPROM_I2C_WaitAck(void) 	 //è¿”å›ä¸º:=1æœ‰ACK,=0æ— ACK
 {
     unsigned int i;
     EEPROM_SDA_H;
@@ -421,7 +421,7 @@ bool EEPROM_I2C_WaitAck(void) 	 //·µ»ØÎª:=1ÓĞACK,=0ÎŞACK
 }
 
 //**************************************
-//ÏòIIC×ÜÏß·¢ËÍÒ»¸ö×Ö½ÚÊı¾İ
+//å‘IICæ€»çº¿å‘é€ä¸€ä¸ªå­—èŠ‚æ•°æ®
 //**************************************
 void EEPROM_I2C_SendByte(u8 dat)
 {
@@ -429,105 +429,105 @@ void EEPROM_I2C_SendByte(u8 dat)
 //	unsigned char ack=1;
 
     EEPROM_SCL_L;
-    for (i=0; i<8; i++)         //8Î»¼ÆÊıÆ÷
+    for (i=0; i<8; i++)         //8ä½è®¡æ•°å™¨
     {
         if(dat&0x80) {
-            EEPROM_SDA_H;   //ËÍÊı¾İ¿Ú
+            EEPROM_SDA_H;   //é€æ•°æ®å£
         }
         else EEPROM_SDA_L;
-        EEPROM_SCL_H;                //À­¸ßÊ±ÖÓÏß
-        EEPROM_Delay_1us(1);             //ÑÓÊ±
-        EEPROM_SCL_L;                //À­µÍÊ±ÖÓÏß
-        EEPROM_Delay_1us(1); 		  //ÑÓÊ±
-        dat <<= 1;          //ÒÆ³öÊı¾İµÄ×î¸ßÎ»
+        EEPROM_SCL_H;                //æ‹‰é«˜æ—¶é’Ÿçº¿
+        EEPROM_Delay_1us(1);             //å»¶æ—¶
+        EEPROM_SCL_L;                //æ‹‰ä½æ—¶é’Ÿçº¿
+        EEPROM_Delay_1us(1); 		  //å»¶æ—¶
+        dat <<= 1;          //ç§»å‡ºæ•°æ®çš„æœ€é«˜ä½
     }
 }
 
 //**************************************
-//´ÓIIC×ÜÏß½ÓÊÕÒ»¸ö×Ö½ÚÊı¾İ
+//ä»IICæ€»çº¿æ¥æ”¶ä¸€ä¸ªå­—èŠ‚æ•°æ®
 //**************************************
 u8 EEPROM_I2C_RecvByte()
 {
     u8 i;
     u8 dat = 0;
-    EEPROM_SDA_H;                    //Ê¹ÄÜÄÚ²¿ÉÏÀ­,×¼±¸¶ÁÈ¡Êı¾İ,
-    for (i=0; i<8; i++)         //8Î»¼ÆÊıÆ÷
+    EEPROM_SDA_H;                    //ä½¿èƒ½å†…éƒ¨ä¸Šæ‹‰,å‡†å¤‡è¯»å–æ•°æ®,
+    for (i=0; i<8; i++)         //8ä½è®¡æ•°å™¨
     {
 
         dat <<= 1;
-        EEPROM_SCL_H;                //À­¸ßÊ±ÖÓÏß
-        EEPROM_Delay_1us(1);            //ÑÓÊ±
-        if(EEPROM_SDA_read) //¶ÁÊı¾İ
+        EEPROM_SCL_H;                //æ‹‰é«˜æ—¶é’Ÿçº¿
+        EEPROM_Delay_1us(1);            //å»¶æ—¶
+        if(EEPROM_SDA_read) //è¯»æ•°æ®
         {
             dat |=0x01;
         }
-        EEPROM_SCL_L;                //À­µÍÊ±ÖÓÏß
+        EEPROM_SCL_L;                //æ‹‰ä½æ—¶é’Ÿçº¿
         EEPROM_Delay_1us(1);
     }
 
     return dat;
 }
 //**************************************
-//ÏòIICÉè±¸Ğ´ÈëÒ»¸ö×Ö½ÚÊı¾İ
+//å‘IICè®¾å¤‡å†™å…¥ä¸€ä¸ªå­—èŠ‚æ•°æ®
 //**************************************
 bool EEPROM_Single_WriteI2C(u8 Slave_Address,u8 REG_Address,u8 REG_data)
 {
-    EEPROM_I2C_Start();              //ÆğÊ¼ĞÅºÅ
+    EEPROM_I2C_Start();              //èµ·å§‹ä¿¡å·
 
-    EEPROM_I2C_SendByte(Slave_Address);   //·¢ËÍÉè±¸µØÖ·+Ğ´ĞÅºÅ
+    EEPROM_I2C_SendByte(Slave_Address);   //å‘é€è®¾å¤‡åœ°å€+å†™ä¿¡å·
     if(!EEPROM_I2C_WaitAck()) {
         EEPROM_I2C_Stop();
         return false;
     }
 
-    EEPROM_I2C_SendByte(REG_Address);    //ÄÚ²¿¼Ä´æÆ÷µØÖ·£¬
+    EEPROM_I2C_SendByte(REG_Address);    //å†…éƒ¨å¯„å­˜å™¨åœ°å€ï¼Œ
     if(!EEPROM_I2C_WaitAck()) {
         EEPROM_I2C_Stop();
         return false;
     }
 
-    EEPROM_I2C_SendByte(REG_data);       //ÄÚ²¿¼Ä´æÆ÷Êı¾İ£¬
+    EEPROM_I2C_SendByte(REG_data);       //å†…éƒ¨å¯„å­˜å™¨æ•°æ®ï¼Œ
     if(!EEPROM_I2C_WaitAck()) {
         EEPROM_I2C_Stop();
         return false;
     }
 
-    EEPROM_I2C_Stop();                   //·¢ËÍÍ£Ö¹ĞÅºÅ
+    EEPROM_I2C_Stop();                   //å‘é€åœæ­¢ä¿¡å·
     return true;
 }
 //**************************************
-//´ÓIICÉè±¸¶ÁÈ¡Ò»¸ö×Ö½ÚÊı¾İ
+//ä»IICè®¾å¤‡è¯»å–ä¸€ä¸ªå­—èŠ‚æ•°æ®
 //**************************************
 u8 EEPROM_Single_ReadI2C(u8 Slave_Address,u8 REG_Address)
 {
     u8 REG_data;
-    EEPROM_I2C_Start();                   //ÆğÊ¼ĞÅºÅ
+    EEPROM_I2C_Start();                   //èµ·å§‹ä¿¡å·
 
-    EEPROM_I2C_SendByte(Slave_Address);    //·¢ËÍÉè±¸µØÖ·+Ğ´ĞÅºÅ
+    EEPROM_I2C_SendByte(Slave_Address);    //å‘é€è®¾å¤‡åœ°å€+å†™ä¿¡å·
     if(!EEPROM_I2C_WaitAck()) {
         EEPROM_I2C_Stop();
         return false;
     }
 
-    EEPROM_I2C_SendByte(REG_Address);     //·¢ËÍ´æ´¢µ¥ÔªµØÖ·£¬´Ó0¿ªÊ¼
+    EEPROM_I2C_SendByte(REG_Address);     //å‘é€å­˜å‚¨å•å…ƒåœ°å€ï¼Œä»0å¼€å§‹
     if(!EEPROM_I2C_WaitAck()) {
         EEPROM_I2C_Stop();
         return false;
     }
 
-    EEPROM_I2C_Start();                   //ÆğÊ¼ĞÅºÅ
+    EEPROM_I2C_Start();                   //èµ·å§‹ä¿¡å·
 
-    EEPROM_I2C_SendByte(Slave_Address+1);  //·¢ËÍÉè±¸µØÖ·+¶ÁĞÅºÅ
+    EEPROM_I2C_SendByte(Slave_Address+1);  //å‘é€è®¾å¤‡åœ°å€+è¯»ä¿¡å·
     if(!EEPROM_I2C_WaitAck()) {
         EEPROM_I2C_Stop();
         return false;
     }
 
-    REG_data=EEPROM_I2C_RecvByte();       //¶Á³ö¼Ä´æÆ÷Êı¾İ
+    REG_data=EEPROM_I2C_RecvByte();       //è¯»å‡ºå¯„å­˜å™¨æ•°æ®
 
-    EEPROM_I2C_SendACK(1);                //·¢ËÍÍ£Ö¹´«ÊäĞÅºÅ
+    EEPROM_I2C_SendACK(1);                //å‘é€åœæ­¢ä¼ è¾“ä¿¡å·
 
-    EEPROM_I2C_Stop();                    //Í£Ö¹ĞÅºÅ
+    EEPROM_I2C_Stop();                    //åœæ­¢ä¿¡å·
     return REG_data;
 }
 u8 AT24CXX_ReadOneByte(u16 ReadAddr)
@@ -536,50 +536,50 @@ u8 AT24CXX_ReadOneByte(u16 ReadAddr)
     EEPROM_I2C_Start();
     if(E2END>2047)
     {
-        EEPROM_I2C_SendByte(0XA0);	   //·¢ËÍĞ´ÃüÁî
+        EEPROM_I2C_SendByte(0XA0);	   //å‘é€å†™å‘½ä»¤
         EEPROM_I2C_WaitAck();
-        EEPROM_I2C_SendByte(ReadAddr>>8);//·¢ËÍ¸ßµØÖ·
+        EEPROM_I2C_SendByte(ReadAddr>>8);//å‘é€é«˜åœ°å€
     } else {
-        EEPROM_I2C_SendByte(0XA0+((ReadAddr/256)<<1));   //·¢ËÍÆ÷¼şµØÖ·0XA0,Ğ´Êı¾İ
+        EEPROM_I2C_SendByte(0XA0+((ReadAddr/256)<<1));   //å‘é€å™¨ä»¶åœ°å€0XA0,å†™æ•°æ®
     }
     EEPROM_I2C_WaitAck();
-    EEPROM_I2C_SendByte(ReadAddr%256);   //·¢ËÍµÍµØÖ·
+    EEPROM_I2C_SendByte(ReadAddr%256);   //å‘é€ä½åœ°å€
     EEPROM_I2C_WaitAck();
     EEPROM_I2C_Start();
-    EEPROM_I2C_SendByte(0XA1);           //½øÈë½ÓÊÕÄ£Ê½
+    EEPROM_I2C_SendByte(0XA1);           //è¿›å…¥æ¥æ”¶æ¨¡å¼
     EEPROM_I2C_WaitAck();
     temp=EEPROM_I2C_RecvByte();
-    EEPROM_I2C_Stop();//²úÉúÒ»¸öÍ£Ö¹Ìõ¼ş
+    EEPROM_I2C_Stop();//äº§ç”Ÿä¸€ä¸ªåœæ­¢æ¡ä»¶
     return temp;
 }
-//ÔÚAT24CXXÖ¸¶¨µØÖ·Ğ´ÈëÒ»¸öÊı¾İ
-//WriteAddr  :Ğ´ÈëÊı¾İµÄÄ¿µÄµØÖ·
-//DataToWrite:ÒªĞ´ÈëµÄÊı¾İ
+//åœ¨AT24CXXæŒ‡å®šåœ°å€å†™å…¥ä¸€ä¸ªæ•°æ®
+//WriteAddr  :å†™å…¥æ•°æ®çš„ç›®çš„åœ°å€
+//DataToWrite:è¦å†™å…¥çš„æ•°æ®
 void AT24CXX_WriteOneByte(u16 WriteAddr,u8 DataToWrite)
 {
     EEPROM_I2C_Start();
     if(E2END>2047)
     {
-        EEPROM_I2C_SendByte(0XA0);	    //·¢ËÍĞ´ÃüÁî
+        EEPROM_I2C_SendByte(0XA0);	    //å‘é€å†™å‘½ä»¤
         EEPROM_I2C_WaitAck();
-        EEPROM_I2C_SendByte(WriteAddr>>8);//·¢ËÍ¸ßµØÖ·
+        EEPROM_I2C_SendByte(WriteAddr>>8);//å‘é€é«˜åœ°å€
     } else {
-        EEPROM_I2C_SendByte(0XA0+((WriteAddr/256)<<1));   //·¢ËÍÆ÷¼şµØÖ·0XA0,Ğ´Êı¾İ
+        EEPROM_I2C_SendByte(0XA0+((WriteAddr/256)<<1));   //å‘é€å™¨ä»¶åœ°å€0XA0,å†™æ•°æ®
     }
     EEPROM_I2C_WaitAck();
-    EEPROM_I2C_SendByte(WriteAddr%256);   //·¢ËÍµÍµØÖ·
+    EEPROM_I2C_SendByte(WriteAddr%256);   //å‘é€ä½åœ°å€
     EEPROM_I2C_WaitAck();
-    EEPROM_I2C_SendByte(DataToWrite);     //·¢ËÍ×Ö½Ú
+    EEPROM_I2C_SendByte(DataToWrite);     //å‘é€å­—èŠ‚
     EEPROM_I2C_WaitAck();
-    EEPROM_I2C_Stop();//²úÉúÒ»¸öÍ£Ö¹Ìõ¼ş
+    EEPROM_I2C_Stop();//äº§ç”Ÿä¸€ä¸ªåœæ­¢æ¡ä»¶
     EEPROM_Delay_1us(10);
 }
 uint8_t AT24CXX_Check(void)
 {
     static uint8_t temp=0,i;
-    temp=AT24CXX_ReadOneByte(E2END);//±ÜÃâÃ¿´Î¿ª»ú¶¼Ğ´AT24CXX
+    temp=AT24CXX_ReadOneByte(E2END);//é¿å…æ¯æ¬¡å¼€æœºéƒ½å†™AT24CXX
     if(temp==0XA3)return 0;
-    else//ÅÅ³ıµÚÒ»´Î³õÊ¼»¯µÄÇé¿ö
+    else//æ’é™¤ç¬¬ä¸€æ¬¡åˆå§‹åŒ–çš„æƒ…å†µ
     {
         AT24CXX_WriteOneByte(E2END,0XA3);
         temp=AT24CXX_ReadOneByte(E2END);
@@ -590,138 +590,138 @@ uint8_t AT24CXX_Check(void)
 u8 AT24CXX_write_Page(u8 *buf, u16 addr, size_t n)
 {
     //http://ww1.microchip.com/downloads/en/devicedoc/21081G.pdf
-    //24C08µÄÒ³¶ÁĞ´Ö»Òª2msµÄµÈ´ıÊ±¼ä£¬16×Ö½ÚÒ»Ò³
+    //24C08çš„é¡µè¯»å†™åªè¦2msçš„ç­‰å¾…æ—¶é—´ï¼Œ16å­—èŠ‚ä¸€é¡µ
     uint16_t i,j,k,h,p1,p2,last_n;
     k=0;
     p2=0;
-    p1=addr/E2PAGESIZE;//Ç°Ãæ¾­¹ıµÄÒ³Êı
-    h=addr%E2PAGESIZE;//×îºóÒ»Ò³²ĞÈ±
-    if(h!=0)//²»Âú×ãÒ»Ò³
+    p1=addr/E2PAGESIZE;//å‰é¢ç»è¿‡çš„é¡µæ•°
+    h=addr%E2PAGESIZE;//æœ€åä¸€é¡µæ®‹ç¼º
+    if(h!=0)//ä¸æ»¡è¶³ä¸€é¡µ
     {
-        p2=E2PAGESIZE-h;//²¹×ãÒ»Ò³
+        p2=E2PAGESIZE-h;//è¡¥è¶³ä¸€é¡µ
         if(p2>n)
-            p2=n;//²¹×ãÒ»Ò³
-        for(i=0; i<p2; i++) //½«Ç°·½Ê£ÓàµÄÒ³Ğ´Èë
+            p2=n;//è¡¥è¶³ä¸€é¡µ
+        for(i=0; i<p2; i++) //å°†å‰æ–¹å‰©ä½™çš„é¡µå†™å…¥
         {
             //AT24CXX_WriteOneByte(addr+i,*(buf++));
             //delay_ms(7);
             EEPROM_I2C_Start();
             if(E2END>2047)
             {
-                EEPROM_I2C_SendByte(0XA0);	    //·¢ËÍĞ´ÃüÁî
+                EEPROM_I2C_SendByte(0XA0);	    //å‘é€å†™å‘½ä»¤
                 EEPROM_I2C_WaitAck();
-                EEPROM_I2C_SendByte(addr>>8);//·¢ËÍ¸ßµØÖ·
+                EEPROM_I2C_SendByte(addr>>8);//å‘é€é«˜åœ°å€
             } else {
-                EEPROM_I2C_SendByte(0XA0+((addr/256)<<1));   //·¢ËÍÆ÷¼şµØÖ·0XA0,Ğ´Êı¾İ
+                EEPROM_I2C_SendByte(0XA0+((addr/256)<<1));   //å‘é€å™¨ä»¶åœ°å€0XA0,å†™æ•°æ®
             }
             EEPROM_I2C_WaitAck();
-            EEPROM_I2C_SendByte(addr%256);   //·¢ËÍµÍµØÖ·
+            EEPROM_I2C_SendByte(addr%256);   //å‘é€ä½åœ°å€
             EEPROM_I2C_WaitAck();
             for(; h<E2PAGESIZE; h++)
             {
-                EEPROM_I2C_SendByte(*(buf));//·¢ËÍÊı¾İ
+                EEPROM_I2C_SendByte(*(buf));//å‘é€æ•°æ®
                 EEPROM_I2C_WaitAck();
                 buf++;
             }
-            EEPROM_I2C_Stop();//²úÉúÒ»¸öÍ£Ö¹Ìõ¼ş
+            EEPROM_I2C_Stop();//äº§ç”Ÿä¸€ä¸ªåœæ­¢æ¡ä»¶
             delay_ms(5);
         }
     }
     last_n=n;
-    n=n-p2;//Ğ´ÈëÍê³É¼õÈ¥
+    n=n-p2;//å†™å…¥å®Œæˆå‡å»
     if(n>1000)
         n=n;
     addr=addr+p2;
 //
 //
-//	i=n/16;//¼ÆËãÒ³Êı
-//	j=n%16;//¼ÆËãÊ£Óà×Ö½ÚÊı
+//	i=n/16;//è®¡ç®—é¡µæ•°
+//	j=n%16;//è®¡ç®—å‰©ä½™å­—èŠ‚æ•°
 //
-//	for(k=0;k<i;k++)//Ğ´Èë¶àÒ³
+//	for(k=0;k<i;k++)//å†™å…¥å¤šé¡µ
 //	{
 //		EEPROM_I2C_Start();
 //		EEPROM_I2C_SendByte(0XA0+((addr/256)<<1));
 //		EEPROM_I2C_WaitAck();
-//		EEPROM_I2C_SendByte(addr%256);   //·¢ËÍµÍµØÖ·
+//		EEPROM_I2C_SendByte(addr%256);   //å‘é€ä½åœ°å€
 //		EEPROM_I2C_WaitAck();
 //		for(h=0;h<16;h++)
 //		{
-//			EEPROM_I2C_SendByte(*(buf));//·¢ËÍÊı¾İ
+//			EEPROM_I2C_SendByte(*(buf));//å‘é€æ•°æ®
 //			EEPROM_I2C_WaitAck();
 //			buf=buf+1;
 //			addr++;
 //		}
 //		//buf=buf+16;
-//		EEPROM_I2C_Stop();//²úÉúÒ»¸öÍ£Ö¹Ìõ¼ş
+//		EEPROM_I2C_Stop();//äº§ç”Ÿä¸€ä¸ªåœæ­¢æ¡ä»¶
 //		delay_ms(10);
 //	}
 
-//	for(i=0;i<j;i++)//½«Ç°·½Ê£ÓàµÄÒ³µ¥×Ö½ÚĞ´Èë
+//	for(i=0;i<j;i++)//å°†å‰æ–¹å‰©ä½™çš„é¡µå•å­—èŠ‚å†™å…¥
 //	{
 //		AT24CXX_WriteOneByte(addr++,*(buf++));
 //		delay_ms(7);
 //	}
 
-    while(k<n)//Ğ´Èë¶àÒ³
+    while(k<n)//å†™å…¥å¤šé¡µ
     {
         EEPROM_I2C_Start();
         if(E2END>2047)
         {
-            EEPROM_I2C_SendByte(0XA0);	    //·¢ËÍĞ´ÃüÁî
+            EEPROM_I2C_SendByte(0XA0);	    //å‘é€å†™å‘½ä»¤
             EEPROM_I2C_WaitAck();
-            EEPROM_I2C_SendByte(addr>>8);//·¢ËÍ¸ßµØÖ·
+            EEPROM_I2C_SendByte(addr>>8);//å‘é€é«˜åœ°å€
         } else {
-            EEPROM_I2C_SendByte(0XA0+((addr/256)<<1));   //·¢ËÍÆ÷¼şµØÖ·0XA0,Ğ´Êı¾İ
+            EEPROM_I2C_SendByte(0XA0+((addr/256)<<1));   //å‘é€å™¨ä»¶åœ°å€0XA0,å†™æ•°æ®
         }
         EEPROM_I2C_WaitAck();
-        EEPROM_I2C_SendByte(addr%256);   //·¢ËÍµÍµØÖ·
+        EEPROM_I2C_SendByte(addr%256);   //å‘é€ä½åœ°å€
         EEPROM_I2C_WaitAck();
         for(h=0; h<E2PAGESIZE; h++)
         {
             if(k>n)
                 break;
-            EEPROM_I2C_SendByte(*(buf));//·¢ËÍÊı¾İ
+            EEPROM_I2C_SendByte(*(buf));//å‘é€æ•°æ®
             EEPROM_I2C_WaitAck();
             buf=buf+1;
             addr++;
             k++;
         }
-        EEPROM_I2C_Stop();//²úÉúÒ»¸öÍ£Ö¹Ìõ¼ş
-        delay_ms(5);//Êı¾İÊÖ²áĞ´5ms²Ù×÷Ê±¼ä£¬5msÖ®ÄÚ²»ÏìÓ¦
+        EEPROM_I2C_Stop();//äº§ç”Ÿä¸€ä¸ªåœæ­¢æ¡ä»¶
+        delay_ms(5);//æ•°æ®æ‰‹å†Œå†™5msæ“ä½œæ—¶é—´ï¼Œ5msä¹‹å†…ä¸å“åº”
     }
 
 }
 /*
-Á¬Ğø¶ÁÈ¡:
-·¢ËÍ¿ªÊ¼ĞÅºÅ
-·¢ËÍÆ÷¼şÑ¡Ôñ+Ğ´ĞÅºÅ
-·¢ËÍÄÚ´æµØÖ·
-·¢ËÍ¿ªÊ¼ĞÅºÅ
-·¢ËÍÆ÷¼şÑ¡Ôñ+¶ÁĞÅºÅ
-¶ÁÈ¡Êı¾İ
-·¢ËÍÓ¦´ğĞÅºÅ
-¶ÁÈ¡ÏÂÒ»×Ö½ÚµÄÊı¾İ
-·¢ËÍÓ¦´ğĞÅºÅ
+è¿ç»­è¯»å–:
+å‘é€å¼€å§‹ä¿¡å·
+å‘é€å™¨ä»¶é€‰æ‹©+å†™ä¿¡å·
+å‘é€å†…å­˜åœ°å€
+å‘é€å¼€å§‹ä¿¡å·
+å‘é€å™¨ä»¶é€‰æ‹©+è¯»ä¿¡å·
+è¯»å–æ•°æ®
+å‘é€åº”ç­”ä¿¡å·
+è¯»å–ä¸‹ä¸€å­—èŠ‚çš„æ•°æ®
+å‘é€åº”ç­”ä¿¡å·
 ......
-¶ÁÈ¡×îºóÒ»×Ö½ÚµÄÊı¾İ
-²»·¢ËÍÓ¦´ğĞÅºÅ
-·¢ËÍÍ£Ö¹ĞÅºÅ
+è¯»å–æœ€åä¸€å­—èŠ‚çš„æ•°æ®
+ä¸å‘é€åº”ç­”ä¿¡å·
+å‘é€åœæ­¢ä¿¡å·
 */
-void eeprom_Continuous_reading(u8 *buf,u16 addr, size_t n)//Á¬Ğø¶ÁÈ¡
+void eeprom_Continuous_reading(u8 *buf,u16 addr, size_t n)//è¿ç»­è¯»å–
 {
     EEPROM_I2C_Start();
     if(E2END>2047)
     {
-        EEPROM_I2C_SendByte(0XA0);	   //·¢ËÍĞ´ÃüÁî
+        EEPROM_I2C_SendByte(0XA0);	   //å‘é€å†™å‘½ä»¤
         EEPROM_I2C_WaitAck();
-        EEPROM_I2C_SendByte(addr>>8);//·¢ËÍ¸ßµØÖ·
-    } else EEPROM_I2C_SendByte(0XA0+((addr/256)<<1));   //·¢ËÍÆ÷¼şµØÖ·0XA0,Ğ´Êı¾İ
+        EEPROM_I2C_SendByte(addr>>8);//å‘é€é«˜åœ°å€
+    } else EEPROM_I2C_SendByte(0XA0+((addr/256)<<1));   //å‘é€å™¨ä»¶åœ°å€0XA0,å†™æ•°æ®
 
     EEPROM_I2C_WaitAck();
-    EEPROM_I2C_SendByte(addr%256);   //·¢ËÍµÍµØÖ·
+    EEPROM_I2C_SendByte(addr%256);   //å‘é€ä½åœ°å€
     EEPROM_I2C_WaitAck();
     EEPROM_I2C_Start();
-    EEPROM_I2C_SendByte(0XA1);           //½øÈë½ÓÊÕÄ£Ê½
+    EEPROM_I2C_SendByte(0XA1);           //è¿›å…¥æ¥æ”¶æ¨¡å¼
     EEPROM_I2C_WaitAck();
     while(--n)
     {
@@ -731,7 +731,7 @@ void eeprom_Continuous_reading(u8 *buf,u16 addr, size_t n)//Á¬Ğø¶ÁÈ¡
     }
     *buf=EEPROM_I2C_RecvByte();
     EEPROM_I2C_SendACK(1);//ACK
-    EEPROM_I2C_Stop();//²úÉúÒ»¸öÍ£Ö¹Ìõ¼ş
+    EEPROM_I2C_Stop();//äº§ç”Ÿä¸€ä¸ªåœæ­¢æ¡ä»¶
     //EEPROM_Delay_1us(1);
 }
 //u8 temp_wp[4096]=0;
@@ -752,17 +752,17 @@ void eeprom_write_block (void *buf, void *addr, size_t n)
 //		LED1_OFF
 
 }
-void eeprom_read_block (void *buf,void *addr, size_t n)//¶ÁÈ¡ÓÉÖ¸¶¨µØÖ·¿ªÊ¼µÄÖ¸¶¨³¤¶ÈµÄEEPROMÊı¾İ
+void eeprom_read_block (void *buf,void *addr, size_t n)//è¯»å–ç”±æŒ‡å®šåœ°å€å¼€å§‹çš„æŒ‡å®šé•¿åº¦çš„EEPROMæ•°æ®
 {
     LED2_ON
-    eeprom_Continuous_reading((u8*)buf,(u16)addr,n);//Á¬Ğø¶ÁÈ¡
+    eeprom_Continuous_reading((u8*)buf,(u16)addr,n);//è¿ç»­è¯»å–
     LED2_OFF
 //		uint16_t i;
 //		u8 *temp=(u8*)buf;
 //		LED2_ON
 //		for(i=0;i<=n;i++)
 //	{
-//		*temp=(u8)AT24CXX_ReadOneByte((u16)addr+i);//µ¥×Ö½Ú¶ÁÈ¡
+//		*temp=(u8)AT24CXX_ReadOneByte((u16)addr+i);//å•å­—èŠ‚è¯»å–
 //		temp++;
 //	}
 //		LED2_OFF

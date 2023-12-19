@@ -6,7 +6,7 @@
 #elif defined(PROMICRO)
 #define UART_NUMBER 2
 #elif defined(GUET_FLY_V1)
-#define UART_NUMBER 6  //·É¿Ø°å6¸ö´®¿Ú
+#define UART_NUMBER 6  //é£æ§æ¿6ä¸ªä¸²å£
 #elif defined(GUET_FLY_MINI_V1)
 #define UART_NUMBER 4
 #else

@@ -8,7 +8,7 @@
 * Author        : whq
 * Mode          : Thumb2
 * Toolchain     : 
-* Description   : ¶ÓÁĞ²Ù×÷Í·ÎÄ¼ş
+* Description   : é˜Ÿåˆ—æ“ä½œå¤´æ–‡ä»¶
 *                
 * History       :
 * Date          : 2013.07.22
@@ -41,19 +41,19 @@ void ASSERT_FAILED(uint8_t* file, uint32_t line);
 
 
 typedef volatile struct {
-    volatile uint32_t   bufSize;        //»º³åÇø×Ü´óĞ¡
-    volatile uint8_t    *pStart;        //ÆğÊ¼µØÖ·
-    volatile uint8_t    *pEnd;          //½áÊøµØÖ·
-    volatile uint8_t    *pBuf;          //»º³åÇøÊ×µØÖ·
+    volatile uint32_t   bufSize;        //ç¼“å†²åŒºæ€»å¤§å°
+    volatile uint8_t    *pStart;        //èµ·å§‹åœ°å€
+    volatile uint8_t    *pEnd;          //ç»“æŸåœ°å€
+    volatile uint8_t    *pBuf;          //ç¼“å†²åŒºé¦–åœ°å€
 }QUEUE8_t;
 
 
 typedef volatile struct {
-    volatile uint32_t   elemSize;       //½á¹¹Ìåµ¥Ôª´óĞ¡
-    volatile uint32_t   sumCount;       //½á¹¹Ìåµ¥ÔªµÄ×î´ó¸öÊı
-    volatile uint32_t   start;          //½áÊø½á¹¹ÌåµØÖ·
-    volatile uint32_t   end;            //»º³åÇøÊ×µØÖ·
-    volatile void       *pBuf;          //ÆğÊ¼½á¹¹ÌåµØÖ·
+    volatile uint32_t   elemSize;       //ç»“æ„ä½“å•å…ƒå¤§å°
+    volatile uint32_t   sumCount;       //ç»“æ„ä½“å•å…ƒçš„æœ€å¤§ä¸ªæ•°
+    volatile uint32_t   start;          //ç»“æŸç»“æ„ä½“åœ°å€
+    volatile uint32_t   end;            //ç¼“å†²åŒºé¦–åœ°å€
+    volatile void       *pBuf;          //èµ·å§‹ç»“æ„ä½“åœ°å€
 }QUEUE_STRUCT_t;
 
 

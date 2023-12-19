@@ -7,7 +7,7 @@
 * Author        : whq
 * Mode          : Thumb2
 * Toolchain     :                      
-* Description   : ¿âº¯Êı
+* Description   : åº“å‡½æ•°
 *
 * Date          : 2013/12/11
 * History		: 
@@ -27,7 +27,7 @@ extern "C"
 #endif
 
 
-/******************************ºê¶¨Òå*******************************************/
+/******************************å®å®šä¹‰*******************************************/
 
 
 //#define _OS_WINDOWS_
@@ -39,7 +39,7 @@ extern "C"
 #define ABS(x)                  ((x)>0 ? (x) : -(x))  
 #define CHECKVAL(val, min,max)  ((val < min || val > max) ? 0 : 1)
 
-/******************************ÀàĞÍÉùÃ÷*****************************************/
+/******************************ç±»å‹å£°æ˜*****************************************/
 
 
 typedef struct
@@ -50,20 +50,20 @@ typedef struct
     uint8_t hour;
     uint8_t minute;
     uint8_t seconds;
-}BCDTIME_t;                 //BCD Ê±¼ä½á¹¹
+}BCDTIME_t;                 //BCD æ—¶é—´ç»“æ„
 
 
 
 
 typedef struct {
-    int8_t state;           //µ±Ç°×´Ì¬
-    int16_t judgeCount;     //ÒÑ¾­ÅĞ¶¨µÄ´ÎÊı
+    int8_t state;           //å½“å‰çŠ¶æ€
+    int16_t judgeCount;     //å·²ç»åˆ¤å®šçš„æ¬¡æ•°
 }STATE_JUDGE_t;
 
 
 
 
-/******************************º¯ÊıÉùÃ÷****************************************/
+/******************************å‡½æ•°å£°æ˜****************************************/
 
 uint8_t LIB_BcdToInt8(uint8_t val);
 uint8_t LIB_Int8ToBcd(uint8_t val);

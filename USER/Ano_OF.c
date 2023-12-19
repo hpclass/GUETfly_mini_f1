@@ -67,9 +67,9 @@ void AnoOF_DataAnl(uint8_t *data_buf,uint8_t num)
         sum += *(data_buf+i);
     if(!(sum==*(data_buf+num-1)))		return;
 
-    if(*(data_buf+2)==0X51)//¹âÁ÷ĞÅÏ¢
+    if(*(data_buf+2)==0X51)//å…‰æµä¿¡æ¯
     {
-        if(*(data_buf+4)==0)//Ô­Ê¼¹âÁ÷ĞÅÏ¢
+        if(*(data_buf+4)==0)//åŸå§‹å…‰æµä¿¡æ¯
         {
             OF_QUA 		= *(data_buf+5);
             OF_DX  		= *(data_buf+6);
@@ -77,7 +77,7 @@ void AnoOF_DataAnl(uint8_t *data_buf,uint8_t num)
             OF_LIGHT  	= *(data_buf+8);
             OF_FLAG=1;
         }
-        else if(*(data_buf+4)==1)//ÈÚºÏºó¹âÁ÷ĞÅÏ¢
+        else if(*(data_buf+4)==1)//èåˆåå…‰æµä¿¡æ¯
         {
             OF_QUA 		= *(data_buf+5);
             OF_DX2		= (int16_t)(*(data_buf+6)<<8)|*(data_buf+7) ;
@@ -88,22 +88,22 @@ void AnoOF_DataAnl(uint8_t *data_buf,uint8_t num)
             OF_FLAG=1;
         }
     }
-    if(*(data_buf+2)==0X52)//¸ß¶ÈĞÅÏ¢
+    if(*(data_buf+2)==0X52)//é«˜åº¦ä¿¡æ¯
     {
-        if(*(data_buf+4)==0)//Ô­Ê¼¸ß¶ÈĞÅÏ¢
+        if(*(data_buf+4)==0)//åŸå§‹é«˜åº¦ä¿¡æ¯
         {
             OF_ALT = (uint16_t)(*(data_buf+5)<<8)|*(data_buf+6) ;
             OF_FLAG_ALT=1;
         }
-        else if(*(data_buf+4)==1)//ÈÚºÏºó¸ß¶ÈĞÅÏ¢
+        else if(*(data_buf+4)==1)//èåˆåé«˜åº¦ä¿¡æ¯
         {
             OF_ALT2 = (uint16_t)(*(data_buf+5)<<8)|*(data_buf+6) ;
             OF_FLAG_ALT=1;
         }
     }
-    if(*(data_buf+2)==0X53)//¹ßĞÔÊı¾İ
+    if(*(data_buf+2)==0X53)//æƒ¯æ€§æ•°æ®
     {
-        if(*(data_buf+4)==0)//Ô­Ê¼Êı¾İ
+        if(*(data_buf+4)==0)//åŸå§‹æ•°æ®
         {
             OF_GYR_X = (int16_t)(*(data_buf+5)<<8)|*(data_buf+6) ;
             OF_GYR_Y = (int16_t)(*(data_buf+7)<<8)|*(data_buf+8) ;
@@ -112,7 +112,7 @@ void AnoOF_DataAnl(uint8_t *data_buf,uint8_t num)
             OF_ACC_Y = (int16_t)(*(data_buf+13)<<8)|*(data_buf+14) ;
             OF_ACC_Z = (int16_t)(*(data_buf+15)<<8)|*(data_buf+16) ;
         }
-        else if(*(data_buf+4)==1)//ÂË²¨ºóÊı¾İ
+        else if(*(data_buf+4)==1)//æ»¤æ³¢åæ•°æ®
         {
             OF_GYR_X2 = (int16_t)(*(data_buf+5)<<8)|*(data_buf+6) ;
             OF_GYR_Y2 = (int16_t)(*(data_buf+7)<<8)|*(data_buf+8) ;
@@ -122,15 +122,15 @@ void AnoOF_DataAnl(uint8_t *data_buf,uint8_t num)
             OF_ACC_Z2 = (int16_t)(*(data_buf+15)<<8)|*(data_buf+16) ;
         }
     }
-    if(*(data_buf+2)==0X54)//×ËÌ¬ĞÅÏ¢
+    if(*(data_buf+2)==0X54)//å§¿æ€ä¿¡æ¯
     {
-        if(*(data_buf+4)==0)//Å·À­½Ç¸ñÊ½
+        if(*(data_buf+4)==0)//æ¬§æ‹‰è§’æ ¼å¼
         {
             OF_ATT_ROL = ((int16_t)(*(data_buf+5)<<8)|*(data_buf+6)) * 0.01 ;
             OF_ATT_PIT = ((int16_t)(*(data_buf+7)<<8)|*(data_buf+8)) * 0.01 ;
             OF_ATT_YAW = ((int16_t)(*(data_buf+9)<<8)|*(data_buf+10)) * 0.01 ;
         }
-        else if(*(data_buf+4)==1)//ËÄÔªÊı¸ñÊ½
+        else if(*(data_buf+4)==1)//å››å…ƒæ•°æ ¼å¼
         {
             OF_ATT_S1 = ((int16_t)(*(data_buf+5)<<8)|*(data_buf+6)) * 0.0001 ;
             OF_ATT_S2 = ((int16_t)(*(data_buf+7)<<8)|*(data_buf+8)) * 0.0001 ;
@@ -140,41 +140,41 @@ void AnoOF_DataAnl(uint8_t *data_buf,uint8_t num)
     }
 }
 #else
-//ĞÂ°æ±¾
+//æ–°ç‰ˆæœ¬
 void AnoOF_GetOneByte(uint8_t data)
 {
     static uint8_t _datatemp[50];
     static u8 _data_len = 0,_data_cnt = 0;
     static u8 state = 0;
 
-    if(state==0&&data==0xAA)//Í·×Ö½Ú0xaa
+    if(state==0&&data==0xAA)//å¤´å­—èŠ‚0xaa
     {
         state=1;
         _datatemp[0]=data;
     }
-    else if(state==1&&data==0x22)//Êı¾İÔ´0x22
+    else if(state==1&&data==0x22)//æ•°æ®æº0x22
     {
         state=2;
         _datatemp[1]=data;
     }
-    else if(state==2&&data==0xaf)//0 Ä¿±êµØÖ·
+    else if(state==2&&data==0xaf)//0 ç›®æ ‡åœ°å€
     {
         state=3;
         _datatemp[2]=data;
     }
-    else if(state==3&&data<0x56)//¹¦ÄÜ×Ö
+    else if(state==3&&data<0x56)//åŠŸèƒ½å­—
     {
         state=4;
         _datatemp[3]=data;
     }
-    else if(state==4&&data<45)//³¤¶È
+    else if(state==4&&data<45)//é•¿åº¦
     {
         state = 5;
         _datatemp[4]=data;
         _data_len = data;
         _data_cnt = 0;
     }
-    else if(state==5&&_data_len>0)//Êı¾İÄÚÈİ
+    else if(state==5&&_data_len>0)//æ•°æ®å†…å®¹
     {
         _data_len--;
         _datatemp[5+_data_cnt++]=data;
@@ -199,9 +199,9 @@ void AnoOF_DataAnl(uint8_t *data_buf,uint8_t num)
         sum += *(data_buf+i);
     if(!(sum==*(data_buf+num-1)))		return;
 
-    if(*(data_buf+3)==0X51)//¹âÁ÷ĞÅÏ¢
+    if(*(data_buf+3)==0X51)//å…‰æµä¿¡æ¯
     {
-        if(*(data_buf+5)==0)//Ô­Ê¼¹âÁ÷ĞÅÏ¢
+        if(*(data_buf+5)==0)//åŸå§‹å…‰æµä¿¡æ¯
         {
             OF_QUA 		= *(data_buf+6);
             OF_DX  		= *(data_buf+7);
@@ -209,7 +209,7 @@ void AnoOF_DataAnl(uint8_t *data_buf,uint8_t num)
             OF_LIGHT  	= *(data_buf+9);
             OF_FLAG=1;
         }
-        else if(*(data_buf+5)==1)//ÈÚºÏºó¹âÁ÷ĞÅÏ¢
+        else if(*(data_buf+5)==1)//èåˆåå…‰æµä¿¡æ¯
         {
             OF_QUA 		= *(data_buf+6);
             OF_DX2		= (int16_t)(*(data_buf+7)<<8)|*(data_buf+8) ;
@@ -220,22 +220,22 @@ void AnoOF_DataAnl(uint8_t *data_buf,uint8_t num)
             OF_FLAG=1;
         }
     }
-    if(*(data_buf+3)==0X52)//¸ß¶ÈĞÅÏ¢
+    if(*(data_buf+3)==0X52)//é«˜åº¦ä¿¡æ¯
     {
-        if(*(data_buf+5)==0)//Ô­Ê¼¸ß¶ÈĞÅÏ¢
+        if(*(data_buf+5)==0)//åŸå§‹é«˜åº¦ä¿¡æ¯
         {
             OF_ALT = (uint16_t)(*(data_buf+6)<<8)|*(data_buf+7) ;
             OF_FLAG_ALT=1;
         }
-        else if(*(data_buf+5)==1)//ÈÚºÏºó¸ß¶ÈĞÅÏ¢
+        else if(*(data_buf+5)==1)//èåˆåé«˜åº¦ä¿¡æ¯
         {
             OF_ALT2 = (uint16_t)(*(data_buf+6)<<8)|*(data_buf+7) ;
             OF_FLAG_ALT=1;
         }
     }
-    if(*(data_buf+3)==0X53)//¹ßĞÔÊı¾İ
+    if(*(data_buf+3)==0X53)//æƒ¯æ€§æ•°æ®
     {
-        if(*(data_buf+5)==0)//Ô­Ê¼Êı¾İ
+        if(*(data_buf+5)==0)//åŸå§‹æ•°æ®
         {
             OF_GYR_X = (int16_t)(*(data_buf+6)<<8)|*(data_buf+7) ;
             OF_GYR_Y = (int16_t)(*(data_buf+8)<<8)|*(data_buf+9) ;
@@ -244,7 +244,7 @@ void AnoOF_DataAnl(uint8_t *data_buf,uint8_t num)
             OF_ACC_Y = (int16_t)(*(data_buf+14)<<8)|*(data_buf+15) ;
             OF_ACC_Z = (int16_t)(*(data_buf+16)<<8)|*(data_buf+17) ;
         }
-        else if(*(data_buf+5)==1)//ÂË²¨ºóÊı¾İ
+        else if(*(data_buf+5)==1)//æ»¤æ³¢åæ•°æ®
         {
             OF_GYR_X2 = (int16_t)(*(data_buf+6)<<8)|*(data_buf+7) ;
             OF_GYR_Y2 = (int16_t)(*(data_buf+8)<<8)|*(data_buf+9) ;
@@ -254,15 +254,15 @@ void AnoOF_DataAnl(uint8_t *data_buf,uint8_t num)
             OF_ACC_Z2 = (int16_t)(*(data_buf+16)<<8)|*(data_buf+17) ;
         }
     }
-    if(*(data_buf+3)==0X54)//×ËÌ¬ĞÅÏ¢
+    if(*(data_buf+3)==0X54)//å§¿æ€ä¿¡æ¯
     {
-        if(*(data_buf+5)==0)//Å·À­½Ç¸ñÊ½
+        if(*(data_buf+5)==0)//æ¬§æ‹‰è§’æ ¼å¼
         {
             OF_ATT_ROL = ((int16_t)(*(data_buf+6)<<8)|*(data_buf+7)) * 0.01 ;
             OF_ATT_PIT = ((int16_t)(*(data_buf+8)<<8)|*(data_buf+9)) * 0.01 ;
             OF_ATT_YAW = ((int16_t)(*(data_buf+10)<<8)|*(data_buf+11)) * 0.01 ;
         }
-        else if(*(data_buf+5)==1)//ËÄÔªÊı¸ñÊ½
+        else if(*(data_buf+5)==1)//å››å…ƒæ•°æ ¼å¼
         {
             OF_ATT_S1 = ((int16_t)(*(data_buf+6)<<8)|*(data_buf+7)) * 0.0001 ;
             OF_ATT_S2 = ((int16_t)(*(data_buf+8)<<8)|*(data_buf+9)) * 0.0001 ;

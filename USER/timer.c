@@ -1,11 +1,11 @@
 /************************************
 
-���ֵ��ӿƼ���ѧ
-ʱ�䣺2016-07-25
+桂林电子科技大学
+时间：2016-07-25
 
-�ļ�˵����
+文件说明：
 
-�δ�ʱ��
+滴答时钟
 ************************************/
 
 #include "timer.h"
@@ -22,12 +22,12 @@ extern unsigned int delays;
 //extern unsigned int SysTick_Handler_times;
 //extern unsigned int delays_u;
 //extern unsigned long	micros_time;
-static uint64_t _micros_time_=0;//΢��
+static uint64_t _micros_time_=0;//微秒
 uint64_t micros(void)
 {
-    return _micros_time_+(72000-SysTick->VAL)/72;//���������϶�ʱ����ֵ
+    return _micros_time_+(72000-SysTick->VAL)/72;//毫秒数加上定时器的值
 }
-static uint64_t _millis_time_=0;//����
+static uint64_t _millis_time_=0;//毫秒
 uint64_t millis(void)
 {
     return _millis_time_;
@@ -36,7 +36,7 @@ void SysTick_Handler(void)
 {
     //SysTick_Handler_time_rise();
     _millis_time_++;
-    _micros_time_+=1000;//�����жϼ�1000��
+    _micros_time_+=1000;//产生中断加1000；
     if(delays!=0)delays--;
 }
 void time_init()
@@ -47,43 +47,43 @@ void time_init()
 }
 
 /**********************************************
-��ʱ��3������ܽţ�
-PA6��PA7��PB0��PB1
+定时器3，输出管脚：
+PA6、PA7、PB0、PB1
 ***********************************************/
 void TIM3_PWM_Init(u16 arr,u16 psc)
 {
 
-    RCC->APB1ENR|=1<<1;     //TIM3ʱ��ʹ��
-    RCC->APB2ENR|=1<<2;     //ʹ��PORTAʱ��
-    RCC->APB2ENR|=1<<3;     //ʹ��PORTBʱ��
+    RCC->APB1ENR|=1<<1;     //TIM3时钟使能
+    RCC->APB2ENR|=1<<2;     //使能PORTA时钟
+    RCC->APB2ENR|=1<<3;     //使能PORTB时钟
 
     GPIOA->CRL&=0X00FFFFFF; //PA6 CH1 PA7 CH2
-    GPIOA->CRL|=0XBB000000; //���ù������
+    GPIOA->CRL|=0XBB000000; //复用功能输出
     GPIOB->CRL&=0XFFFFFF00; //PB0 CH3 PB1 CH4
-    GPIOB->CRL|=0X000000BB; //���ù������
+    GPIOB->CRL|=0X000000BB; //复用功能输出
 
 
-    TIM3->ARR=arr;   //�趨�������Զ���װֵ
-    TIM3->PSC=psc;   //Ԥ��Ƶ��
+    TIM3->ARR=arr;   //设定计数器自动重装值
+    TIM3->PSC=psc;   //预分频器
 
 
-    TIM3->CCMR1|=6<<4;   //CH1 PWM1ģʽ
-    TIM3->CCMR1|=1<<3;      //CH1Ԥװ��ʹ��
-    TIM3->CCER|=1<<0;    //OC1 ���ʹ��
+    TIM3->CCMR1|=6<<4;   //CH1 PWM1模式
+    TIM3->CCMR1|=1<<3;      //CH1预装载使能
+    TIM3->CCER|=1<<0;    //OC1 输出使能
 
 
-    TIM3->CCMR1|=6<<12;   //CH2 PWM1ģʽ
-    TIM3->CCMR1|=1<<11;  //CH2Ԥװ��ʹ��
-    TIM3->CCER|=1<<4;    //OC2 ���ʹ��
+    TIM3->CCMR1|=6<<12;   //CH2 PWM1模式
+    TIM3->CCMR1|=1<<11;  //CH2预装载使能
+    TIM3->CCER|=1<<4;    //OC2 输出使能
 
 
-    TIM3->CCMR2|=6<<4;   //CH3 PWM1ģʽ
-    TIM3->CCMR2|=1<<3;      //CH3Ԥװ��ʹ��
-    TIM3->CCER|=1<<8;    //OC3 ���ʹ��
+    TIM3->CCMR2|=6<<4;   //CH3 PWM1模式
+    TIM3->CCMR2|=1<<3;      //CH3预装载使能
+    TIM3->CCER|=1<<8;    //OC3 输出使能
 
-    TIM3->CCMR2|=6<<12;   //CH4 PWM1ģʽ
-    TIM3->CCMR2|=1<<11;  //CH4Ԥװ��ʹ��
-    TIM3->CCER|=1<<12;    //OC4 ���ʹ��
+    TIM3->CCMR2|=6<<12;   //CH4 PWM1模式
+    TIM3->CCMR2|=1<<11;  //CH4预装载使能
+    TIM3->CCER|=1<<12;    //OC4 输出使能
 
 //    TIM3->CCR1=1000;
 //    TIM3->CCR2=1000;
@@ -92,152 +92,152 @@ void TIM3_PWM_Init(u16 arr,u16 psc)
 
 //    TIM3->CCR4=1000;
 
-    TIM3->CR1|=1<<7;        //ARPEʹ��
-    TIM3->CR1|=0x01;     //ʹ�ܶ�ʱ��3
+    TIM3->CR1|=1<<7;        //ARPE使能
+    TIM3->CR1|=0x01;     //使能定时器3
 //    TIM_SetCompare1(TIM3,1000);
 //    TIM_SetCompare2(TIM3,1000);
 //    TIM_SetCompare3(TIM3,1000);
 //    TIM_SetCompare4(TIM3,1000);
 }
 /**********************************************
-��ʱ��8������ܽţ�
-PD12,13,14,15 ����ӳ�䣩
-����
+定时器8，输出管脚：
+PD12,13,14,15 （重映射）
+或者
 PB6,7,8,9
 ***********************************************/
 
 void TIM4_PWM_Init(u16 arr,u16 psc)
 {
 #if defined(GUET_FLY_V1)
-    RCC->APB1ENR|=1<<2;  //TIM4ʱ��ʹ��
-    RCC->APB2ENR|=1<<5;     //ʹ��PORTDʱ��
-    AFIO->MAPR &=0XFFFEFF;  //TIM4��ӳ�䣬bit12,����
-    AFIO->MAPR |=0X001000;   //TIM4��ӳ�䣬bit12��д��
-    GPIOD->CRH&=0X0000FFFF; //������ӦλPD12,13,14,15
-    GPIOD->CRH|=0XBBBB0000; //���ù������
+    RCC->APB1ENR|=1<<2;  //TIM4时钟使能
+    RCC->APB2ENR|=1<<5;     //使能PORTD时钟
+    AFIO->MAPR &=0XFFFEFF;  //TIM4重映射，bit12,清零
+    AFIO->MAPR |=0X001000;   //TIM4重映射，bit12，写入
+    GPIOD->CRH&=0X0000FFFF; //清零相应位PD12,13,14,15
+    GPIOD->CRH|=0XBBBB0000; //复用功能输出
 #elif defined(GUET_FLY_MINI_V1)
-    RCC->APB1ENR|=1<<2;  //TIM4ʱ��ʹ��
-    RCC->APB2ENR|=1<<3;     //ʹ��PORTBʱ��
-    GPIOB->CRH&=0XFFFFFF00; //������ӦλPB8,9
-    GPIOB->CRH|=0X000000BB; //���ù������
-    GPIOB->CRL&=0X00FFFFFF; //������ӦλPB6,7
-    GPIOB->CRL|=0XBB000000; //���ù������
+    RCC->APB1ENR|=1<<2;  //TIM4时钟使能
+    RCC->APB2ENR|=1<<3;     //使能PORTB时钟
+    GPIOB->CRH&=0XFFFFFF00; //清零相应位PB8,9
+    GPIOB->CRH|=0X000000BB; //复用功能输出
+    GPIOB->CRL&=0X00FFFFFF; //清零相应位PB6,7
+    GPIOB->CRL|=0XBB000000; //复用功能输出
 #else
-    RCC->APB1ENR|=1<<2;  //TIM4ʱ��ʹ��
-    RCC->APB2ENR|=1<<3;     //ʹ��PORTBʱ��
-    GPIOB->CRH&=0XFFFFFF00; //������ӦλPB8,9
-    GPIOB->CRH|=0X000000BB; //���ù������
-    GPIOB->CRL&=0X00FFFFFF; //������ӦλPB6,7
-    GPIOB->CRL|=0XBB000000; //���ù������
+    RCC->APB1ENR|=1<<2;  //TIM4时钟使能
+    RCC->APB2ENR|=1<<3;     //使能PORTB时钟
+    GPIOB->CRH&=0XFFFFFF00; //清零相应位PB8,9
+    GPIOB->CRH|=0X000000BB; //复用功能输出
+    GPIOB->CRL&=0X00FFFFFF; //清零相应位PB6,7
+    GPIOB->CRL|=0XBB000000; //复用功能输出
 #endif
-    TIM4->ARR=arr;   //�趨�������Զ���װֵ
-    TIM4->PSC=psc;   //Ԥ��Ƶ��
-    TIM4->CCMR1|=6<<4;   //CH1 PWM1ģʽ
-    TIM4->CCMR1|=1<<3;      //CH1Ԥװ��ʹ��
-    TIM4->CCER|=1<<0;    //OC1 ���ʹ��
-    TIM4->CCMR1|=6<<12;   //CH2 PWM1ģʽ
-    TIM4->CCMR1|=1<<11;  //CH2Ԥװ��ʹ��
-    TIM4->CCER|=1<<4;    //OC2 ���ʹ��
-    TIM4->CCMR2|=6<<4;   //CH3 PWM1ģʽ
-    TIM4->CCMR2|=1<<3;      //CH3Ԥװ��ʹ��
-    TIM4->CCER|=1<<8;    //OC3 ���ʹ��
-    TIM4->CCMR2|=6<<12;   //CH4 PWM1ģʽ
-    TIM4->CCMR2|=1<<11;  //CH4Ԥװ��ʹ��
-    TIM4->CCER|=1<<12;    //OC4 ���ʹ��
-    TIM4->CR1|=1<<7;        //ARPEʹ��
-    TIM4->CR1|=0x01;     //ʹ�ܶ�ʱ��
+    TIM4->ARR=arr;   //设定计数器自动重装值
+    TIM4->PSC=psc;   //预分频器
+    TIM4->CCMR1|=6<<4;   //CH1 PWM1模式
+    TIM4->CCMR1|=1<<3;      //CH1预装载使能
+    TIM4->CCER|=1<<0;    //OC1 输出使能
+    TIM4->CCMR1|=6<<12;   //CH2 PWM1模式
+    TIM4->CCMR1|=1<<11;  //CH2预装载使能
+    TIM4->CCER|=1<<4;    //OC2 输出使能
+    TIM4->CCMR2|=6<<4;   //CH3 PWM1模式
+    TIM4->CCMR2|=1<<3;      //CH3预装载使能
+    TIM4->CCER|=1<<8;    //OC3 输出使能
+    TIM4->CCMR2|=6<<12;   //CH4 PWM1模式
+    TIM4->CCMR2|=1<<11;  //CH4预装载使能
+    TIM4->CCER|=1<<12;    //OC4 输出使能
+    TIM4->CR1|=1<<7;        //ARPE使能
+    TIM4->CR1|=0x01;     //使能定时器
 
 }
 /**********************************************
-��ʱ��2������ܽţ�
-PA0��PA1��PA2��PA3
+定时器2，输出管脚：
+PA0、PA1、PA2、PA3
 ***********************************************/
 
 
 void TIM2_PWM_Init(u16 arr,u16 psc)
 {
-    RCC->APB1ENR|=1<<0;  //TIM2ʱ��ʹ��
-    RCC->APB2ENR|=1<<1;     //ʹ��PORTAʱ��
-    GPIOA->CRL&=0XFFFF0000; //������ӦλPD12,13,14,15
-    GPIOA->CRL|=0X0000BBBB; //���ù������
-    TIM2->ARR=arr;   //�趨�������Զ���װֵ
-    TIM2->PSC=psc;   //Ԥ��Ƶ��
-    TIM2->CCMR1|=6<<4;   //CH1 PWM1ģʽ
-    TIM2->CCMR1|=1<<3;      //CH1Ԥװ��ʹ��
-    TIM2->CCER|=1<<0;    //OC1 ���ʹ��
-    TIM2->CCMR1|=6<<12;   //CH2 PWM1ģʽ
-    TIM2->CCMR1|=1<<11;  //CH2Ԥװ��ʹ��
-    TIM2->CCER|=1<<4;    //OC2 ���ʹ��
-    TIM2->CCMR2|=6<<4;   //CH3 PWM1ģʽ
-    TIM2->CCMR2|=1<<3;      //CH3Ԥװ��ʹ��
-    TIM2->CCER|=1<<8;    //OC3 ���ʹ��
-    TIM2->CCMR2|=6<<12;   //CH4 PWM1ģʽ
-    TIM2->CCMR2|=1<<11;  //CH4Ԥװ��ʹ��
-    TIM2->CCER|=1<<12;    //OC4 ���ʹ��
-    TIM2->CR1|=1<<7;        //ARPEʹ��
-    TIM2->CR1|=0x01;     //ʹ�ܶ�ʱ��3
+    RCC->APB1ENR|=1<<0;  //TIM2时钟使能
+    RCC->APB2ENR|=1<<1;     //使能PORTA时钟
+    GPIOA->CRL&=0XFFFF0000; //清零相应位PD12,13,14,15
+    GPIOA->CRL|=0X0000BBBB; //复用功能输出
+    TIM2->ARR=arr;   //设定计数器自动重装值
+    TIM2->PSC=psc;   //预分频器
+    TIM2->CCMR1|=6<<4;   //CH1 PWM1模式
+    TIM2->CCMR1|=1<<3;      //CH1预装载使能
+    TIM2->CCER|=1<<0;    //OC1 输出使能
+    TIM2->CCMR1|=6<<12;   //CH2 PWM1模式
+    TIM2->CCMR1|=1<<11;  //CH2预装载使能
+    TIM2->CCER|=1<<4;    //OC2 输出使能
+    TIM2->CCMR2|=6<<4;   //CH3 PWM1模式
+    TIM2->CCMR2|=1<<3;      //CH3预装载使能
+    TIM2->CCER|=1<<8;    //OC3 输出使能
+    TIM2->CCMR2|=6<<12;   //CH4 PWM1模式
+    TIM2->CCMR2|=1<<11;  //CH4预装载使能
+    TIM2->CCER|=1<<12;    //OC4 输出使能
+    TIM2->CR1|=1<<7;        //ARPE使能
+    TIM2->CR1|=0x01;     //使能定时器3
 }
 /**********************************************
-��ʱ��8������ܽţ�
-PC6��PC7��PC8��PC9
+定时器8，输出管脚：
+PC6、PC7、PC8、PC9
 ***********************************************/
 void TIM8_PWM_Init(u16 arr,u16 psc)
 {
-    RCC->APB2ENR|=1<<13;  //TIM8ʱ��ʹ��
-    RCC->APB2ENR|=1<<4;     //ʹ��PORTCʱ��
-    GPIOC->CRH&=0XFFFFFF00; //������ӦλPC8,9
-    GPIOC->CRH|=0X000000BB; //���ù������
-    GPIOC->CRL&=0X00FFFFFF; //������ӦλPC6,7
-    GPIOC->CRL|=0XBB000000; //���ù������
-    TIM8->ARR=arr;   //�趨�������Զ���װֵ
-    TIM8->PSC=psc;   //Ԥ��Ƶ��
-    TIM8->CCMR1|=6<<4;   //CH1 PWM1ģʽ
-    TIM8->CCMR1|=1<<3;      //CH1Ԥװ��ʹ��
-    TIM8->CCER|=1<<0;    //OC1 ���ʹ��
-    TIM8->CCMR1|=6<<12;   //CH2 PWM1ģʽ
-    TIM8->CCMR1|=1<<11;  //CH2Ԥװ��ʹ��
-    TIM8->CCER|=1<<4;    //OC2 ���ʹ��
-    TIM8->CCMR2|=6<<4;   //CH3 PWM1ģʽ
-    TIM8->CCMR2|=1<<3;      //CH3Ԥװ��ʹ��
-    TIM8->CCER|=1<<8;    //OC3 ���ʹ��
-    TIM8->CCMR2|=6<<12;   //CH4 PWM1ģʽ
-    TIM8->CCMR2|=1<<11;  //CH4Ԥװ��ʹ��
-    TIM8->CCER|=1<<12;    //OC4 ���ʹ��
-    TIM8->CR1|=1<<7;        //ARPEʹ��
-    TIM8->CR1|=0x01;     //ʹ�ܶ�ʱ��
-    TIM8->BDTR |=1<<15;  //����OC��OCN���
+    RCC->APB2ENR|=1<<13;  //TIM8时钟使能
+    RCC->APB2ENR|=1<<4;     //使能PORTC时钟
+    GPIOC->CRH&=0XFFFFFF00; //清零相应位PC8,9
+    GPIOC->CRH|=0X000000BB; //复用功能输出
+    GPIOC->CRL&=0X00FFFFFF; //清零相应位PC6,7
+    GPIOC->CRL|=0XBB000000; //复用功能输出
+    TIM8->ARR=arr;   //设定计数器自动重装值
+    TIM8->PSC=psc;   //预分频器
+    TIM8->CCMR1|=6<<4;   //CH1 PWM1模式
+    TIM8->CCMR1|=1<<3;      //CH1预装载使能
+    TIM8->CCER|=1<<0;    //OC1 输出使能
+    TIM8->CCMR1|=6<<12;   //CH2 PWM1模式
+    TIM8->CCMR1|=1<<11;  //CH2预装载使能
+    TIM8->CCER|=1<<4;    //OC2 输出使能
+    TIM8->CCMR2|=6<<4;   //CH3 PWM1模式
+    TIM8->CCMR2|=1<<3;      //CH3预装载使能
+    TIM8->CCER|=1<<8;    //OC3 输出使能
+    TIM8->CCMR2|=6<<12;   //CH4 PWM1模式
+    TIM8->CCMR2|=1<<11;  //CH4预装载使能
+    TIM8->CCER|=1<<12;    //OC4 输出使能
+    TIM8->CR1|=1<<7;        //ARPE使能
+    TIM8->CR1|=0x01;     //使能定时器
+    TIM8->BDTR |=1<<15;  //开启OC和OCN输出
 }
 void TIM1_PWM_Init(u16 arr,u16 psc)
 {
-    RCC->APB1ENR|=1<<11;  //TIM1ʱ��ʹ��
-    RCC->APB2ENR|=1<<6;     //ʹ��PORTDʱ��
-    AFIO->MAPR &=0XFFFF3F;  //TIM1��ȫ��ӳ�䣬bit12,����
-    AFIO->MAPR |=0X0000C0;   //TIM1��ȫ��ӳ�䣬bit12��д��
-    GPIOE->CRH&=0XF00F0F0F; //������Ӧλ
-    GPIOE->CRH|=0X0BB0B0B0; //���ù������
+    RCC->APB1ENR|=1<<11;  //TIM1时钟使能
+    RCC->APB2ENR|=1<<6;     //使能PORTD时钟
+    AFIO->MAPR &=0XFFFF3F;  //TIM1完全重映射，bit12,清零
+    AFIO->MAPR |=0X0000C0;   //TIM1完全重映射，bit12，写入
+    GPIOE->CRH&=0XF00F0F0F; //清零相应位
+    GPIOE->CRH|=0X0BB0B0B0; //复用功能输出
 
-    TIM1->ARR=arr;   //�趨�������Զ���װֵ
-    TIM1->PSC=psc;   //Ԥ��Ƶ��
-
-
-    //  TIM1->CCMR1|=6<<4;   //CH1 PWM1ģʽ
-    //  TIM1->CCMR1|=1<<3;      //CH1Ԥװ��ʹ��
-    //  TIM1->CCER|=1<<0;    //OC1 ���ʹ��
+    TIM1->ARR=arr;   //设定计数器自动重装值
+    TIM1->PSC=psc;   //预分频器
 
 
-    TIM1->CCMR1|=6<<12;   //CH2 PWM1ģʽ
-    TIM1->CCMR1|=1<<11;  //CH2Ԥװ��ʹ��
-    TIM1->CCER|=1<<4;    //OC2 ���ʹ��
+    //  TIM1->CCMR1|=6<<4;   //CH1 PWM1模式
+    //  TIM1->CCMR1|=1<<3;      //CH1预装载使能
+    //  TIM1->CCER|=1<<0;    //OC1 输出使能
 
 
-    TIM1->CCMR2|=6<<4;   //CH3 PWM1ģʽ
-    TIM1->CCMR2|=1<<3;      //CH3Ԥװ��ʹ��
-    TIM1->CCER|=1<<8;    //OC3 ���ʹ��
+    TIM1->CCMR1|=6<<12;   //CH2 PWM1模式
+    TIM1->CCMR1|=1<<11;  //CH2预装载使能
+    TIM1->CCER|=1<<4;    //OC2 输出使能
 
-    TIM1->CCMR2|=6<<12;   //CH4 PWM1ģʽ
-    TIM1->CCMR2|=1<<11;  //CH4Ԥװ��ʹ��
-    TIM1->CCER|=1<<12;    //OC4 ���ʹ��
-    //OCNĬ�ϲ�����
+
+    TIM1->CCMR2|=6<<4;   //CH3 PWM1模式
+    TIM1->CCMR2|=1<<3;      //CH3预装载使能
+    TIM1->CCER|=1<<8;    //OC3 输出使能
+
+    TIM1->CCMR2|=6<<12;   //CH4 PWM1模式
+    TIM1->CCMR2|=1<<11;  //CH4预装载使能
+    TIM1->CCER|=1<<12;    //OC4 输出使能
+    //OCN默认不激活
 
 //    TIM1->CCR1=1000;
 //    TIM1->CCR2=1000;
@@ -246,15 +246,15 @@ void TIM1_PWM_Init(u16 arr,u16 psc)
 
 //    TIM1->CCR4=1000;
 
-    TIM1->CR1|=1<<7;        //ARPEʹ��
-    TIM1->CR1|=0x01;     //ʹ�ܶ�ʱ��
+    TIM1->CR1|=1<<7;        //ARPE使能
+    TIM1->CR1|=0x01;     //使能定时器
 
-    TIM1->BDTR |=1<<15;  //����OC��OCN���
+    TIM1->BDTR |=1<<15;  //开启OC和OCN输出
     //	TIM_CtrlPWMOutputs(TIM8,ENABLE);
 
 }
 
-//��ʱ��1ͨ��1���벶������
+//定时器1通道1输入捕获配置
 #if !defined(SBUS__)
 
 void TIM1_Cap_Init(u16 arr,u16 psc)
@@ -264,39 +264,39 @@ void TIM1_Cap_Init(u16 arr,u16 psc)
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);	//ʹ��TIM2ʱ��
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);  //ʹ��GPIOAʱ��
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);	//使能TIM2时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);  //使能GPIOA时钟
 
-    GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_8;  //PA0 ���֮ǰ����
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; //PA0 ����
+    GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_8;  //PA0 清除之前设置
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; //PA0 输入
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-    GPIO_ResetBits(GPIOA,GPIO_Pin_8);						 //PA0 ����
-    TIM_DeInit(TIM1);   //������TIM1�Ĵ�������ΪĬ��ֵ
-    //��ʼ����ʱ��1
-    TIM_TimeBaseStructure.TIM_Period = arr; //�趨�������Զ���װֵ
-    TIM_TimeBaseStructure.TIM_Prescaler =psc; 	//Ԥ��Ƶ��
-    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; //����ʱ�ӷָ�:TDTS = Tck_tim
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //TIM���ϼ���ģʽ
-    TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure); //����TIM_TimeBaseInitStruct��ָ���Ĳ�����ʼ��TIMx��ʱ�������λ
+    GPIO_ResetBits(GPIOA,GPIO_Pin_8);						 //PA0 下拉
+    TIM_DeInit(TIM1);   //将外设TIM1寄存器重设为默认值
+    //初始化定时器1
+    TIM_TimeBaseStructure.TIM_Period = arr; //设定计数器自动重装值
+    TIM_TimeBaseStructure.TIM_Prescaler =psc; 	//预分频器
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; //设置时钟分割:TDTS = Tck_tim
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //TIM向上计数模式
+    TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure); //根据TIM_TimeBaseInitStruct中指定的参数初始化TIMx的时间基数单位
 
-    //��ʼ��TIM2���벶�����
-    TIM1_ICInitStructure.TIM_Channel = TIM_Channel_1; //CC1S=01 	ѡ������� IC1ӳ�䵽TI1��
-    TIM1_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//�����ز���
-    TIM1_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //ӳ�䵽TI1��
-    TIM1_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //���������Ƶ,����Ƶ
-    TIM1_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 ���������˲��� ���˲�
+    //初始化TIM2输入捕获参数
+    TIM1_ICInitStructure.TIM_Channel = TIM_Channel_1; //CC1S=01 	选择输入端 IC1映射到TI1上
+    TIM1_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//上升沿捕获
+    TIM1_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //映射到TI1上
+    TIM1_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //配置输入分频,不分频
+    TIM1_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 配置输入滤波器 不滤波
     TIM_ICInit(TIM1, &TIM1_ICInitStructure);
 
-    //�жϷ����ʼ��
-    NVIC_InitStructure.NVIC_IRQChannel = TIM1_CC_IRQn;  //TIM1�ж�
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;  //��ռ���ȼ�2��
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;  //�����ȼ�0��
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQͨ����ʹ��
-    NVIC_Init(&NVIC_InitStructure);  //����NVIC_InitStruct��ָ���Ĳ�����ʼ������NVIC�Ĵ���
+    //中断分组初始化
+    NVIC_InitStructure.NVIC_IRQChannel = TIM1_CC_IRQn;  //TIM1中断
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;  //先占优先级2级
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;  //从优先级0级
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道被使能
+    NVIC_Init(&NVIC_InitStructure);  //根据NVIC_InitStruct中指定的参数初始化外设NVIC寄存器
 
-    TIM_ITConfig(TIM1,TIM_IT_Update|TIM_IT_CC1,ENABLE);//���������ж� ,����CC1IE�����ж�
+    TIM_ITConfig(TIM1,TIM_IT_Update|TIM_IT_CC1,ENABLE);//允许更新中断 ,允许CC1IE捕获中断
 
-    TIM_Cmd(TIM1,ENABLE ); 	//ʹ�ܶ�ʱ��1
+    TIM_Cmd(TIM1,ENABLE ); 	//使能定时器1
 
 
 
@@ -304,73 +304,73 @@ void TIM1_Cap_Init(u16 arr,u16 psc)
 }
 
 u32 temp=0;
-u8  TIM1CH1_CAPTURE_STA=0,ppm_rx_sta=0,ppm_rx_num=0;	//���벶��״̬
-u16	TIM1CH1_CAPTURE_VAL;	//���벶��ֵ
-u16 ppm_rx[RC_CHANS+2]; //ppm_rx[0]   1   ���յ�ppm����
+u8  TIM1CH1_CAPTURE_STA=0,ppm_rx_sta=0,ppm_rx_num=0;	//输入捕获状态
+u16	TIM1CH1_CAPTURE_VAL;	//输入捕获值
+u16 ppm_rx[RC_CHANS+2]; //ppm_rx[0]   1   接收到ppm数据
 //extern volatile uint16_t rcValue[RC_CHANS];
-//��ʱ��1�жϷ������
+//定时器1中断服务程序
 
 void TIM1_CC_IRQHandler(void)
 {
 
-    if((TIM1CH1_CAPTURE_STA&0X80)==0)//��δ�ɹ�����
+    if((TIM1CH1_CAPTURE_STA&0X80)==0)//还未成功捕获
     {
         if (TIM_GetITStatus(TIM1, TIM_IT_Update) != RESET)
 
         {
-            if(TIM1CH1_CAPTURE_STA&0X40)//�Ѿ����񵽸ߵ�ƽ��
+            if(TIM1CH1_CAPTURE_STA&0X40)//已经捕获到高电平了
             {
-                if((TIM1CH1_CAPTURE_STA&0X3F)==0X3F)//�ߵ�ƽ̫����
+                if((TIM1CH1_CAPTURE_STA&0X3F)==0X3F)//高电平太长了
                 {
-                    TIM1CH1_CAPTURE_STA|=0X80;//��ǳɹ�������һ��
+                    TIM1CH1_CAPTURE_STA|=0X80;//标记成功捕获了一次
                     TIM1CH1_CAPTURE_VAL=0XFFFF;
                 } else TIM1CH1_CAPTURE_STA++;
             }
         }
-        else if (TIM_GetITStatus(TIM1, TIM_IT_CC1) != RESET)//����1���������¼�
+        else if (TIM_GetITStatus(TIM1, TIM_IT_CC1) != RESET)//捕获1发生捕获事件
         {
-            if(TIM1CH1_CAPTURE_STA&0X40)		//����һ���½���
+            if(TIM1CH1_CAPTURE_STA&0X40)		//捕获到一个下降沿
             {
-                TIM1CH1_CAPTURE_STA|=0X80;		//��ǳɹ�����һ�θߵ�ƽ����
+                TIM1CH1_CAPTURE_STA|=0X80;		//标记成功捕获到一次高电平脉宽
                 TIM1CH1_CAPTURE_VAL=TIM_GetCapture1(TIM1);
-                TIM_OC1PolarityConfig(TIM1,TIM_ICPolarity_Rising); //CC1P=0 ����Ϊ�����ز���
-            } else  								//��δ��ʼ,��һ�β���������
+                TIM_OC1PolarityConfig(TIM1,TIM_ICPolarity_Rising); //CC1P=0 设置为上升沿捕获
+            } else  								//还未开始,第一次捕获上升沿
             {
-                TIM1CH1_CAPTURE_STA=0;			//���
+                TIM1CH1_CAPTURE_STA=0;			//清空
                 TIM1CH1_CAPTURE_VAL=0;
                 TIM_SetCounter(TIM1,0);
-                TIM1CH1_CAPTURE_STA|=0X40;		//��ǲ�����������
-                TIM_OC1PolarityConfig(TIM1,TIM_ICPolarity_Falling);		//CC1P=1 ����Ϊ�½��ز���
+                TIM1CH1_CAPTURE_STA|=0X40;		//标记捕获到了上升沿
+                TIM_OC1PolarityConfig(TIM1,TIM_ICPolarity_Falling);		//CC1P=1 设置为下降沿捕获
             }
         }
     }
 
-    //����֡����
-    if(TIM1CH1_CAPTURE_STA&0X80)//�ɹ�������һ��������
+    //处理帧数据
+    if(TIM1CH1_CAPTURE_STA&0X80)//成功捕获到了一次上升沿
     {
         if(ppm_rx_sta==1){
             ppm_rx[ppm_rx_num+1]=TIM1CH1_CAPTURE_VAL;
             ppm_rx_num++;
         }
         //printf("TIM1CH1_CAPTURE_VAL:%d\r\n",TIM1CH1_CAPTURE_VAL);
-        if(4>TIM1CH1_CAPTURE_STA&0X3F>0||TIM1CH1_CAPTURE_VAL>3000) ppm_rx_sta++;//�͵�ƽʱ�����3000usΪ��ʼ֡
+        if(4>TIM1CH1_CAPTURE_STA&0X3F>0||TIM1CH1_CAPTURE_VAL>3000) ppm_rx_sta++;//低电平时间大于3000us为起始帧
         if(ppm_rx_sta==2) {
-            ppm_rx[ppm_rx_num]=0;    //printf("receive\r\n");//ppm_rx_sta   1 ��ʾ���յ�ͬ��֡/ 2���յ�����һ��ʼ֡ ppm���ݽ������
+            ppm_rx[ppm_rx_num]=0;    //printf("receive\r\n");//ppm_rx_sta   1 表示接收到同步帧/ 2接收到到下一起始帧 ppm数据接收完毕
             ppm_rx_sta=0;
             ppm_rx[0]=1;
             ppm_rx_num=0;
         }
 				if(ppm_rx_num>12)
-					ppm_rx_num=0;//��ֹ���
+					ppm_rx_num=0;//防止溢出
 
-        TIM1CH1_CAPTURE_STA=0;//������һ�β���
+        TIM1CH1_CAPTURE_STA=0;//开启下一次捕获
 
     }
 
 
 
 
-    TIM_ClearITPendingBit(TIM1, TIM_IT_CC1|TIM_IT_Update); //����жϱ�־λ
+    TIM_ClearITPendingBit(TIM1, TIM_IT_CC1|TIM_IT_Update); //清除中断标志位
 
 }
 #endif
@@ -380,44 +380,44 @@ void TIM2_Cap_Init(u16 arr,u16 psc)
     GPIO_InitTypeDef GPIO_InitStructure;
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
-    RCC->APB1ENR |=1<< 0;//ʹ�ܶ�ʱ��2��TIM2
-    RCC->APB2ENR|=1<<2;            //ʹ��PORTAʱ��
+    RCC->APB1ENR |=1<< 0;//使能定时器2，TIM2
+    RCC->APB2ENR|=1<<2;            //使能PORTA时钟
 
-    GPIOA->CRL &= 0XFFFFFF0F;//PA1����
-    GPIOA->CRL |= 0X00000080;//����
-    GPIOA->ODR|=0<<1;                //PA1 ����
+    GPIOA->CRL &= 0XFFFFFF0F;//PA1清零
+    GPIOA->CRL |= 0X00000080;//输入
+    GPIOA->ODR|=0<<1;                //PA1 下拉
 
-    TIM2->ARR=arr;                  //�趨�������Զ���װֵ
-    TIM2->PSC=psc;                  //Ԥ��Ƶ
+    TIM2->ARR=arr;                  //设定计数器自动重装值
+    TIM2->PSC=psc;                  //预分频
 
-    TIM2->CCMR1|=1<<8;                //CC2S=10         ѡ������� IC2ӳ�䵽TI2��
-    TIM2->CCMR1|=0<<12;                 //IC2F=0001 ���������˲��� ���˲�
-    TIM2->CCMR1|=0<<10;         //IC2PS=00         ���������Ƶ,����Ƶ
+    TIM2->CCMR1|=1<<8;                //CC2S=10         选择输入端 IC2映射到TI2上
+    TIM2->CCMR1|=0<<12;                 //IC2F=0001 配置输入滤波器 不滤波
+    TIM2->CCMR1|=0<<10;         //IC2PS=00         配置输入分频,不分频
 
-    TIM2->CCER|=0<<5;                 //CC2P=0        �����ز���
-    TIM2->CCER|=1<<4;                 //CC2E=1         ���������������ֵ������Ĵ�����
+    TIM2->CCER|=0<<5;                 //CC2P=0        上升沿捕获
+    TIM2->CCER|=1<<4;                 //CC2E=1         允许捕获计数器的值到捕获寄存器中
 
-    TIM2->DIER|=1<<2;           //���������ж�CC2IE=1
-    TIM2->DIER|=1<<0;           //���������ж�UIE=1
-    TIM2->CR1|=0x01;            //ʹ�ܶ�ʱ��2
-    //��ʼ��TIM2���벶�����
-//    TIM2_ICInitStructure.TIM_Channel = TIM_Channel_2; //CC1S=01 	ѡ������� IC1ӳ�䵽TI1��
-//    TIM2_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//�����ز���
-//    TIM2_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //ӳ�䵽TI1��
-//    TIM2_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //���������Ƶ,����Ƶ
-//    TIM2_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 ���������˲��� ���˲�
+    TIM2->DIER|=1<<2;           //允许捕获中断CC2IE=1
+    TIM2->DIER|=1<<0;           //允许更新中断UIE=1
+    TIM2->CR1|=0x01;            //使能定时器2
+    //初始化TIM2输入捕获参数
+//    TIM2_ICInitStructure.TIM_Channel = TIM_Channel_2; //CC1S=01 	选择输入端 IC1映射到TI1上
+//    TIM2_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//上升沿捕获
+//    TIM2_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //映射到TI1上
+//    TIM2_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //配置输入分频,不分频
+//    TIM2_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 配置输入滤波器 不滤波
 //    TIM_ICInit(TIM2, &TIM2_ICInitStructure);
 
-//    //�жϷ����ʼ��
-//    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;  //TIM1�ж�
-//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;  //��ռ���ȼ�2��
-//    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;  //�����ȼ�0��
-//    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQͨ����ʹ��
-//    NVIC_Init(&NVIC_InitStructure);  //����NVIC_InitStruct��ָ���Ĳ�����ʼ������NVIC�Ĵ���
+//    //中断分组初始化
+//    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;  //TIM1中断
+//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;  //先占优先级2级
+//    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;  //从优先级0级
+//    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道被使能
+//    NVIC_Init(&NVIC_InitStructure);  //根据NVIC_InitStruct中指定的参数初始化外设NVIC寄存器
 
-//    TIM_ITConfig(TIM2,TIM_IT_Update|TIM_IT_CC2,ENABLE);//���������ж� ,����CC1IE�����ж�
+//    TIM_ITConfig(TIM2,TIM_IT_Update|TIM_IT_CC2,ENABLE);//允许更新中断 ,允许CC1IE捕获中断
 
-//    TIM_Cmd(TIM2,ENABLE ); 	//ʹ�ܶ�ʱ��1
+//    TIM_Cmd(TIM2,ENABLE ); 	//使能定时器1
 
 
 
