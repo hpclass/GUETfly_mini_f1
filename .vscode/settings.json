@@ -64,6 +64,8 @@
         "chrono": "cpp",
         "compare": "cpp",
         "concepts": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "stm32f10x_conf.h": "c",
+        "config.h": "c"
     }
 }

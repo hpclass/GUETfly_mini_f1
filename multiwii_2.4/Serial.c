@@ -4,7 +4,7 @@
 #include "Serial.h"
 #include "MultiWii.h"
 #include "usart.h"
-#include "usb_ch341.h"
+#include "USB_CH341.H"
 
 extern conf_t conf;
 extern flags_struct_t f;

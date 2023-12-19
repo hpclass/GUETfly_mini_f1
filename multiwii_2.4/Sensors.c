@@ -11,7 +11,7 @@
 #include "Sensors.h"
 #include "delay.h"
 #include "soft_iic.h"
-#include "GY_86.h"
+#include "gy_86.h"
 
 // static void Baro_init();
 #if MAG

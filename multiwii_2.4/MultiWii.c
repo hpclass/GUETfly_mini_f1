@@ -1987,16 +1987,15 @@ void loop()
     writeMotors();
 }
 
-#include "OLED.h"
+#include "oled.h"
 #define FCLK 72000000 // 系统时钟72mhz
 #define OSFREQ 100000 // 中断频率10us
 
 // extern int main2(void);
-#include "OLED.h"
 #include "usart.h"
 #include "soft_iic.h"
 #include "gy_86.h"
-#include "usb_ch341.h"
+#include "USB_CH341.H"
 #include "spi.h"
 void LED_init(uint8_t x)
 {
