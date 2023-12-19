@@ -75,7 +75,6 @@ SOURCES = \
 	./Libraries/CMSIS\CM3\DeviceSupport\ST\STM32F10x\startup\arm\startup_stm32f10x_hd.s \
 	./USB/usart.c \
 	./USB/USB_CH341.c \
-	./USB/STM32F10xR.LIB \
 	
 # Object files
 OBJECTS = $(SOURCES:.c=.o)

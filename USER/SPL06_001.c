@@ -1,6 +1,6 @@
 #ifndef SPL06_01_C
 #define SPL06_01_C
-#include "spl06_001.h"
+#include "SPL06_001.h"
 // #include "i2c.h"
 #include "types.h"
 

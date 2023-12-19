@@ -1,4 +1,4 @@
-#include "GY_86.h"
+#include "gy_86.h"
 #include "stm32f10x.h"
 /*硬件IIC*/
 extern int16_t i2c_errors_count;
