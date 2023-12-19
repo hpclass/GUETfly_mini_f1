@@ -7,8 +7,7 @@ March  2015     V2.4
  the Free Software Foundation, either version 3 of the License, or
  any later version. see <http://www.gnu.org/licenses/>
 */
-
-//#include "ano_of.h"
+#include "stm32f10x.h"
 #include "math.h"
 #include "config.h"
 #include "def.h"
@@ -21,86 +20,16 @@ March  2015     V2.4
 #include "Output.h"
 #include "RX.h"
 #include "Sensors.h"
-//#include "Serial.h"
 #include "GPS.h"
 #include "Protocol.h"
 #include "timer.h"
 #include "math.h"
 #include "delay.h"
 #include "usart.h"
-//#define RC_CHANS 6
+#include "stm32f10x_adc.h"
+
 
 ////////////////////////////
-volatile uint16_t sonarTime = 0;  //用于新增超声波测高的时间,us D8接入，中断处理更新该值
-//volatile  uint16_t intervalStart=0;  //只需保留16位即可
-static uint32_t sonarTimer = 0;
-
-u16 Sonar_alt=0;
-u32 Sonar_time_pre=0;
-u32 Sonar_time_now=0;
-//光流
-int16_t  OPTIC_DIS_SUM[2] = {0,0};
-int16_t  OPTIC_angle[2] = {0,0};
-int16_t  OPTIC_angle2[2] = {0,0};
-int16_t  OPTIC_P[2]= {0,0};
-int16_t  OPTIC_I[2]= {0,0};
-int16_t  OPTIC_ISUM[2]= {0,0};
-int16_t  OPTIC_D[2]= {0,0};
-int16_t  OPTIC_Pre[2]= {0,0};
-static int OPTIC_PID[2][3]= {
-    {2,1,1},
-    {2,1,1}
-
-};
-
-unsigned long takoff_start_time;
-uint8_t sonar_out_of_date;
-extern int16_t  sonarAltMy; //平滑后的超声波高度
-//初始化在RX.cpp  void configureReceiver()
-uint8_t TAKEOFF_COMPLETED=1;//自动起飞
-uint8_t TAKEOFF_IN_PROGRESS= 1;
-uint8_t TAKEOFF=1;
-//================================
-/*************超声波更新*****************/
-//static int16_t  sonarAltMy;
-extern  uint8_t alt_switch;//测距模块标志
-extern  int16_t  PressAltMy;//平滑后的气压计高度
-extern  int16_t  alt_diff;//气压和超声波的差值
-void Sonar_update1() {
-
-    static uint32_t lastsonarTimer = 0;
-    static uint32_t nowsonarTimer = 0;
-    nowsonarTimer=micros();
-    if(nowsonarTimer-lastsonarTimer>17000)
-    {
-        lastsonarTimer=micros();
-        Sonar_time_pre=micros();
-    } else {
-        return;
-    }
-    //digitalWrite(TrigPin,HIGH);
-    PBout(3)=1;
-    micros(); //产生延时
-    PBout(3)=0;
-    // digitalWrite(TrigPin,LOW);
-    //sonarAltMy = sonarTime * 0.017;
-    //单位是cm  340*100/1000/1000/2 1us的距离 0.017cm   应该小于<23500us为400cm有效距离  //应该对机体倾斜校正
-//    sonarAlt = sonarTime * 0.017;  //单位是cm  340*100/1000/1000/2 1us的距离 0.017cm   应该小于<23500us为400cm有效距离  //应该对机体倾斜校正
-//    if(ABS(sonarAltMy-sonarAlt)>40)
-//    {
-//    sonarAlt=sonarAltMy;
-//    sonar_out_of_date=1;
-//    alt_switch=1;
-//    alt_diff=alt.EstAlt-PressAltMy;
-//    }else{
-//    sonar_out_of_date=0;
-//
-//    }
-//    //sonarAltMy = sonarTime;  //单位是cm  340*100/1000/1000/2 1us的距离 0.017cm   应该小于<23500us为400cm有效距离  //应该对机体倾斜校正
-    //debug[2]=sonarAlt;
-    // debug[0]++;
-}
-
 
 /*********** RC alias *****************/
 
@@ -174,7 +103,12 @@ const char boxnames[]  = // names for dynamic generation of config GUI
 #if OPTIC
     "OPTIC;"
 #endif
-		"TAKEOFF;"
+#if defined(FIXEDWING)
+    "CRUISE;"
+#endif
+    "DORP;"
+    "Master;"
+    "Slave;"
     ;
 
 const uint8_t boxids[]  = {// permanent IDs associated to boxes. This way, you can rely on an ID number to identify a BOX function.
@@ -233,18 +167,18 @@ const uint8_t boxids[]  = {// permanent IDs associated to boxes. This way, you c
 #if OPTIC
     22,
 #endif
-		23,//TAKEOFF
+#ifndef SLIM_WING
+    23, //"LAND;"
+#endif
+#if defined(FIXEDWING)
+    24, //"CRUISE;"
+#endif
+    25,//		"DORP;"
+    26,//		"Master;"
+    27,//"Slave;"
 };
-///////////////////////////
-//*自动起飞部分声明定义*///
-/////////////////////////
-uint8_t takeoff_step=0;
-//    uint8_t TAKEOFF_IN_PROGRESS: 1;
-    //uint8_t TAKEOFF: 1;
 
 
-
-//////////////////////
 uint32_t currentTime = 0;
 uint16_t previousTime = 0;
 uint16_t cycleTime = 0;     // this is the number in micro second to achieve a full loop, it can differ a little and is taken into account in the PID loop
@@ -254,18 +188,18 @@ uint16_t calibratingG;
 int16_t  magHold,headFreeModeHold; // [-180;+180]
 uint8_t  vbatMin = VBATNOMINAL;  // lowest battery voltage in 0.1V steps
 uint8_t  rcOptions[CHECKBOXITEMS];
-int32_t  AltHold; // in cm
+int32_t  AltHold=0; // in cm
 int16_t  sonarAlt;
 int16_t  BaroPID = 0;
 int16_t  errorAltitudeI = 0;
-
+int16_t  BARO_angle[2] = { 0, 0};                      // 测试加入飞机迎角the angles for BaroAltHold of fixedwing
 // **************
 // gyro+acc IMU
 // **************
 int16_t gyroZero[3] = {0,0,0};
 
 imu_t imu;
-
+ins_t ins;
 analog_t analog;
 
 alt_t alt;
@@ -277,7 +211,7 @@ uint32_t  ArmedTimeWarningMicroSeconds = 0;
 #endif
 
 int16_t  debug[4];
-
+int16_t  D_U[8];
 flags_struct_t f;
 
 //for log
@@ -405,11 +339,12 @@ plog_t plog;
 #if GPS
 gps_conf_struct GPS_conf;
 #endif
-int16_t  GPS_angle[2] = { 0, 0};                      // the angles that must be applied for GPS correction
+int16_t  GPS_angle[3] = { 0, 0,0};                      // the angles that must be applied for GPS correction
 int32_t  GPS_coord[2];
 int32_t  GPS_home[2];
 int32_t  GPS_hold[2];
 int32_t  GPS_prev[2];                                 //previous pos
+
 int32_t  GPS_poi[2];
 uint8_t  GPS_numSat;
 uint16_t GPS_distanceToHome;                          // distance to home  - unit: meter
@@ -419,8 +354,8 @@ uint16_t GPS_altitude;                                // GPS altitude      - uni
 uint16_t GPS_speed;                                   // GPS speed         - unit: cm/s
 uint8_t  GPS_update = 0;                              // a binary toogle to distinct a GPS position update
 uint16_t GPS_ground_course = 0;                       //                   - unit: degree*10
-
-uint8_t GPS_mode  = GPS_MODE_NONE; // contains the current selected gps flight mode --> moved to the f. structure
+uint16_t GPS_altitude_cel;
+//uint8_t GPS_mode  = GPS_MODE_NONE; // contains the current selected gps flight mode --> moved to the f. structure
 uint8_t NAV_state = 0; // NAV_STATE_NONE;  /// State of the nav engine
 uint8_t NAV_error = 0; // NAV_ERROR_NONE;
 uint8_t prv_gps_modes = 0;              /// GPS_checkbox items packed into 1 byte for checking GPS mode changes
@@ -460,7 +395,7 @@ int32_t baroPressure;
 int16_t baroTemperature;
 int32_t baroPressureSum;
 #endif
-
+void cam_roll();
 void annexCode() { // this code is excetuted at each loop and won't interfere with control loop if it lasts less than 650 microseconds
     static uint32_t calibratedAccTime;
     uint16_t tmp,tmp2;
@@ -531,7 +466,6 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
         static uint16_t pvec[PSENSOR_SMOOTH], psum;
         uint16_t p =  analogRead(PSENSORPIN);
         //LCDprintInt16(p); LCDcrlf();
-        //debug[0] = p;
 #if PSENSOR_SMOOTH != 1
         psum += p;
         psum -= pvec[ind];
@@ -631,7 +565,7 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
 
 
     if ( (calibratingA>0 && ACC ) || (calibratingG>0) ) { // Calibration phasis
-    LEDPIN_TOGGLE;
+        LEDPIN_TOGGLE;
     } else {
         if (f.ACC_CALIBRATED) {
             LEDPIN_OFF;
@@ -657,7 +591,9 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
         if (! f.SMALL_ANGLES_25) {
             // the multi uses ACC and is not calibrated or is too much inclinated
             f.ACC_CALIBRATED = 0;
-             LEDPIN_TOGGLE;
+            LEDPIN_TOGGLE;
+            //PDout(1)=~PDin(1);
+            //PCout(13)=~PCin(13);
             calibratedAccTime = currentTime + 100000;
         } else {
             f.ACC_CALIBRATED = 1;
@@ -868,6 +804,7 @@ void setup() {
 }
 
 void go_arm() {
+
     if(calibratingG == 0
 #if defined(ONLYARMWHENFLAT)
             && f.ACC_CALIBRATED
@@ -918,10 +855,23 @@ void go_arm() {
         blinkLED(2,255,1);
         SET_ALARM(ALRM_FAC_ACC, ALRM_LVL_ON);
     }
+#if 0
+//#if GPS
+//    GPS_altitude_cel=GPS_altitude;//记录当前GPS相对高度
+    if (!recallWP(1)) { //尝试读取1号航点
+        NAV_error = NAV_ERROR_WP_CRC;//如果读不出航点不允许解锁
+        NAV_state = NAV_STATE_NONE;
+        go_disarm();
+    }
+#endif
+
 }
 void go_disarm() {
     if (f.ARMED) {
         f.ARMED = 0;
+#if GPS
+        //GPS_altitude_cel=0;
+#endif
 #ifdef LOG_PERMANENT
         plog.disarm++;        // #disarm events
         plog.armed_time = armedTime ;   // lifetime in seconds
@@ -933,7 +883,7 @@ void go_disarm() {
 #endif
     }
 }
-
+static int16_t initialThrottleHold;
 // ******** Main Loop *********
 void loop () {
     static uint8_t rcDelayCommand; // this indicates the number of time (multiple of RC measurement at 50Hz) the sticks must be maintained to run or switch off motors
@@ -956,7 +906,7 @@ void loop () {
     int16_t AngleRateTmp, RateError;
 #endif
     static uint16_t rcTime  = 0;
-    static int16_t initialThrottleHold;
+
     int16_t rc;
     int32_t prop = 0;
     uint16_t auxState;
@@ -984,12 +934,6 @@ void loop () {
 #endif
         rcTime = currentTime + 20000;
         computeRC();
-			
-			
-			//debug[3]=alt_diff;			//气压和超声波的差值
-			//debug[2]=Sonar_alt;
-			//debug[1]=PressAltMy;
-			//debug[0]=alt.EstAlt;    //debug[i]对应GUI界面的debug显示的值
         // Failsafe routine - added by MIS
 #if defined(FAILSAFE)
         if ( failsafeCnt > (5*FAILSAFE_DELAY) && f.ARMED) {                  // Stabilize, and set Throttle to specified level
@@ -1118,10 +1062,12 @@ void loop () {
                 }
 #endif
 #if ACC
-                else if (rcSticks == THR_HI + YAW_LO + PIT_LO + ROL_CE) calibratingA=512;     // throttle=max, yaw=left, pitch=min
+                else if (rcSticks == THR_HI + YAW_LO + PIT_LO + ROL_CE)
+                    calibratingA=512;     // throttle=max, yaw=left, pitch=min
 #endif
 #if MAG
-                else if (rcSticks == THR_HI + YAW_HI + PIT_LO + ROL_CE) f.CALIBRATE_MAG = 1;  // throttle=max, yaw=right, pitch=min
+                else if (rcSticks == THR_HI + YAW_HI + PIT_LO + ROL_CE)
+                    f.CALIBRATE_MAG = 1;  // throttle=max, yaw=right, pitch=min
 #endif
                 i=0;
                 if      (rcSticks == THR_HI + YAW_CE + PIT_HI + ROL_CE) {
@@ -1247,7 +1193,10 @@ void loop () {
                 BaroPID=0;
             }
         } else {
+
             f.BARO_MODE = 0;
+
+            //LED2_OFF;
         }
 #endif
 #ifdef VARIOMETER
@@ -1259,6 +1208,8 @@ void loop () {
             f.VARIO_MODE = 0;
         }
 #endif
+
+
 #endif
         if (rcOptions[BOXMAG]) {
             if (!f.MAG_MODE) {
@@ -1290,59 +1241,98 @@ void loop () {
             headFreeModeHold = att.heading; // acquire new heading
         }
 #endif
-///////////////////
-/*
- 自动起飞代码
-
-
-
-
-*/
-if(NAV_state == NAV_STATE_TAKEOFF_SETTLE)				
-	initialThrottleHold=TAKEOFF_Init_SPEED;//设置怠速值		
-if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
-                initialThrottleHold = ALT_HOLD_THROTTLE_MIDPOINT;
 
 #if GPS
+static uint8_t last_dorp_status=0;
+				if(last_dorp_status!=rcOptions[BOXDROP])
+				{
+					last_dorp_status=rcOptions[BOXDROP];
+        if (rcOptions[BOXDROP]) {
+            if (!f.USER_DROP) {
+                f.USER_DROP=1;
+            }
+        } else {
+						//user_mission_dorp.drop_status=0;
+            f.USER_DROP = 0;
+        }
+			}
         // This handles the three rcOptions boxes
         // unlike other parts of the multiwii code, it looks for changes and not based on flag settings
         // by this method a priority can be established between gps option
 
         //Generate a packed byte of all four GPS boxes.
+#if defined(FIXEDWING)
+        //f.CRUISE_MODE = (rcOptions[BOXCRUISE];   //原来的
+        //f.CRUISE_MODE = (rcOptions[BOXCRUISE] && !f.FAILSAFE_RTH_ENABLE && !rcOptions[BOXGPSHOME]);  //在失控情况下应该关闭此模式   f.FAILSAFE_RTH_ENABLE == 1  ========================
+        //if (f.GPS_mode == GPS_MODE_RTH) rcOptions[BOXGPSHOME] = true; //后加的，用于fence返航时，rcOptions[BOXGPSHOME]开关并没打开时，状态f.GPS_mode == GPS_MODE_RTH不被修改
+        f.CRUISE_MODE = (rcOptions[BOXCRUISE] && !f.FAILSAFE_RTH_ENABLE && !rcOptions[BOXGPSHOME] && (f.GPS_mode != GPS_MODE_RTH));  //在失控情况下应该关闭此模式   f.FAILSAFE_RTH_ENABLE == 1  =====================
+        if(f.CRUISE_MODE) rcOptions[BOXGPSHOLD]=true;    //=通过rcOptions[BOXGPSHOLD]不断设置新的航点,见GPS.cpp中680行===================================
+//        debug[0] = f.GPS_mode;
+//        debug[1] =  rcOptions[BOXGPSNAV];
+//        debug[2] =  NAV_state; //NAV_STATE_PROCESS_NEXT
+//        debug[3] = mission_step.number;
+#endif
+        uint8_t gps_modes_check = (rcOptions[BOXLAND]<< 3) + (rcOptions[BOXGPSHOME]<< 2) + (rcOptions[BOXGPSHOLD]<<1) + (rcOptions[BOXGPSNAV]);
 
-        gps_modes_check = (rcOptions[BOXTAKEOFF]<< 4) + (rcOptions[BOXLAND]<< 3) + (rcOptions[BOXGPSHOME]<< 2) + (rcOptions[BOXGPSHOLD]<<1) + (rcOptions[BOXGPSNAV]);
-
-        if (f.ARMED ) {                       //Check GPS status and armed
+        if (f.ARMED || f.Fixed_Wing_Nav)  {     //Check GPS status and armed
             //TODO: implement f.GPS_Trusted flag, idea from Dramida - Check for degraded HDOP and sudden speed jumps
             if (f.GPS_FIX) {
                 if (GPS_numSat >5 ) {
-                    if (prv_gps_modes != gps_modes_check) {                           //Check for change since last loop
+#if defined(AP_MODE)   //只应该对多轴有意义============================
+                    if (f.GPS_mode == GPS_MODE_HOLD && (abs(rcCommand[ROLL]) > AP_MODE || abs(rcCommand[PITCH]) > AP_MODE))
+                        GPS_set_next_wp(&GPS_coord[LAT], &GPS_coord[LON],&GPS_coord[LAT], & GPS_coord[LON]); // Move HoldPos
+#endif
+                    if(f.Fixed_Wing_Nav && (f.GPS_mode != GPS_MODE_NONE &&(!f.HORIZON_MODE && !f.ANGLE_MODE))) f.ANGLE_MODE = true;
+                    if(f.USER_RTH_FLAG)//地面要求返航
+                    {
+                        f.USER_RTH_FLAG=0;
+                        init_RTH();
+                    } else if(f.USER_DROP_FLAG)
+                    {
+                        f.USER_DROP_FLAG=0;//设置新航点
+                        if (f.GPS_mode == GPS_MODE_NAV) {
+                            next_step = user_mission_dorp.drop_wp-1;
+                            NAV_state = NAV_STATE_PROCESS_NEXT;
+                            user_mission_dorp.drop_status=1;
+                            GPS_prev[LAT] = GPS_coord[LAT];//重设航点
+                            GPS_prev[LON] = GPS_coord[LON];
+                        }
+
+                    }
+                    //===========================================================================================================================
+                    //debug[0] = prv_gps_modes; //失控时值为0xff
+                    //debug[1] = gps_modes_check; //失控时值为0
+                    //===========================================================================================================================
+                    //if (prv_gps_modes != gps_modes_check) {      //Check for change since last loop 原版在失控保护时，将会不断重复进入！！！=================================
+                    if ((prv_gps_modes != gps_modes_check)&&(!f.FAILSAFE_RTH_ENABLE)) {     //Check for change since last loop f.FAILSAFE_RTH_ENABLE变为1时，已经调用init_RTH()
                         NAV_error = NAV_ERROR_NONE;
-                        if (rcOptions[BOXGPSHOME]) {                                    // RTH has the priotity over everything else
-                            init_RTH();
+                        if (rcOptions[BOXGPSHOME] || f.FAILSAFE_RTH_ENABLE ) {          // RTH has the priotity over everything else
+                            init_RTH();    //1160行处有因failsafe调用了一次init_RTH();
                         } else if (rcOptions[BOXGPSHOLD]) {                             //Position hold has priority over mission execution  //But has less priority than RTH
                             if (f.GPS_mode == GPS_MODE_NAV)
                                 NAV_paused_at = mission_step.number;
                             f.GPS_mode = GPS_MODE_HOLD;
+                            clearNav(); //==后加，每次进入时都清除以前的I值======================
                             f.GPS_BARO_MODE = true;  //f.GPS_BARO_MODE = false;
                             GPS_set_next_wp(&GPS_coord[LAT], &GPS_coord[LON],&GPS_coord[LAT], & GPS_coord[LON]); //hold at the current position
-                            set_new_altitude(alt.EstAlt);                                //and current altitude
+                            set_new_altitude(SET_ALT_ROI);//==单位米===
                             NAV_state = NAV_STATE_HOLD_INFINIT;
-                        } else if (rcOptions[BOXLAND]) {                               //Land now (It has priority over Navigation)
-                            f.GPS_mode = GPS_MODE_HOLD;
-                            f.GPS_BARO_MODE = true;
-                            GPS_set_next_wp(&GPS_coord[LAT], &GPS_coord[LON],&GPS_coord[LAT], & GPS_coord[LON]);
-                            set_new_altitude(alt.EstAlt);
-                            NAV_state = NAV_STATE_LAND_START;
-                        }else if (rcOptions[TAKEOFF]) {                               //Land now (It has priority over Navigation)
-                          if(!f.TAKEOFF_COMPLETED){
-														f.GPS_mode = GPS_MODE_HOLD;
-														f.GPS_BARO_MODE = true;
-														GPS_set_next_wp(&GPS_coord[LAT], &GPS_coord[LON],&GPS_coord[LAT], & GPS_coord[LON]);
-                            set_new_altitude(alt.EstAlt);
-                            NAV_state = NAV_STATE_TAKEOFF_START;
-													}
-                        }else if (rcOptions[BOXGPSNAV]) {                             //Start navigation
+                            //===========================================================================================================================
+                            //GPS_hold[ALT] = GPS_altitude; //FIXEDWING  选用气压计在此精度更高==================================
+                            //GPS_hold[ALT] = alt.EstAlt; //FIXEDWING  //GPS_hold[ALT]好象没有使用过？？？！！！==============================
+                            f.CLIMBOUT_FW = 0 ;
+                        }
+#ifndef SLIM_WING   //大展弦比机翼？？？ 滑翔机？？？//超薄翼型
+//            else if (rcOptions[BOXLAND]) {                               //Land now (It has priority over Navigation)
+//              f.GPS_mode = GPS_MODE_HOLD;    //f.GPS_mode  控制否进入固定翼导航代码FW_NAV()  if (( f.GPS_mode != GPS_MODE_NONE ) && f.GPS_FIX_HOME ) {
+//              f.GPS_BARO_MODE = true;
+//              GPS_set_next_wp(&GPS_coord[LAT], &GPS_coord[LON],&GPS_coord[LAT], & GPS_coord[LON]);
+//              set_new_altitude(alt.EstAlt);
+//              NAV_state = NAV_STATE_LAND_START;
+//              NAV_state = NAV_STATE_NONE; //固定翼的降落======================================
+//            }
+#endif
+                        else if (rcOptions[BOXGPSNAV]) {                             //Start navigation
                             f.GPS_mode = GPS_MODE_NAV;                                   //Nav mode start
                             f.GPS_BARO_MODE = true;
                             GPS_prev[LAT] = GPS_coord[LAT];
@@ -1350,8 +1340,8 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
                             if (NAV_paused_at != 0) {
                                 next_step = NAV_paused_at;
                                 NAV_paused_at = 0;                                         //Clear paused step
-                            }else{
-                                next_step = 1;
+                            } else {
+                                next_step = 1;  //===0为Home点======================================
                                 jump_times = -10;                                          //Reset jump counter
                             }
                             NAV_state = NAV_STATE_PROCESS_NEXT;
@@ -1361,19 +1351,37 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
                             f.THROTTLE_IGNORED = false;
                             f.LAND_IN_PROGRESS = 0;
                             f.THROTTLE_IGNORED = 0;
-														f.TAKEOFF_COMPLETED = 0;  //自动起飞未完成
-														f.TAKEOFF_IN_PROGRESS = 0; //自动起飞执行中 
+                            user_mission_dorp.drop_status=0;
                             NAV_state = NAV_STATE_NONE;
                             GPS_reset_nav();
+                            f.CLIMBOUT_FW = 0 ;
                         }
                         prv_gps_modes = gps_modes_check;
+
+                    }   //if ((prv_gps_modes != gps_modes_check)&&(!f.FAILSAFE_RTH_ENABLE))
+                    //========2017/12/31添加，用于pitch控制定高==============================================================
+                    if(f.GPS_mode == GPS_MODE_HOLD) {
+//              if(abs(rcCommand[ROLL])>=150||abs(rcCommand[YAW])>=150){  //====改变定点=============
+//                    GPS_set_next_wp(&GPS_coord[LAT], &GPS_coord[LON],&GPS_coord[LAT], & GPS_coord[LON]); //hold at the current position
+//                    debug[0]=(uint16_t)GPS_coord[LAT]; //================
+//                    debug[1]=target_bearing;
+//              }
+                        if(ABS(rcCommand[PITCH])>=150) {
+                            //set_new_altitude(alt.EstAlt);      //按原来的进行测试，测试完成后请打开      alt_to_hold                     //and current altitude
+                            //set_new_altitude(alt_to_hold); //===2017/12/26=====
+                            set_new_altitude(SET_ALT_ROI);//==单位米===
+                            clearNav(); //==后加，每次进入时都清除以前的I值======================
+                        }
                     }
+                    //debug[2]=GPS_altitude * 100; //================
+                    //debug[3]=rcCommand[PITCH];
+                    //============================================================================================================
                 } else { //numSat>5
                     //numSat dropped below 5 during navigation
                     if (f.GPS_mode == GPS_MODE_NAV) {
                         NAV_paused_at = mission_step.number;
                         f.GPS_mode = GPS_MODE_NONE;
-                        set_new_altitude(alt.EstAlt);                                  //and current altitude
+                        set_new_altitude(SET_ALT_ROI);                                  //and current altitude
                         NAV_state = NAV_STATE_NONE;
                         NAV_error = NAV_ERROR_SPOILED_GPS;
                         prv_gps_modes = 0xff;                                          //invalidates mode check, to allow re evaluate rcOptions when numsats raised again
@@ -1382,6 +1390,7 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
                         f.GPS_mode = GPS_MODE_NONE;
                         NAV_state = NAV_STATE_NONE;
                         NAV_error = NAV_ERROR_SPOILED_GPS;
+                        f.GPS_BARO_MODE = false;
                         prv_gps_modes = 0xff;                                          //invalidates mode check, to allow re evaluate rcOptions when numsats raised again
                     }
                     nav[0] = 0;
@@ -1406,20 +1415,55 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
             NAV_error = NAV_ERROR_DISARMED;
             GPS_reset_nav();
         }
-
+        //============================================================================================================================
+        if(rcOptions[BOXLAND]) { //==========单独设置降落，如果开启导航中断===============================
+            f.GPS_mode = GPS_MODE_NONE; //f.GPS_mode  控制否进入固定翼导航代码FW_NAV()  if (( f.GPS_mode != GPS_MODE_NONE ) && f.GPS_FIX_HOME ) {
+            //uint8_t  flapAngle = constrain((rcData[AUX4]-1000)/100,0,10);  //====取消襟翼角度补尝=========
+//        //debug[3] = flapAngle;
+            BARO_angle[PITCH] = 55; //BARO_angle[PITCH] = 90 + flapAngle; //BARO_angle[PITCH] = 70; //attackAngle = -70;  //
+            BARO_angle[ROLL] = 0;
+//        debug[1] = BARO_angle[PITCH];
+            NAV_state = NAV_STATE_NONE;
+//        //===========测试================================================
+//        recallWP(0);
+//        debug[2] = mission_step.number;
+//        debug[3] = mission_step.flag;
+        } else {
+            BARO_angle[PITCH] = 0;//BARO_angle[PITCH] = 0;
+            BARO_angle[ROLL] = 0;
+//        recallWP(1);
+//        debug[0] = mission_step.number;
+//        debug[1] = mission_step.flag;
+//        recallWP(3);
+//        debug[2] = mission_step.number;
+//        debug[3] = mission_step.flag;
+        }
+        //===========================================================================================================================
 #endif //GPS
 
-#if defined(FIXEDWING) || defined(HELICOPTER)
-        if (rcOptions[BOXPASSTHRU]) {
-            f.PASSTHRU_MODE = 1;
+#if (defined(FIXEDWING) || defined(HELICOPTER))
+        if (rcOptions[BOXPASSTHRU] && !f.FS_MODE) {
+            f.PASSTHRU_MODE = 1;   //===========何时允许手动控制，注意相应的条件！！！！=================================================
         }
+        // if (rcOptions[BOXPASSTHRU] && !f.FS_MODE  && f.GPS_mode == GPS_MODE_NONE)) {f.PASSTHRU_MODE = 1;}
         else {
             f.PASSTHRU_MODE = 0;
         }
 #endif
 
+
+
     } else { // not in rc loop
+
+
+
         static uint8_t taskOrder=0; // never call all functions in the same loop, to avoid high delay spikes
+
+
+        // do rotation of acceleration X/Y/Z to earth frame
+        //	rotateAccelToEarthFrame();
+
+
         switch (taskOrder) {
         case 0:
             taskOrder++;
@@ -1429,12 +1473,21 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
         case 1:
             taskOrder++;
 #if BARO
+            //PDout(11)=1;
             if (Baro_update() != 0) break; // for MS baro: I2C set and get: 220 us  -  presure and temperature computation 160 us
+            //PDout(11)=1;
+            D_U[0]=alt.EstAlt;
 #endif
         case 2:
             taskOrder++;
 #if BARO
+
+            PDout(11)=1;
             if (getEstimatedAltitude() != 0) break; // 280 us
+
+//			  if (calculateZ_INS()) break;
+
+//							PDout(11)=1;
 #endif
         case 3:
             taskOrder++;
@@ -1446,17 +1499,7 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
 #endif
         case 4:
             taskOrder=0;
-            //#if SONAR
-#if 1
-            Sonar_update1(); //debug[2] = sonarAlt;
-#endif
-#if TrigPin
-            if(sonarTimer < currentTime) {
-                sonarTimer = currentTime + 40000;
-                Sonar_update1();
-                //debug[2] = sonarAlt;//debug 超声波
-            }
-#endif
+
 #ifdef LANDING_LIGHTS_DDR
             auto_switch_landing_lights();
 #endif
@@ -1466,7 +1509,6 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
             break;
         }
     }
-    computeIMU();
     while(1) {
         currentTime = micros();
         cycleTime = currentTime - previousTime;
@@ -1477,9 +1519,8 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
 #endif
     }
     previousTime = currentTime;
-    //***********************************
-    //**** Experimental FlightModes *****
-    //***********************************
+    computeIMU();
+
 #if defined(ACROTRAINER_MODE)
     if(f.ANGLE_MODE) {
         if (ABS(rcCommand[ROLL]) + ABS(rcCommand[PITCH]) >= ACROTRAINER_MODE ) {
@@ -1491,7 +1532,17 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
         }
     }
 #endif
-
+        if(user_mission_dorp.drop_status==3)
+        {
+            f.USER_DROP=1;//导航任务决定
+        }
+        if(f.USER_DROP) {
+            servo[0]=1000;
+            servo[1]=2000;
+        } else {
+            servo[0]=2000;
+            servo[1]=1000;
+        }
     //***********************************
     // THROTTLE sticks during mission and RTH
 #if GPS
@@ -1501,8 +1552,9 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
             //rcCommand[PITCH] = 0;
             //rcCommand[YAW] = 0;
             f.THROTTLE_IGNORED = 1;
-        } else
+        } else {
             f.THROTTLE_IGNORED = 0;
+        }
     }
 
     //Heading manipulation TODO: Do heading manipulation
@@ -1519,6 +1571,8 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
     /* Smooth alt change routine , for slow auto and aerophoto modes (in general solution from alexmos). It's slowly increase/decrease
     * altitude proportional to stick movement (+/-100 throttle gives about +/-50 cm in 1 second with cycle time about 3-4ms)
     */
+
+
 #if BARO && (!defined(SUPPRESS_BARO_ALTHOLD))
     if (f.BARO_MODE) {
         static uint8_t isAltHoldChanged = 0;
@@ -1534,21 +1588,12 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
                 AltHoldCorr %= 512;
 
             }
-            debug[0]--;
+            //debug[1]--;
         }
 
-        
-        if(f.TAKEOFF_IN_PROGRESS)//利用定高实现平稳起飞
-        {
-         debug[2]++;
-         AltHoldCorr += TAKEOFF_SPEED;
-         if(ABS(AltHoldCorr) > 512) {
-           AltHold += AltHoldCorr/512;
-           AltHoldCorr %= 512;
-                 }
-				 debug[1]--;
-        }
 #endif
+
+
         //IF Throttle not ignored then allow change altitude with the stick....
         if ( (ABS(rcCommand[THROTTLE]-initialThrottleHold)>ALT_HOLD_THROTTLE_NEUTRAL_ZONE) && !f.THROTTLE_IGNORED) {
             // Slowly increase/decrease AltHold proportional to stick movement ( +100 throttle gives ~ +50 cm in 1 second with cycle time about 3-4ms)
@@ -1567,70 +1612,33 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
     }
 #endif //BARO
 
-
-
-
-//	//光流
-//int16_t  OPTIC_angle[2] = {0,0};
-//int16_t  OPTIC_P[2]= {0,0};
-//int16_t  OPTIC_I[2]= {0,0};
-//int16_t  OPTIC_D[2]= {0,0};
-//int16_t  OPTIC_Pre[2]= {0,0};
-//
-/*
-    if(f.OPTIC_MODE)//开启光流模式
-    {
-
-        OPTIC_angle[0]=OF_DX2;
-        OPTIC_angle[1]=OF_DY2;
-        OPTIC_angle2[0]=OF_DX2FIX;
-        OPTIC_angle2[1]=OF_DY2FIX;
-        //OPTIC_DIS_SUM[0]+=OF_DX2FIX;
-        //OPTIC_DIS_SUM[1]+=OF_DY2FIX;
-        for(axis=0; axis<2; axis++)
-        {
-
-            //OPTIC_angle[axis]+=OPTIC_DIS_SUM[axis];
-            OPTIC_P[axis]=constrain(OPTIC_angle[axis]*OPTIC_PID[axis][0],-500,+500);
-
-
-            OPTIC_ISUM[axis]+=constrain(OPTIC_angle2[axis],-50,+50);
-            OPTIC_ISUM[axis]=constrain(OPTIC_ISUM[axis],-1000,+1000);
-            OPTIC_I[axis]=constrain((OPTIC_ISUM[axis]*OPTIC_PID[axis][1])>>5,-500,+500);
-
-            OPTIC_D[axis]=constrain((OPTIC_angle[axis]-OPTIC_Pre[axis])*OPTIC_PID[axis][2],-500,+500);
-            OPTIC_Pre[axis]=OPTIC_angle[axis];
-
-            OPTIC_angle[axis]=constrain(OPTIC_P[axis]+OPTIC_I[axis]-OPTIC_D[axis],-100,+100);
-        }
-
-
-        //debug[2]=OPTIC_angle[0];
-        //debug[3]=OPTIC_angle[1];
-    }
-*/
 #if defined(THROTTLE_ANGLE_CORRECTION)
     if(f.ANGLE_MODE || f.HORIZON_MODE) {
         rcCommand[THROTTLE]+= throttleAngleCorrection;
     }
 #endif
-
 #if GPS
     //TODO: split cos_yaw calculations into two phases (X and Y)
     if (( f.GPS_mode != GPS_MODE_NONE ) && f.GPS_FIX_HOME ) {
+#if !defined(FIXEDWING)
         sin_yaw_y = sin(att.heading*0.0174532925f);
         cos_yaw_x = cos(att.heading*0.0174532925f);
         GPS_angle[ROLL]   = (nav[LON]*cos_yaw_x - nav[LAT]*sin_yaw_y) /10;
         GPS_angle[PITCH]  = (nav[LON]*sin_yaw_y + nav[LAT]*cos_yaw_x) /10;
         GPS_angle[ROLL]   = constrain(GPS_angle[ROLL],-150,+150);
         GPS_angle[PITCH]  = constrain(GPS_angle[PITCH],-150,+150);
+#else
+        FW_NAV();//固定翼导航使用
+#endif
 
-				
 
     } else {
         GPS_angle[ROLL]  = 0;
         GPS_angle[PITCH] = 0;
+        GPS_angle[YAW] = 0;
     }
+    //debug[0]=GPS_angle[ROLL];
+    //debug[1]=GPS_angle[PITCH];
 
     //Used to communicate back nav angles to the GPS simulator (for HIL testing)
 #if defined(GPS_SIMULATOR)
@@ -1639,10 +1647,8 @@ if(NAV_state == NAV_STATE_TAKEOFF_START_DESCENT)
     SerialWrite16(2,nav[LON]+rcCommand[ROLL]);
     SerialWrite16(2,(nav[LAT]+rcCommand[PITCH])-(nav[LON]+rcCommand[ROLL])); //check
 #endif
-
 #endif //GPS
-debug[2]=GPS_angle[ROLL];
-				debug[3]=GPS_angle[PITCH];
+
     //**** PITCH & ROLL & YAW PID ****
 #if PID_CONTROLLER == 1 // evolved oldschool
     if ( f.HORIZON_MODE ) prop = MIN(MAX(ABS(rcCommand[PITCH]),ABS(rcCommand[ROLL])),512);
@@ -1651,8 +1657,8 @@ debug[2]=GPS_angle[ROLL];
     for(axis=0; axis<2; axis++) {
         rc = rcCommand[axis]<<1;
         if(rc)
-            OPTIC_angle[axis]=0;
-        error = rc - imu.gyroData[axis];
+            //OPTIC_angle[axis]=0;
+            error = rc - imu.gyroData[axis];
         errorGyroI[axis]  = constrain(errorGyroI[axis]+error,-16000,+16000);       // WindUp   16 bits is ok here
         if (ABS(imu.gyroData[axis])>640) errorGyroI[axis] = 0;
 
@@ -1662,7 +1668,7 @@ debug[2]=GPS_angle[ROLL];
 
         if (f.ANGLE_MODE || f.HORIZON_MODE) { // axis relying on ACC
             // 50 degrees max inclination
-            errorAngle         = constrain(rc + GPS_angle[axis],-500,+500) - att.angle[axis] + conf.angleTrim[axis] + OPTIC_angle[axis]; //16 bits is ok here
+            errorAngle         = constrain(rc + GPS_angle[axis],-500,+500) - att.angle[axis] + conf.angleTrim[axis] ; //16 bits is ok here
             errorAngleI[axis]  = constrain(errorAngleI[axis]+errorAngle,-10000,+10000);                                                // WindUp     //16 bits is ok here
 
             PTermACC           = mul(errorAngle,conf.pid[PIDLEVEL].P8)>>7; // 32 bits is needed for calculation: errorAngle*P8 could exceed 32768   16 bits is ok for result
@@ -1720,7 +1726,7 @@ debug[2]=GPS_angle[ROLL];
         //-----Get the desired angle rate depending on flight mode
         if ((f.ANGLE_MODE || f.HORIZON_MODE) && axis<2 ) { // MODE relying on ACC
             // calculate error and limit the angle to 50 degrees max inclination
-            errorAngle = constrain((rcCommand[axis]<<1) + GPS_angle[axis],-500,+500) - att.angle[axis] + conf.angleTrim[axis]; //16 bits is ok here
+            errorAngle = constrain((rcCommand[axis]<<1) + GPS_angle[axis],-500,+500) - att.angle[axis] + conf.angleTrim[axis]+BARO_angle[axis]; //16 bits is ok here
         }
         if (axis == 2) {//YAW is always gyro-controlled (MAG correction is applied to rcCommand)
             AngleRateTmp = (((int32_t) (conf.yawRate + 27) * rcCommand[2]) >> 5);
@@ -1779,9 +1785,13 @@ debug[2]=GPS_angle[ROLL];
 #endif
     mixTable();
     // do not update servos during unarmed calibration of sensors which are sensitive to vibration
+    //servo[0]=readRawRC(6)/10;
+    //servo[1]=readRawRC(7)/10;
+    //cam_roll();
 #if defined(DISABLE_SERVOS_WHEN_UNARMED)
     if (f.ARMED) writeServos();
 #else
+    //servo[5]=1500-axisPID[YAW];
     if ( (f.ARMED) || ((!calibratingG) && (!calibratingA)) ) writeServos();
 #endif
     writeMotors();
@@ -1790,7 +1800,7 @@ debug[2]=GPS_angle[ROLL];
 
 #include "OLED.h"
 #define FCLK 	72000000		//系统时钟72mhz
-#define OSFREQ 100000		//中断频率10us
+#define OSFREQ  100000		//中断频率10us
 
 //extern int main2(void);
 #include "OLED.h"
@@ -1799,142 +1809,264 @@ debug[2]=GPS_angle[ROLL];
 #include "gy_86.h"
 #include "usb_ch341.h"
 #include "spi.h"
+void LED_init(uint8_t x)
+{
+#if defined(GUET_FLY_MINI_V1)
+    if(x==1)
+    {
+        LED1_OFF;
+        LED2_OFF;
+        delay_ms(100);
+        LED1_ON;
+        delay_ms(100);
+        LED2_ON;
+        delay_ms(100);
+    }
+    else
+    {
+        LED1_OFF;
+        delay_ms(100);
+        LED2_OFF;
+        delay_ms(100);
+    }
+#elif define(GUET_FLY_V1)
+#define This_LED_H 0x003E
+#define This_LED_L 0xFFC1
+    uint8_t i;
+    uint16_t temp,temp2;
+    GPIOE->ODR|=This_LED_H;
+    if(x==1) {
+        for(i=4; i>0; i--)
+        {
+            temp=0x0001<<(i+1);
+            temp2=~(This_LED_H&(~temp));
+            GPIOE->ODR&=This_LED_L|(~temp);//清空LED
+            delay_ms(100);
+
+            GPIOE->ODR|=temp;
+        }
+
+    } else {
+        for(i=0; i<5; i++)
+        {
+            temp=0x0001<<(i+1);
+            temp2=~(This_LED_H&(~temp));
+            GPIOE->ODR&=This_LED_L|(~temp);//清空LED
+            delay_ms(100);
+
+            GPIOE->ODR|=temp;
+        }
+    }
+#else
+    if(x==1)
+        LED1_ON;
+    else
+        LED1_OFF;
+
+#endif
+}
 void GPIO_Configuration(void)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
+#if defined(GUET_FLY_MINI_V1)
+    RCC->APB2ENR|=1<<2;     //使能PORTA时钟
+    GPIOA->CRL&=0XFFFFFF00; //清零相应位
+    GPIOA->CRL|=0X00000033; //推完输出
 
-    RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE, ENABLE);
-    /**
-    *  LED1 -> PF6 , LED2 -> PF7 , LED3 -> PF8 , LED4 -> PF9
-    */
-    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_0|GPIO_Pin_1 ;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-    GPIO_SetBits(GPIOA, GPIO_Pin_0);
-    GPIO_ResetBits(GPIOA, GPIO_Pin_0);
+#elif defined(GUET_FLY_V1)
+    RCC->APB2ENR|=1<<4;     //使能PORTC时钟
+    GPIOC->CRL&=0XFFF0FFFF; //清零相应位
+    GPIOC->CRL|=0X00030000; //推完输出
 
 
+    RCC->APB2ENR|=1<<3;     //使能PORTB时钟
+    GPIOB->CRH&=0XF0F0FFFF; //清零相应位
+    GPIOB->CRH|=0X03030000; //推完输出
 
-    /**
-    *  LED1 -> PF6 , LED2 -> PF7 , LED3 -> PF8 , LED4 -> PF9
-    */
+    PBout(12)=1;//IIC_SPI_CH
+    PBout(14)=0;//MISO
 
 
-    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_15;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-// GPIO_Init(GPIOB, &GPIO_InitStructure);
+    //器件片选
+    RCC->APB2ENR|=1<<5;     //使能PORTD时钟
 
-    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_14;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-// GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIOD->CRL&=0XFFF00000; //清零相应位
+    GPIOD->CRL|=0X00033333; //推完输出
 
-    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-    GPIO_Init(GPIOE, &GPIO_InitStructure);
+    GPIOD->CRH&=0XFFFFF00F; //清零相应位
+    GPIOD->CRH|=0X00000330; //推完输出
 
-    PEout(1)=0;
-    PEout(2)=0;
-    PEout(3)=0;
-    PEout(4)=0;
-    PEout(5)=0;
+
+    PDout(10)=1;//
+    PDout(11)=1;//
+
+    //LED
+    RCC->APB2ENR|=1<<6;     //使能PORTE时钟
+    GPIOE->CRL&=0XFF000000; //清零相应位
+    GPIOE->CRL|=0X00333333; //推完输出
+    GPIOE->ODR&=~0xffc1;
+#else
+    RCC->APB2ENR|=1<<4;     //使能PORTC时钟
+    GPIOC->CRH&=0XFF0FFFFF; //清零相应位
+    GPIOC->CRH|=0X00300000; //推完输出
+#endif
 }
-u8 temp2[32];
-
-void Sonar_init_my()
-{
-
-    GPIO_InitTypeDef GPIO_InitStructure;
-    EXTI_InitTypeDef EXTI_InitStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
-
-
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
-    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_3 ;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_4 ;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-
-    //清空中断标志
-
-    GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource4);
-    EXTI_InitStructure.EXTI_Line = EXTI_Line4; //选择中断线路
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt; //设置为中断请求，非事件请求
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling; //设置中断触发方式为下降沿触发
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;                           //外部中断使能
-    EXTI_Init(&EXTI_InitStructure);
-    NVIC_InitStructure.NVIC_IRQChannel = EXTI4_IRQn;			//使能外部中断通道
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x02;	//抢占优先级2，
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x03;					//子优先级3
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;								//使能外部中断通道
-    NVIC_Init(&NVIC_InitStructure);
-}
-void EXTI4_IRQHandler()
-{
-    EXTI_ClearITPendingBit(EXTI_Line4);
-    if(PBin(4)==0)
-    {   //下降沿
-        Sonar_time_now=micros();
-        Sonar_alt=(Sonar_time_now-Sonar_time_pre)*0.017;
-    } else {
-        //上升沿
-        Sonar_time_pre=micros();
-    }
-}
-//1youmen
-//2fangcuiang
-//3shengjiang
-//4henggun 
+//u8 temp2[32];
+#define A_airspeed
 int main()
 {
-	  //debug[0];
-    Stm32_Clock_Init(9);//系统时钟设置
-    SysTick_Config(FCLK/OSFREQ);//系统滴答时钟
-    USB_CH341_Init();
-  #if !defined(SBUS__)
+    //u16 jjj=0;
+    //基础初始化，硬件底层部分的初始化一般不用修改
+    Stm32_Clock_Init(9);//系统时钟设置倍频
+    SysTick_Config(72000);//新修改1ms定时，减少系统负担
+    JTAG_Set(SWD_ENABLE);//修改SWD模式，释放被占用的IO口
+//#if !defined(GUET_FLY_MINI_V1)//mini板不带USB
+    USB_CH341_Init();//虚拟串口
+//#endif
+#if !defined(SBUS__)
     TIM1_Cap_Init(0XFFFF,72-1);	//以1Mhz的频率计数，这个是PPM捕获使用的
-	#endif    
-	  GPIO_Configuration();
-    I2C_GPIO_Config();
-	#if defined(GPS_SERIAL)
-    uart_init(72,921600);
-	#endif
-    USART2_Configuration(115200);
-    #if !defined(SBUS__)
-    USART3_Configuration(115200);//串口3
-#else
-    USART3_Configuration(100000);
 #endif
-    JTAG_Set(SWD_ENABLE);
-//    Sonar_init_my();
-//    TIM3_PWM_Init(1999,72); //400Hz (0-2000)
-//  	TIM4_PWM_Init(1999,720-1);//50hz  720分频，计数2000，，=>10us计数，10us*2000=20ms
-    while((USART1->SR&0X40)==0);//循环发送,直到发送完毕
-    USART1->DR = 0x65;
-    while((USART2->SR&0X40)==0);//循环发送,直到发送完毕
-    USART2->DR = 0x65;
-    while((USART3->SR&0X40)==0);//循环发送,直到发送完毕
-    USART3->DR = 0x65;
-	  #if defined(USE_EX_EEPROM)
+    GPIO_Configuration();//LED初始化
+    I2C_GPIO_Config();
+#if defined(USE_EX_EEPROM)
     EEPROM_I2C_GPIO_Config();//EEPROM的IIC
     while(AT24CXX_Check())
     {
         delay_ms(1000);
         EEPROM_I2C_GPIO_Config();//EEPROM的IIC
     }
-		#endif
+#endif
+    LED_init(1);
+#if 0
+    init_A_airspeed();
+    while(1)
+        Get_Adc(1);
+#endif
+
+#if 0
+    calibratingB=50;
+    spl0601_init();
+    while(1)
+    {
+        //uint8_t b[3];
+        //EX_i2c_read_reg_to_buf(0x76, 0x03, (uint8_t*)&temp2, sizeof(b));
+//b[0]=EX_i2c_readReg(0x76,00);
+        user_spl0601_get();
+        delay_ms(12);
+    }
+#endif
+#if 0
+    while(1)
+    {
+        //temp22[0]=Single_ReadI2C(0xaa,10);
+        //	EX_Single_WriteI2C(0x3c,00);
+        delay_ms(1);
+        temp2[0]=EX_i2c_readReg(0x1e,00);
+    }
+#endif
+//    /****************/
+//    //定时器分频，前面是计数，后面是分频，默认前面不更改，更改后面部分，72代表400hz（电调使用），720-1代表50Hz（舵机使用）
+//    //TIM1_PWM_Init(1999,720-1);//高级定时器，//50hz  720分频，计数2000，，=>10us计数，10us*2000=20ms
+//
+//    //IIC、串口等高级接口初始化
+//
+//    //关于串口，0-3号串口收到的数据都在堆栈里，4-5号串口收到数据暂时没设计进入堆栈，详情看UART5_IRQHandler()
+#if defined(GPS_SERIAL)
+
+#if  (GPS_SERIAL==1)
+#undef SERIAL1_COM_SPEED
+#define SERIAL1_COM_SPEED GPS_BAUD
+#endif
+
+#if  (GPS_SERIAL==1)
+#undef SERIAL1_COM_SPEED
+#define SERIAL1_COM_SPEED GPS_BAUD
+#endif
+
+#if  (GPS_SERIAL==2)
+#undef SERIAL2_COM_SPEED
+#define SERIAL2_COM_SPEED GPS_BAUD
+#endif
+
+#if  (GPS_SERIAL==3)
+#undef SERIAL3_COM_SPEED
+#define SERIAL3_COM_SPEED GPS_BAUD
+#endif
+
+#if  (GPS_SERIAL==4)
+#undef SERIAL4_COM_SPEED
+#define SERIAL4_COM_SPEED GPS_BAUD
+#endif
+
+#if  (GPS_SERIAL==5)
+#undef SERIAL5_COM_SPEED
+#define SERIAL5_COM_SPEED GPS_BAUD
+#endif
+#endif
+    uart_init(72,SERIAL1_COM_SPEED);//串口1
+    USART2_Configuration(SERIAL2_COM_SPEED);//串口2
+#if !defined(SBUS__)
+    USART3_Configuration(SERIAL3_COM_SPEED);//串口3
+#else
+    USART3_Configuration(100000);
+#endif
+#if defined(STM32F10X_HD)
+    USART4_Configuration(SERIAL4_COM_SPEED);
+    USART5_Configuration(SERIAL5_COM_SPEED);
+#endif
+    while((USART1->SR&0X40)==0);//循环发送,直到发送完毕
+    USART1->DR = 0x65;
+    while((USART2->SR&0X40)==0);//循环发送,直到发送完毕
+    USART2->DR = 0x65;
+    while((USART3->SR&0X40)==0);//循环发送,直到发送完毕
+    USART3->DR = 0x65;
+#if defined(STM32F10X_HD)
+    while((UART4->SR&0X40)==0);//循环发送,直到发送完毕
+    UART4->DR = 0x65;
+    while((UART5->SR&0X40)==0);//循环发送,直到发送完毕
+    UART5->DR = 0x65;
+#endif
+    //  OLED_ShowStr(0,3,"Init USARTS Done!",1);
+    //LED1_ON;
+    //test_Uart();
+    LED_init(2);
+
+    //Adc_Init();
     setup();
     while(1)
     {
         loop();
     }
+}
+void mission_led(uint8_t c)
+{
+    if((c&0x08)>0) {
+        LED5_ON;
+    }
+    else {
+        LED5_OFF;
+    }
+    if((c&0x04)>0) {
+        LED4_ON;
+    }
+    else {
+        LED4_OFF;
+    };
+    if((c&0x02)>0) {
+        LED3_ON;
+    }
+    else {
+        LED3_OFF;
+    }
+    if((c&0x01)>0) {
+        LED2_ON;
+    }
+    else {
+        LED2_OFF;
+    }
+}
+/**************************************/
+void cam_roll()//横滚轴云台补偿
+{
+    servo[7]=constrain((att.angle[ROLL]*1.73)+1500,1000,2000);
+
 }

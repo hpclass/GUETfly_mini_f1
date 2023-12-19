@@ -8,7 +8,8 @@
 
 #include "math.h"
 #include "timer.h"
-
+#include "ano_of.h"
+#include "DJI_Guidance_usat.h"
 int16_t  sonarAltMy; //平滑后的超声波高度
 int16_t  PressAltMy;//平滑后的气压计高度
 uint8_t alt_switch=0;//测距模块标志

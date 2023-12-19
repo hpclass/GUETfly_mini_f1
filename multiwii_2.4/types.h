@@ -39,7 +39,7 @@ enum box {
     BOXHORIZON,
 #endif
 #if BARO && (!defined(SUPPRESS_BARO_ALTHOLD))
-    BOXBARO,    //4
+    BOXBARO,
 #endif
 #ifdef VARIOMETER
     BOXVARIO,
@@ -58,6 +58,7 @@ enum box {
 #if GPS
     BOXGPSHOME,
     BOXGPSHOLD,
+
 #endif
 #if defined(FIXEDWING) || defined(HELICOPTER)
     BOXPASSTHRU,
@@ -88,10 +89,19 @@ enum box {
 #if OPTIC
     BOXOPTIC,
 #endif
-    BOXTAKEOFF,
+#if defined(FIXEDWING)
+    BOXCRUISE,
+#endif
+    BOXDROP,
+		BOXMASTER,
+		BOXSLAVE,
     CHECKBOXITEMS
-};
 
+};
+typedef struct {
+    uint32_t    lastTime;
+    uint32_t    dTime;
+} timer_t;
 typedef struct {
     int16_t  accSmooth[3];
     int16_t  gyroData[3];
@@ -99,7 +109,18 @@ typedef struct {
     int16_t  gyroADC[3];
     int16_t  accADC[3];
 } imu_t;
-
+typedef struct {
+    float    accelEF[3];               // earth X,Y,Z acceleration in cm/s^2
+    float    accelEF_Filtered[3];      // earth X,Y,Z acceleration in cm/s^2
+    float    accelEF_Sum[3];
+    uint8_t  accelEF_Sum_count[3];
+    float    accelEF_Horizontal;       // earth averaged horizontal acceleration in cm/s^2
+    float    velocityEF[3];            // ins earth velocity in cm/s
+    float    positionEF[3];            // ins position in cm
+    float	 accCorrection[3];     //===���======
+    float	 lastAcceleration[3];     //===���======
+    float 	 acceleration[3];  //===���======
+} ins_t;
 typedef struct {
     uint8_t  vbat;               // battery voltage in 0.1V steps
     uint16_t intPowerMeterSum;
@@ -111,12 +132,17 @@ typedef struct {
 
 typedef struct {
     int32_t  EstAlt;             // in cm
-    int16_t  vario;              // variometer in cm/s
+    int16_t  vario;           // variometer in cm/s
+    int32_t  rawAlt;			   // in cm
+    //int32_t  lastRawAlt;		   // in cm
+    int32_t  groundRawAlt;	   // in cm
+    //int16_t  rawVario;           // in cm/s
 } alt_t;
 
 typedef struct {
     int16_t angle[2];            // absolute angle inclination in multiple of 0.1 degree    180 deg = 1800
     int16_t heading;             // variometer in cm/s
+    int16_t angle_YAW;		   // angle in multiple of 0.1 degree    180 deg = 1800
 } att_t;
 
 typedef struct {
@@ -128,6 +154,7 @@ typedef struct {
     uint8_t MAG_MODE :1 ;
     uint8_t BARO_MODE :1 ;
     uint8_t OPTIC_MODE :1 ;
+
 #ifdef HEADFREE
     uint8_t HEADFREE_MODE :1 ;
 #endif
@@ -155,13 +182,25 @@ typedef struct {
     uint8_t TAKEOFF_COMPLETED: 1;//自动起飞
     uint8_t TAKEOFF_IN_PROGRESS: 1;
     uint8_t TAKEOFF: 1;
-
+    uint8_t MOTORS_STOPPED :1;
+    uint8_t FS_MODE: 1;        // Failsafe Flag
+    uint8_t FAILSAFE_RTH_ENABLE :1;
+    uint8_t CLIMBOUT_FW :1 ;
+    uint8_t CRUISE_MODE :1;
+    uint8_t Fixed_Wing_Nav :1;
+    uint8_t USER_RTH_FLAG :1;
+    uint8_t USER_DROP_FLAG :1;
+    uint8_t USER_DROP :1;
+    uint8_t NAV_ROLL_LOCK :1;
+		uint8_t Master :1;//		"Master;"
+		uint8_t Slave :1;//"Slave;"
 #endif
 } flags_struct_t;
 
 typedef struct {
     uint8_t currentSet;
     int16_t accZero[3];
+    uint16_t accScale[3];   // sensitivity correction (1000 for acc_1G)
     int16_t magZero[3];
     uint16_t flashsum;
     uint8_t checksum;      // MUST BE ON LAST POSITION OF STRUCTURE !
@@ -236,6 +275,7 @@ typedef struct {
     uint8_t yawCollPrecomp;
     uint16_t yawCollPrecompDeadband;
 #endif
+
     uint8_t  checksum;      // MUST BE ON LAST POSITION OF CONF STRUCTURE !
 } conf_t;
 
@@ -279,11 +319,8 @@ enum navstate {
     NAV_STATE_LANDED,
     NAV_STATE_LAND_SETTLE,
     NAV_STATE_LAND_START_DESCENT,
-    NAV_STATE_TAKEOFF_START,
-    NAV_STATE_TAKEOFF_IN_PROGRESS,
-    NAV_STATE_TAKEOFF_OK,
-    NAV_STATE_TAKEOFF_SETTLE,
-    NAV_STATE_TAKEOFF_START_DESCENT,
+    NAV_STATE_WP_START,
+    NAV_STATE_LAND_DETECTED
 };
 
 enum naverror {
@@ -311,6 +348,9 @@ typedef struct {
     uint32_t altitude;   //Altitude in cm (AGL)
     uint8_t  flag;       //flags the last wp and other fancy things that are not yet defined
     uint8_t  checksum;   //this must be at the last position
+#if !defined(USE_EX_EEPROM)
+    uint8_t  checksum_;   //字符填充
+#endif
 } mission_step_struct;
 
 
@@ -336,10 +376,6 @@ typedef struct {
     // Second byte
     uint8_t ignore_throttle: 1; // Disable stick controls during mission and RTH
     uint8_t takeover_baro: 1;
-
-
-
-
     uint16_t wp_radius;           // in cm
     uint16_t safe_wp_distance;    // in meter
     uint16_t nav_max_altitude;    // in meter
@@ -349,13 +385,28 @@ typedef struct {
     uint16_t nav_bank_max;        // degree * 100; (3000 default)
     uint16_t rth_altitude;        // in meter
     uint8_t  land_speed;          // between 50 and 255 (100 approx = 50cm/sec)
+    uint8_t  min_nav_vario;      // in cm/s
     uint16_t fence;               // fence control in meters
-
     uint8_t  max_wp_number;
-
+		int16_t  dorp_delay_ms;					//投放机构延迟，正数增加，负数减小
+		uint16_t dorp_servor_open;			//投放舵机舵量
+		uint16_t dorp_servor_close;			//投放舵机舵量
+//		uint16_t cadc_pan[2];						//锁定云台
     uint8_t  checksum;
 } gps_conf_struct;
-
+typedef struct {
+    uint8_t drop_wp,drop_status;
+} user_mission_dorp_;
 #endif
+//////////////
+typedef struct {
+    int16_t  master_speed;//GPS速度
+    int32_t  GPS_[2];//GPS信息
+    int16_t  GPS_ALT;//编队高度
+    int16_t  distance;//编队距离
+    int16_t  faction;//编队模式
+		uint8_t	 flag;//数据帧标志
+} mission_flow_;
+
 
 #endif /* TYPES_H_ */

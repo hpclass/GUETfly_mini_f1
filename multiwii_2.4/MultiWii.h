@@ -35,6 +35,7 @@ extern uint8_t alarmArray[ALRM_FAC_SIZE];
 extern global_conf_t global_conf;
 
 extern imu_t imu;
+extern ins_t ins;
 extern analog_t analog;
 extern alt_t alt;
 extern att_t att;
@@ -43,6 +44,7 @@ extern plog_t plog;
 #endif
 
 extern int16_t debug[4];
+extern int16_t  D_U[8];
 
 extern conf_t conf;
 extern int16_t  annex650_overrun_count;
@@ -66,7 +68,8 @@ extern int16_t servo[8];
 extern int16_t failsafeEvents;
 extern volatile int16_t failsafeCnt;
 
-extern int16_t rcData[RC_CHANS];//stm32 add
+extern int16_t rcData[RC_CHANS];
+
 extern int16_t rcSerial[8];
 extern int16_t rcCommand[4];
 extern uint8_t rcSerialCount;
@@ -107,7 +110,7 @@ extern uint32_t armedTime;
 
 extern gps_conf_struct GPS_conf;
 
-extern int16_t  GPS_angle[2];           // the angles that must be applied for GPS correction
+extern int16_t  GPS_angle[3];           // the angles that must be applied for GPS correction
 extern int32_t  GPS_coord[2];
 extern int32_t  GPS_home[2];
 extern int32_t  GPS_hold[2];
@@ -152,6 +155,8 @@ extern uint32_t alt_change;
 extern int16_t  jump_times;             //How many loops do we have to do (alt/100 from mission step) -10 means not used jet, -1 unlimited
 extern uint8_t  land_detect;            //land detector variable
 
+///
+extern uint16_t GPS_altitude_cel;  //GPS init ALT
 
 // ************************
 // mission step structure
@@ -178,6 +183,7 @@ extern mission_step_struct mission_step;
 
 #define LAT  0
 #define LON  1
+#define ALT  2
 
 extern int16_t  nav[2];
 
@@ -206,7 +212,7 @@ extern int16_t  nav[2];
 extern volatile uint8_t  spekFrameFlags;
 extern volatile uint32_t spekTimeLast;
 extern uint8_t  spekFrameDone;
-
+extern uint16_t GPS_speed_smooth[GPS_USER_SMOOTH_LEN]; 
 #if defined(OPENLRSv2MULTI)
 extern uint8_t pot_P,pot_I; // OpenLRS onboard potentiometers for P and I trim or other usages
 #endif
@@ -235,4 +241,23 @@ void annexCode(void);
 void go_disarm(void);
 void setup(void);
 void loop(void);
+
+uint8_t updateTimer(timer_t * timer, uint32_t interval);
+void resetTimer(timer_t * timer);
+void mission_time_conut_to_land();
+void landing();
+void mission_led(uint8_t c);
+void USER_OPEN_DORP();
+void USER_LOCK_DROP();//锁定投弹
+#if defined(A_airspeed) //模拟空速计
+#include "stm32f10x_adc.h"
+u16 Get_Adc(u8 ch)  ;
+void init_A_airspeed();
+#endif
+#define HZ2US(hz)   (1000000 / (hz))
+#define HZ2MS(hz)   (1000 / (hz))
+#define HZ2S(hz)    (1.0f / (hz))
+#define US2S(us)    ((us) * 1e-6f)
+#define MS2S(ms)    ((ms) * 1e-3f)
+#define MS2US(ms)   ((ms) * 1000)
 #endif /* MULTIWII_H_ */

@@ -27,12 +27,12 @@
 **********************************************************************************/
 void UartSendString(unsigned char *p,unsigned int strlong)
 {
- unsigned char tmp=0;
- for(tmp=0;tmp<strlong;tmp++)
- {
-  //UartSendChar(*(p+tmp));
- }
- 
+    unsigned char tmp=0;
+    for(tmp=0; tmp<strlong; tmp++)
+    {
+        //UartSendChar(*(p+tmp));
+    }
+
 
 }
 

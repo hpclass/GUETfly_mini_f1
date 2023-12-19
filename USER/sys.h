@@ -1,9 +1,9 @@
 #ifndef __SYS_H
-#define __SYS_H	
+#define __SYS_H
 #include "stm32f10x.h"
-//////////////////////////////////////////////////////////////////////////////////	 
+//////////////////////////////////////////////////////////////////////////////////
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
-//ALIENTEK STM32开发板		   
+//ALIENTEK STM32开发板
 //正点原子@ALIENTEK
 //技术论坛:www.openedv.com
 //修改日期:2012/8/18
@@ -11,19 +11,19 @@
 //版权所有，盗版必究。
 //Copyright(C) 广州市星翼电子科技有限公司 2009-2019
 //All rights reserved
-////////////////////////////////////////////////////////////////////////////////// 	 
+//////////////////////////////////////////////////////////////////////////////////
 
 //0,不支持ucos
 //1,支持ucos
 #define SYSTEM_SUPPORT_UCOS		0		//定义系统文件夹是否支持UCOS
-																    
-	 
+
+
 //位带操作,实现51类似的GPIO控制功能
 //具体实现思想,参考<<CM3权威指南>>第五章(87页~92页).
 //IO口操作宏定义
-#define BITBAND(addr, bitnum) ((addr & 0xF0000000)+0x2000000+((addr &0xFFFFF)<<5)+(bitnum<<2)) 
-#define MEM_ADDR(addr)  *((volatile unsigned long  *)(addr)) 
-#define BIT_ADDR(addr, bitnum)   MEM_ADDR(BITBAND(addr, bitnum)) 
+#define BITBAND(addr, bitnum) ((addr & 0xF0000000)+0x2000000+((addr &0xFFFFF)<<5)+(bitnum<<2))
+#define MEM_ADDR(addr)  *((volatile unsigned long  *)(addr))
+#define BIT_ADDR(addr, bitnum)   MEM_ADDR(BITBAND(addr, bitnum))
 //IO口地址映射
 #define GPIOA_ODR_Addr    (GPIOA_BASE+12) //0x4001080C 
 #define GPIOB_ODR_Addr    (GPIOB_BASE+12) //0x40010C0C 
@@ -40,7 +40,7 @@
 #define GPIOE_IDR_Addr    (GPIOE_BASE+8) //0x40011808 
 #define GPIOF_IDR_Addr    (GPIOF_BASE+8) //0x40011A08 
 #define GPIOG_IDR_Addr    (GPIOG_BASE+8) //0x40011E08 
- 
+
 //IO口操作,只对单一的IO口!
 //确保n的值小于16!
 #define PAout(n)   BIT_ADDR(GPIOA_ODR_Addr,n)  //输出 
@@ -67,14 +67,14 @@
 //JTAG模式设置定义
 #define JTAG_SWD_DISABLE   0X02
 #define SWD_ENABLE         0X01
-#define JTAG_SWD_ENABLE    0X00	
+#define JTAG_SWD_ENABLE    0X00
 
 void NVIC_Configuration(void);
-/////////////////////////////////////////////////////////////////  
+/////////////////////////////////////////////////////////////////
 //void BKP_Write(u8 reg,u16 dat);	//写入后备寄存器
-void Stm32_Clock_Init(u8 PLL);  //时钟初始化  
+void Stm32_Clock_Init(u8 PLL);  //时钟初始化
 void Sys_Soft_Reset(void);      //系统软复位
-void Sys_Standby(void);         //待机模式 	
+void Sys_Standby(void);         //待机模式
 void MY_NVIC_SetVectorTable(u32 NVIC_VectTab, u32 Offset);//设置偏移地址
 void MY_NVIC_PriorityGroupConfig(u8 NVIC_Group);//设置NVIC分组
 void MY_NVIC_Init(u8 NVIC_PreemptionPriority,u8 NVIC_SubPriority,u8 NVIC_Channel,u8 NVIC_Group);//设置中断

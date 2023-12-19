@@ -1,9 +1,8 @@
 
 
-
+#include "config.h"
 #include "def.h"
 #include "types.h"
-#include "config.h"
 #include "MultiWii.h"
 #include "timer.h"
 #include "LCD.h"
@@ -349,8 +348,9 @@ void blinkLED(uint8_t num, uint8_t ontime,uint8_t repeat) {
 #if defined(LANDING_LIGHTS_DDR)
             switch_landing_lights(1);
 #endif
-            // LEDPIN_TOGGLE; // switch LEDPIN state
-					PAout(0)=~PAin(0); 
+             LEDPIN_TOGGLE; // switch LEDPIN state
+            //PDout(1)=~PDin(1);
+            //PCout(13)=~PCin(13);
             delay(ontime);
 #if defined(LED_FLASHER)
             switch_led_flasher(0);

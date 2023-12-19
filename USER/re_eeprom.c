@@ -19,6 +19,8 @@ ErrorStatus HSEStartUpStatus;
 #define FLASH_WRITE_ADDR                (u32)(0x08000000 + (uint32_t)FLASH_PAGE_SIZE * (FLASH_PAGE_COUNT - 1))       // use the last KB for storage
 #if defined(GUET_FLY_V1)
 #define STM32_FLASH_SIZE 512 	 		//ËùÑ¡STM32µÄFLASHÈÝÁ¿´óÐ¡(µ¥Î»ÎªK)
+#elif defined(GUET_FLY_MINI_V1)
+#define STM32_FLASH_SIZE 64 	 		//ËùÑ¡STM32µÄFLASHÈÝÁ¿´óÐ¡(µ¥Î»ÎªK)
 #else
 #define STM32_FLASH_SIZE 64 	 		//0ËùÑ¡STM32µÄFLASHÈÝÁ¿´óÐ¡(µ¥Î»ÎªK)
 #endif
@@ -297,7 +299,18 @@ void eeprom_read_block (void *buf,void *addr, size_t n)//¶ÁÈ¡ÓÉÖ¸¶¨µØÖ·¿ªÊ¼µÄÖ¸¶
 PA4 ->SDA
 PA5 ->SCL
 *****************************************/
+	#if defined(GUET_FLY_V1)
+#define EEPROM_ADDR
+#define EEPROM_SCL_H         GPIOA->BSRR |= GPIO_Pin_5
+#define EEPROM_SCL_L         GPIOA->BRR  |= GPIO_Pin_5
 
+#define EEPROM_SDA_H         GPIOA->BSRR |= GPIO_Pin_4
+#define EEPROM_SDA_L         GPIOA->BRR  |= GPIO_Pin_4
+
+#define EEPROM_SCL_read      GPIOA->IDR  & GPIO_Pin_5
+#define EEPROM_SDA_read      GPIOA->IDR  & GPIO_Pin_4
+
+#elif defined(GUET_FLY_MINI_V1)
 #define EEPROM_ADDR
 #define EEPROM_SCL_H         GPIOB->BSRR |= GPIO_Pin_12
 #define EEPROM_SCL_L         GPIOB->BRR  |= GPIO_Pin_12
@@ -307,6 +320,8 @@ PA5 ->SCL
 
 #define EEPROM_SCL_read      GPIOB->IDR  & GPIO_Pin_12
 #define EEPROM_SDA_read      GPIOB->IDR  & GPIO_Pin_13
+
+#endif
 //´óÐ¡¶¨Òå
 
 
@@ -314,18 +329,17 @@ PA5 ->SCL
 
 void EEPROM_I2C_GPIO_Config(void)
 {
-    GPIO_InitTypeDef  GPIO_InitStructure;
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-    // Configure I2C1 pins: SCL and SDA
-    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_13;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_12;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
+	#if defined(GUET_FLY_V1)
+    RCC->APB2ENR|=1<<2;     //Ê¹ÄÜPORTAÊ±ÖÓ
+    GPIOA->CRL&=0XFF00FFFF; //ÇåÁãÏàÓ¦Î»
+    GPIOA->CRL|=0X00370000; //
+    GPIOA->ODR= 0X000000C0;
+	#elif defined(GUET_FLY_MINI_V1)
+		RCC->APB2ENR|=1<<3;     //Ê¹ÄÜPORTBÊ±ÖÓ
+    GPIOB->CRH&=0XFF00FFFF; //ÇåÁãÏàÓ¦Î»
+    GPIOB->CRH|=0X00730000; //
+    GPIOB->ODR= 0X00003000;
+	#endif
 }
 ///////////IIC³õÊ¼»¯//////////////
 
@@ -719,15 +733,13 @@ void eeprom_Continuous_reading(u8 *buf,u16 addr, size_t n)//Á¬Ðø¶ÁÈ¡
     EEPROM_I2C_SendACK(1);//ACK
     EEPROM_I2C_Stop();//²úÉúÒ»¸öÍ£Ö¹Ìõ¼þ
     //EEPROM_Delay_1us(1);
-
 }
 //u8 temp_wp[4096]=0;
 void eeprom_write_block (void *buf, void *addr, size_t n)
 {
-    
+    LED1_ON
     AT24CXX_write_Page((u8*)buf,(u16)addr,n);
-    
-
+    LED1_OFF
 //		uint16_t i;
 //	u8 *temp=(u8*)buf;
 //		LED1_ON
@@ -742,14 +754,9 @@ void eeprom_write_block (void *buf, void *addr, size_t n)
 }
 void eeprom_read_block (void *buf,void *addr, size_t n)//¶ÁÈ¡ÓÉÖ¸¶¨µØÖ·¿ªÊ¼µÄÖ¸¶¨³¤¶ÈµÄEEPROMÊý¾Ý
 {
-
-
-
-    
+    LED2_ON
     eeprom_Continuous_reading((u8*)buf,(u16)addr,n);//Á¬Ðø¶ÁÈ¡
-    
-
-
+    LED2_OFF
 //		uint16_t i;
 //		u8 *temp=(u8*)buf;
 //		LED2_ON
