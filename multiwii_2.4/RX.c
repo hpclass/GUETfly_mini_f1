@@ -316,10 +316,10 @@ uint16_t readRawRC(uint8_t chan) {
     data = ppm_rx[rcChannel[chan]+1]+PPM_ADD_TIME;//1不是遥控器通道，是标志变量
 #else
 #define SBUS_ADD_TIME 1000
-
-    extern uint16_t Cap_CH[13];
-
-    Capture();
+    
+		extern uint16_t Cap_CH[13];
+   
+        Capture();
 
     data = map(Cap_CH[rcChannel[chan]+1],300,1700,0,1000)+SBUS_ADD_TIME;
 #endif
@@ -342,16 +342,16 @@ void computeRC() {
 #if !defined(OPENLRSv2MULTI)
     rc4ValuesIndex++;
     if (rc4ValuesIndex == AVERAGING_ARRAY_LENGTH-1) rc4ValuesIndex = 0;
-#if !defined(SBUS__)
+	#if !defined(SBUS__)
     if(ppm_rx[0]==1)ppm_rx[0]=0;
     else return;//此处可做遥控器信号丢失处理
-#else
-    extern uint8_t SBUS_FLAG_;
-    if(SBUS_FLAG_) SBUS_FLAG_=0;
-
-    else return;
-
-#endif
+	#else
+	extern uint8_t SBUS_FLAG_;
+	 if(SBUS_FLAG_) SBUS_FLAG_=0;
+	
+		 else return;
+		 
+	#endif
     for (chan = 0; chan < RC_CHANS; chan++) {
         rcDataTmp = readRawRC(chan);
 #if defined(FAILSAFE)

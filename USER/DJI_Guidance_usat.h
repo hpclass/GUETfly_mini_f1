@@ -90,8 +90,8 @@ typedef struct _protocal_sdk_uart_header
     uint16_t        m_data_checksum;
 } protocal_sdk_uart_header;
 
-extern obstacle_distance DJI_Guidance_obstacle_distance;//ÕÏ°­¾àÀë
-extern ultrasonic_data DJI_Guidance_ultrasonic;//5Â·¾àÀë
-extern velocity DJI_Guidance_vo;//3Â·ËÙ¶È£¬µ¥Î»mm
+extern obstacle_distance DJI_Guidance_obstacle_distance;//ï¿½Ï°ï¿½ï¿½ï¿½ï¿½ï¿½
+extern ultrasonic_data DJI_Guidance_ultrasonic;//5Â·ï¿½ï¿½ï¿½ï¿½
+extern velocity DJI_Guidance_vo;//3Â·ï¿½Ù¶È£ï¿½ï¿½ï¿½Î»mm
 extern uint8_t DJI_Guidance_flag_alt;
 extern uint8_t DJI_Guidance_flag_vel;

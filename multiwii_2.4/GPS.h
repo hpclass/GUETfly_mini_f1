@@ -16,7 +16,7 @@ extern uint8_t GPS_Frame;            // a valid GPS_Frame was detected, and data
 extern int32_t wrap_18000(int32_t ang);
 #if GPS
 extern mission_flow_ mission_flow;
-extern user_mission_dorp_ user_mission_dorp;//空投结构体
+extern user_mission_dorp_ user_mission_dorp;//锟斤拷投锟结构锟斤拷
 #endif
 void GPS_set_pids(void);
 void GPS_SerialInit(void);

@@ -3,6 +3,29 @@
 #include "usart.h"
 #include "def.h"
 #include "Serial.h"
+#if 1
+#pragma import(__use_no_semihosting)
+struct __FILE
+{
+    int handle;
+    /* Whatever you require here. If the only file you are using is */
+    /* standard output using printf() for debugging, no file handling */
+    /* is required. */
+};
+/* FILE is typedef�� d in stdio.h. */
+FILE __stdout;
+int _sys_exit(int x)
+{
+    x = x;
+}
+int fputc(int ch, FILE *f)
+{
+    while((USART1->SR&0X40)==0);//ѭ������,ֱ���������
+    USART1->DR = (u8) ch;
+    return ch;
+}
+#endif
+//end
 //////////////////////////////////////////////////////////////////
 //串口1中断服务程序
 void USART1_IRQHandler(void)
@@ -44,7 +67,6 @@ void USART3_IRQHandler(void)
 static uint8_t num_cap=0;
 u16 SBUSBuf[30]= {0};
 uint8_t SBUS_FLAG_=0;
-u8 testdata[256]={0};
 void USART3_IRQHandler(void)
 {
     u8 res;
@@ -54,9 +76,7 @@ void USART3_IRQHandler(void)
     if(USART3->SR&(1<<5))//接收到数据
     {
         res=USART3->DR;
-				testdata[testdata[0]+1]=res;
-				testdata[0]++;
-			
+
         if(startflag==1)
         {
             SBUSBuf[i]=res;
@@ -68,22 +88,14 @@ void USART3_IRQHandler(void)
                 //Capture();
             }
         }
-//#if defined(FRSHY_SBUS)
-#if 1
-     if(res==0x0F&&lastres==0x00)
-        {
-					SBUSBuf[0]=res;
-            startflag=1;
-            i=1;
-        }  
-#endif
-#if 0
- if(res==0x00&&lastres==0x00&&lastlastres==0x80)
+
+        if(res==0x00&&lastres==0x00&&lastlastres==0x80)
         {
             startflag=1;
             i=0;
         }
-#endif
+
+
 
         lastlastres=lastres;
         lastres=res;
@@ -92,27 +104,8 @@ void USART3_IRQHandler(void)
 }
 uint16_t Cap_CH[13];
 //uint16_t Capture_CH[13];
-void Capture()
-{
-    int i=0;
-    if(SBUSBuf[0]==0x0F)
-    {
-        Cap_CH[1]=((SBUSBuf[i+2]&0x07)<<8)|(SBUSBuf[i+1]&0xff);
-        Cap_CH[2]=((SBUSBuf[i+3]&0x3f)<<5)|((SBUSBuf[i+2]&0xf8)>>3);
-        Cap_CH[3]=((SBUSBuf[i+5]&0x01)<<10)|((SBUSBuf[i+4]&0xff)<<2)|(((SBUSBuf[i+3]&0xc0)>>6)&0xff);
-        Cap_CH[4]=((SBUSBuf[i+6]&0x0f)<<7)|((SBUSBuf[i+5]&0xfe)>>1);
-        Cap_CH[5]=((SBUSBuf[i+7]&0x7f)<<4)|((SBUSBuf[i+6]&0xf0)>>4);
-        Cap_CH[6]=((SBUSBuf[i+9]&0x03)<<9)|((SBUSBuf[i+8])<<1)|(SBUSBuf[i+7]&0x80)>>7;
-        Cap_CH[7]=((SBUSBuf[i+10]&0x1f)<<6)|(SBUSBuf[i+9]&0xfc)>>2;
-        Cap_CH[8]=((SBUSBuf[i+11]&0xff)<<3)|(SBUSBuf[i+10]&0xe0)>>5;
-        Cap_CH[9]=((SBUSBuf[i+13]&0x07)<<8)|(SBUSBuf[i+12]&0xff);
-        Cap_CH[10]=((SBUSBuf[i+14]&0x3f)<<5)|(SBUSBuf[i+13]&0xf8)>>3;
 
-        SBUSBuf[20]=0;
-        SBUSBuf[21]=0;
-    }
-}
-#if 0
+
 void Capture()
 {
     int i=0;
@@ -131,7 +124,34 @@ void Capture()
 
         SBUSBuf[20]=0;
         SBUSBuf[21]=0;
+
+//        if((Cap_CH[1]<1900&&Cap_CH[1]>200)&&(Cap_CH[2]<1900&&Cap_CH[2]>200)&&(Cap_CH[3]<1900&&Cap_CH[3]>200)&&(Cap_CH[4]<1900&&Cap_CH[4]>200)&&(Cap_CH[5]<1900&&Cap_CH[5]>200)&&
+//                (Cap_CH[6]<1900&&Cap_CH[6]>200)&&(Cap_CH[7]<1900&&Cap_CH[7]>200)&&(Cap_CH[8]<1900&&Cap_CH[8]>200))
+
+//        {
+//            Capture_CH[1]=(int)((Cap_CH[1]-300)/1.4);
+//            Capture_CH[2]=(int)((Cap_CH[2]-300)/1.4);
+//            Capture_CH[3]=(int)((Cap_CH[3]-300)/1.4);
+//            Capture_CH[4]=(int)((Cap_CH[4]-300)/1.4);
+//            Capture_CH[5]=(int)((Cap_CH[5]-300)/1.4);
+//            Capture_CH[6]=(int)((Cap_CH[6]-300)/1.4);
+//            Capture_CH[7]=(int)((Cap_CH[7]-300)/1.4);
+//            Capture_CH[8]=(int)((Cap_CH[8]-300)/1.4);
+//            if(Cap_CH[9]>=1000)Capture_CH[9]=1000;
+//            else if(Cap_CH[9]<=300)Capture_CH[9]=0;
+//            if(Cap_CH[10]>=1000)Capture_CH[10]=1000;
+//            else if(Cap_CH[10]<=300)Capture_CH[10]=0;
+
+//        }
+
+
     }
+//				for(i=1;i<12;i++)
+//		{
+//			Cap_CH[i]=Cap_CH[i]>>2;
+//		}
+//		i=0;
+
 }
 #endif
 #endif
