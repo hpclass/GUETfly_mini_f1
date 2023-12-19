@@ -1831,7 +1831,9 @@
 #define LED5_OFF ;
 
 #define OVERRIDE_LEDPIN_TOGGLE PAout(0)=~PAin(0);
+#if !defined(LEDPIN_TOGGLE)
 #define LEDPIN_TOGGLE 	OVERRIDE_LEDPIN_TOGGLE
+#endif
 
 #define GPS_TOGGLE PAout(1)=~PAin(1);
 #define GPS_LED_ON	LED2_ON
@@ -2176,7 +2178,6 @@
 /**************************************************************************************/
 /***************               Error Checking Section              ********************/
 /**************************************************************************************/
-#define NUMBER_MOTOR 4
 #ifndef NUMBER_MOTOR
 #error "NUMBER_MOTOR is not set, most likely you have not defined any type of multicopter"
 #endif

@@ -145,7 +145,6 @@ void Capture()
     //		i=0;
 }
 #endif
-#endif
 #if defined(STM32F10X_HD)
 void UART4_IRQHandler(void)
 {

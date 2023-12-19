@@ -10,7 +10,7 @@ OBJCOPY = arm-none-eabi-objcopy
 CFLAGS = -mcpu=cortex-m3 \
 			-mthumb -std=gnu11 -Wall \
 			-DSTM32F10X_MD \
-			-DGUET_FLY_V1
+			-DGUET_FLY_MINI_V1
 ASFLAGS = -mcpu=cortex-m3 -mthumb
 
 # Directories
@@ -50,11 +50,11 @@ SOURCES = \
     ./USER/SPL06_001.c \
     ./Libraries/CMSIS/CM3/CoreSupport/core_cm3.c \
 	./USER/system_stm32f10x.c \
-	./Libraries/STM32F10x_StdPeriph_DriveR/src\misc.c \
-	./Libraries/CMSIS\CM3\DeviceSupport\ST\STM32F10x\startup\arm\startup_stm32f10x_hd.s \
+	./Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
 	./USB/usart.c \
 	./USB/USB_CH341.c \
 	
+#	./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/arm/startup_stm32f10x_hd.s \
 # Object files
 OBJECTS = $(SOURCES:.c=.o)
 

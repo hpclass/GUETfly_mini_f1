@@ -1,4 +1,4 @@
-#include "usb_ch341.h"
+#include "USB_CH341.H"
 #include "usb_lib.h"
 
 void delay_ms(u16 nms);
