@@ -40,7 +40,7 @@
  *
  *************************************************************************************/
 
-#include "OLED.h"
+#include "oled.h"
 #include "delay.h"
 #include "codetab.h"
 #include "stm32f10x_i2c.h"

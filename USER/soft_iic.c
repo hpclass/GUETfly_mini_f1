@@ -1,4 +1,5 @@
 #include "stm32f10x.h"
+#include "stm32f10x_conf.h"
 #include "math.h"
 #include "delay.h"
 #include "soft_iic.h"

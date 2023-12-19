@@ -66,6 +66,7 @@
         "concepts": "cpp",
         "algorithm": "cpp",
         "stm32f10x_conf.h": "c",
-        "config.h": "c"
+        "config.h": "c",
+        "kalman_f.h": "c"
     }
 }

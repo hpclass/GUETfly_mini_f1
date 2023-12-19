@@ -1,4 +1,5 @@
-#include "i2c.h"
+#include "stm32f10x_conf.h"
+#include "I2C.h"
 
 void I2c_Soft_delay()
 {

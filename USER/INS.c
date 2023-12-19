@@ -207,7 +207,7 @@ void calculateRAWAltitude()
 /******************************** GPS ********************************************/
 
 #if GPS && defined(INS_PH_NAV_ON)
-
+#define GPS_LAG 1
 #define HIST_XY_POINTS (GPS_LAG / HZ2MS(INS_UPDATE_RATE))
 uint8_t histXYCount;
 int32_t histXYPosition[2][HIST_XY_POINTS];

@@ -12,7 +12,7 @@ STM32F103C8T6新建工程模板
 #include "timer.h"
 #include "oled.h"
 #include "soft_iic.h"
-#include "GY_86.h"
+#include "gy_86.h"
 // #include "def.h"
 
 float pitch, roll, yaw;    // 欧拉角
