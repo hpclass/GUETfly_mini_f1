@@ -142,15 +142,15 @@ void MYRCC_DeInit(void)
 // 进入待机模式
 // check ok
 // 091202
-void Sys_Standby(void)
-{
-    SCB->SCR |= 1 << 2;      // 使能SLEEPDEEP位 (SYS->CTRL)
-    RCC->APB1ENR |= 1 << 28; // 使能电源时钟
-    PWR->CSR |= 1 << 8;      // 设置WKUP用于唤醒
-    PWR->CR |= 1 << 2;       // 清除Wake-up 标志
-    PWR->CR |= 1 << 1;       // PDDS置位
-    WFI_SET();               // 执行WFI指令
-}
+// void Sys_Standby(void)
+// {
+//     SCB->SCR |= 1 << 2;      // 使能SLEEPDEEP位 (SYS->CTRL)
+//     RCC->APB1ENR |= 1 << 28; // 使能电源时钟
+//     PWR->CSR |= 1 << 8;      // 设置WKUP用于唤醒
+//     PWR->CR |= 1 << 2;       // 清除Wake-up 标志
+//     PWR->CR |= 1 << 1;       // PDDS置位
+//     WFI_SET();               // 执行WFI指令
+// }
 // 后备寄存器写入操作
 // reg:寄存器编号
 // reg:要写入的数值
