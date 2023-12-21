@@ -1,10 +1,10 @@
 # Makefile for multiwii project
 
 # Toolchain
-CC = arm-none-eabi-gcc
-AS = arm-none-eabi-as
-LD = arm-none-eabi-ld
-OBJCOPY = arm-none-eabi-objcopy
+CC = ${CROSS_COMPILE}gcc
+AS = ${CROSS_COMPILE}as
+LD = ${CROSS_COMPILE}ld
+OBJCOPY = ${CROSS_COMPILE}objcopy
 
 # Compiler flags
 CFLAGS = -mcpu=cortex-m3 \
