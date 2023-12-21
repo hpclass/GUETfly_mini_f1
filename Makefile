@@ -10,11 +10,12 @@ OBJCOPY = ${CROSS_COMPILE}objcopy
 CFLAGS = -mcpu=cortex-m3 \
          -mthumb -std=gnu11 -Wall \
          -DSTM32F10X_MD \
-         -DGUET_FLY_MINI_V1 \
+         -DGUET_FLY_MINI_V1  \
 		 -fno-stack-protector \
 		 -mfloat-abi=soft 
 ASFLAGS = -mcpu=cortex-m3 -mthumb
 
+LDFLAGS = -lm
 # Directories
 SRC_DIR = ./multiwii_2.4
 USER_DIR = ./USER 
@@ -100,7 +101,7 @@ TARGET = multiwii_2.4_STM32.elf
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(LD) $(LDFLAGS) -o $@ $^ -lm
+	$(LD) $(LDFLAGS) -o $@ $^ 
 
 %.o: %.c
 	$(CC) $(INC_DIRS) $(CFLAGS) -c -o $@ $<
