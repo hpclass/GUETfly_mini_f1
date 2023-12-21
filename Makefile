@@ -91,15 +91,16 @@ SOURCES = \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_sdio.c \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_wwdg.c \
 
-OBJECTS = $(SOURCES:.c=.o) $(ASM_FILES:.s=.o)
+# 在OBJECTS的定义中，使用grep过滤大小写不同的.s文件
+OBJECTS = $(filter-out $(shell grep -il "\.s" $(SOURCES)), $(SOURCES:.c=.o))
 
 TARGET = multiwii_2.4_STM32.elf
 
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(LD) $(LDFLAGS) -o $@ $(filter-out $(ASM_FILES), $^) $(filter %.o,$(OBJECTS))
-
+	$(LD) $(LDFLAGS) -o $@ $^ -lm -lssp
+#
 %.o: %.c
 	$(CC) $(INC_DIRS) $(CFLAGS) -c -o $@ $<
 
