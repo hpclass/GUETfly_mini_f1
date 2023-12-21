@@ -11,6 +11,7 @@ CFLAGS = -mcpu=cortex-m3 \
          -mthumb -std=gnu11 -Wall \
          -DSTM32F10X_MD \
          -DGUET_FLY_MINI_V1 \
+		 -fno-stack-protector \
 		 -mfloat-abi=soft 
 ASFLAGS = -mcpu=cortex-m3 -mthumb
 
@@ -99,8 +100,8 @@ TARGET = multiwii_2.4_STM32.elf
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(LD) $(LDFLAGS) -o $@ $^ -lm -lssp
-#
+	$(LD) $(LDFLAGS) -o $@ $^ -lm
+
 %.o: %.c
 	$(CC) $(INC_DIRS) $(CFLAGS) -c -o $@ $<
 
