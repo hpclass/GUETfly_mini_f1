@@ -16,10 +16,7 @@ OBJCOPY = ${CROSS_COMPILE}objcopy
 
 # Compiler flags
 
-DDEFS += -DSTM32F10X_MD
-DDEFS += -DHSE_VALUE=8000000 -DUSE_STDPERIPH_DRIVER
-
-DEFS  := $(DDEFS) -DRUN_FROM_FLASH=1
+DEFS  := $(DDEFS) -DRUN_FROM_FLASH=1 -DHSE_VALUE=8000000 -DUSE_STDPERIPH_DRIVER 
 
 MCU   := cortex-m3
 
@@ -32,17 +29,6 @@ OPT   += -fdata-sections
 SPECS := --specs=rdimon.specs -u _printf_float
 LINK_SCRIPT := stm32f10x_flash.lds
 
-FLAGS_MCU := -mcpu=$(MCU)
-FLAGS_AS  := $(SPECS) $(FLAGS_MCU) $(OPT) -c -g -gdwarf-2 -mthumb
-FLAGS_C   := $(SPECS) $(FLAGS_MCU) $(OPT) -c -g -gdwarf-2 -mthumb \
-             -fomit-frame-pointer -Wall -fverbose-asm $(DEFS)
-FLAGS_CXX := $(SPECS) $(FLAGS_MCU) $(OPT) -c -g -gdwarf-2 -mthumb \
-             -fomit-frame-pointer -Wall -fverbose-asm -fno-exceptions \
-             -fno-rtti -fno-threadsafe-statics -fvisibility=hidden -std=c++11 \
-             $(DEFS)
-FLAGS_LD  := $(SPECS) $(FLAGS_MCU) $(OPT) -lm -g -gdwarf-2 -mthumb \
-             -nostartfiles -Xlinker --gc-sections -T$(LINK_SCRIPT) \
-             -Wl,-Map=$(PROJECT).map,--cref,--no-warn-mismatch
 # Directories
 SRC_DIR = ./multiwii_2.4
 USER_DIR = ./USER 
@@ -53,12 +39,18 @@ ASM_FILES = ./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/gcc_ride7/s
 CMSIS_FILES = $(CMSIS_DIR)/core_cm3.c
 
 # Header files
-INC_DIRS = -I$(SRC_DIR) -I$(USER_DIR) -I$(CMSIS_DIR) \
-           -I./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/ \
+INC_STM32_LIB := -I./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/ \
            -I./Libraries/STM32F10x_StdPeriph_Driver/inc/ \
-           -I./USB
+		   -I./USB \
 
-SOURCES = \
+INC_GD32_LIB := -I./Libraries/GD32F3x0_standard_peripheral/Include/ \
+				-I./Libraries/CMSIS/GD32F3x0/Include/ \
+				-I./Libraries/CMSIS/ \
+				
+INC_DIRS := -I$(SRC_DIR) -I$(USER_DIR) -I$(CMSIS_DIR) \
+
+
+MultiWii_SOURCES = \
     ./multiwii_2.4/Alarms.c \
     ./multiwii_2.4/IMU.c \
     ./multiwii_2.4/Output.c \
@@ -71,6 +63,8 @@ SOURCES = \
     ./multiwii_2.4/MultiWii.c \
     ./multiwii_2.4/RX.c \
     ./multiwii_2.4/init_c.c \
+
+HAL_SOURCES = \
     ./USER/AltHold.c \
     ./USER/SPL06_001.c \
     ./USER/main.c \
@@ -94,6 +88,8 @@ SOURCES = \
     ./USER/sys.c \
     ./USB/usart.c \
     ./USB/USB_CH341.c \
+
+SOURCES_STM32_LIBS := \
     ./Libraries/CMSIS/CM3/CoreSupport/core_cm3.c \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_can.c \
@@ -119,22 +115,73 @@ SOURCES = \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_sdio.c \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_wwdg.c \
 
-# 在OBJECTS的定义中，使用grep过滤大小写不同的.s文件
+SOURCES_GD32_LIBS := \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_adc.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_cec.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_cmp.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_crc.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_ctc.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_dac.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_dbg.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_dma.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_exti.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_fmc.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_fwdgt.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_gpio.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_i2c.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_misc.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_pmu.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_rcu.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_rtc.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_spi.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_syscfg.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_timer.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_tsi.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_usart.c \
+	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_wwdgt.c \
 
+# 在OBJECTS的定义中，使用grep过滤大小写不同的.s文件
+ifeq ($(MAKECMDGOALS),GD32)
+	SOURCES := $(SOURCES_GD32_LIBS) $(HAL_SOURCES) $(MultiWii_SOURCES) $(USB_SOURCES)
+	TARGET := $(PROJECT)_GD32
+	INC_DIRS += $(INC_GD32_LIB)
+	DEFS += -DGD32F330
+else
+	SOURCES := $(SOURCES_STM32_LIBS) $(HAL_SOURCES) $(MultiWii_SOURCES) $(USB_SOURCES)
+	TARGET := $(PROJECT)_STM32
+	INC_DIRS += $(INC_STM32_LIB)
+	DEFS += -DSTM32F10X_MD
+endif
+
+
+
+FLAGS_MCU := -mcpu=$(MCU)
+FLAGS_AS  := $(SPECS) $(FLAGS_MCU) $(OPT) -c -g -gdwarf-2 -mthumb
+FLAGS_C   := $(SPECS) $(FLAGS_MCU) $(OPT) -c -g -gdwarf-2 -mthumb \
+             -fomit-frame-pointer -Wall -fverbose-asm $(DEFS)
+FLAGS_CXX := $(SPECS) $(FLAGS_MCU) $(OPT) -c -g -gdwarf-2 -mthumb \
+             -fomit-frame-pointer -Wall -fverbose-asm -fno-exceptions \
+             -fno-rtti -fno-threadsafe-statics -fvisibility=hidden -std=c++11 \
+             $(DEFS)
+FLAGS_LD  := $(SPECS) $(FLAGS_MCU) $(OPT) -lm -g -gdwarf-2 -mthumb \
+             -nostartfiles -Xlinker --gc-sections -T$(LINK_SCRIPT) \
+             -Wl,-Map=$(PROJECT).map,--cref,--no-warn-mismatch
+
+			 
 OBJECTS    := $(filter %.o, $(ASM_FILES:.s=.o)) $(filter %.o, $(SOURCES:.c=.o))
 
-
-# OBJECTS = $(filter-out $(shell grep -il "\.s" $(SOURCES)), $(SOURCES:.c=.o))
-
-TARGET = $(PROJECT).elf
-
-
-.PHONY: all clean
+.PHONY: all GD32 STM32 clean help
 
 all: $(PROJECT).elf $(PROJECT).hex $(PROJECT).bin
 	$(SIZE) $(PROJECT).elf -A
 
-$(TARGET): $(OBJECTS) 
+GD32: $(TARGET).elf $(TARGET).hex $(TARGET).bin
+	$(SIZE) $(TARGET).elf -A
+
+STM32:$(TARGET).elf $(TARGET).hex $(TARGET).bin
+	$(SIZE) $(TARGET).elf -A
+
+$(TARGET).elf: $(OBJECTS) 
 	$(CC) $(OBJECTS) $(FLAGS_LD) -o $@
 
 %.o: %.c
@@ -150,3 +197,6 @@ $(TARGET): $(OBJECTS)
 
 clean:
 	rm -f $(filter-out $(ASM_FILES), $(OBJECTS) $(TARGET))
+
+help: 
+	echo "usage : make "
