@@ -1,28 +1,55 @@
 # Makefile for multiwii project
-
+PROJECT := multiwii
 # Toolchain
 CC = ${CROSS_COMPILE}gcc
 AS = ${CROSS_COMPILE}as
 LD = ${CROSS_COMPILE}ld
+CC        := $(CROSS_COMPILE)gcc
+CXX       := $(CROSS_COMPILE)g++
+CP        := $(CROSS_COMPILE)objcopy
+GDB       := $(CROSS_COMPILE)gdb
+SIZE      := $(CROSS_COMPILE)size
+AS        := $(CC) -x assembler-with-cpp
+HEX       := $(CP) -O ihex
+BIN       := $(CP) -O binary -S
 OBJCOPY = ${CROSS_COMPILE}objcopy
 
 # Compiler flags
-CFLAGS = -mcpu=cortex-m3 \
-         -mthumb -std=gnu11 -Wall \
-         -DSTM32F10X_MD \
-         -DGUET_FLY_MINI_V1  \
-		 -fno-stack-protector \
-		 -mfloat-abi=soft 
-ASFLAGS = -mcpu=cortex-m3 -mthumb
 
-LDFLAGS = -lm
+DDEFS += -DSTM32F10X_MD
+DDEFS += -DHSE_VALUE=8000000 -DUSE_STDPERIPH_DRIVER
+
+DEFS  := $(DDEFS) -DRUN_FROM_FLASH=1
+
+MCU   := cortex-m3
+
+OPT   += -Os
+OPT   += -fsingle-precision-constant
+OPT   += -fno-common
+OPT   += -ffunction-sections
+OPT   += -fdata-sections
+
+SPECS := --specs=rdimon.specs -u _printf_float
+LINK_SCRIPT := stm32f10x_flash.lds
+
+FLAGS_MCU := -mcpu=$(MCU)
+FLAGS_AS  := $(SPECS) $(FLAGS_MCU) $(OPT) -c -g -gdwarf-2 -mthumb
+FLAGS_C   := $(SPECS) $(FLAGS_MCU) $(OPT) -c -g -gdwarf-2 -mthumb \
+             -fomit-frame-pointer -Wall -fverbose-asm $(DEFS)
+FLAGS_CXX := $(SPECS) $(FLAGS_MCU) $(OPT) -c -g -gdwarf-2 -mthumb \
+             -fomit-frame-pointer -Wall -fverbose-asm -fno-exceptions \
+             -fno-rtti -fno-threadsafe-statics -fvisibility=hidden -std=c++11 \
+             $(DEFS)
+FLAGS_LD  := $(SPECS) $(FLAGS_MCU) $(OPT) -lm -g -gdwarf-2 -mthumb \
+             -nostartfiles -Xlinker --gc-sections -T$(LINK_SCRIPT) \
+             -Wl,-Map=$(PROJECT).map,--cref,--no-warn-mismatch
 # Directories
 SRC_DIR = ./multiwii_2.4
 USER_DIR = ./USER 
 CMSIS_DIR = ./Libraries/CMSIS/CM3/CoreSupport
 
 # Source files
-ASM_FILES = ./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/arm/startup_stm32f10x_hd.S 
+ASM_FILES = ./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/gcc_ride7/startup_stm32f10x_hd.s
 CMSIS_FILES = $(CMSIS_DIR)/core_cm3.c
 
 # Header files
@@ -68,7 +95,6 @@ SOURCES = \
     ./USB/usart.c \
     ./USB/USB_CH341.c \
     ./Libraries/CMSIS/CM3/CoreSupport/core_cm3.c \
-    ./USER/system_stm32f10x.c \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_can.c \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dbgmcu.c \
@@ -94,20 +120,33 @@ SOURCES = \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_wwdg.c \
 
 # 在OBJECTS的定义中，使用grep过滤大小写不同的.s文件
-OBJECTS = $(filter-out $(shell grep -il "\.s" $(SOURCES)), $(SOURCES:.c=.o))
 
-TARGET = multiwii_2.4_STM32.elf
+OBJECTS    := $(filter %.o, $(ASM_FILES:.s=.o)) $(filter %.o, $(SOURCES:.c=.o))
 
-all: $(TARGET)
 
-$(TARGET): $(OBJECTS)
-	$(LD) $(LDFLAGS) -o $@ $^ 
+# OBJECTS = $(filter-out $(shell grep -il "\.s" $(SOURCES)), $(SOURCES:.c=.o))
+
+TARGET = $(PROJECT).elf
+
+
+.PHONY: all clean
+
+all: $(PROJECT).elf $(PROJECT).hex $(PROJECT).bin
+	$(SIZE) $(PROJECT).elf -A
+
+$(TARGET): $(OBJECTS) 
+	$(CC) $(OBJECTS) $(FLAGS_LD) -o $@
 
 %.o: %.c
-	$(CC) $(INC_DIRS) $(CFLAGS) -c -o $@ $<
+	$(CC) $(INC_DIRS) $(FLAGS_C) -c -o $@ $<
 
 %.o: %.s
-	$(AS) $(ASFLAGS) -o $@ $<
+	$(AS) $(FLAGS_AS) $< -o $@
+%.hex: %.elf
+	$(HEX) $< $@
+
+%.bin: %.elf
+	$(BIN) $< $@
 
 clean:
 	rm -f $(filter-out $(ASM_FILES), $(OBJECTS) $(TARGET))

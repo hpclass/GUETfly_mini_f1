@@ -65,7 +65,7 @@ void HardFault_Handler(void)
     TIM3->CCR3=1;
     TIM3->CCR4=1;
     if(CoreDebug->DHCSR & 1) {  //check C_DEBUGEN == 1 -> Debugger Connected
-        __breakpoint(0);  // halt program execution here
+       // __breakpoint(0);  // halt program execution here
     }
     while (1)
     {
