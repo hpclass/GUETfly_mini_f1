@@ -1,10 +1,13 @@
+#ifdef STM32F10X_MD
 #include "stm32f10x.h"
 #include "stm32f10x_conf.h"
+#endif
+#include "stdint.h"
 #include "math.h"
 #include "delay.h"
 #include "soft_iic.h"
 
-extern u8 exchange_num[11];
+extern uint8_t exchange_num[11];
 
 // void IIC_EE_Init(void)
 //{
@@ -57,7 +60,7 @@ void DelayMs(uint16_t ms)
  }
 }
 */
-u8 TWI_Start()
+uint8_t TWI_Start()
 {
     SDAH;
     SCLH;
@@ -244,7 +247,7 @@ uint8_t TWI_ReadByte(uint8_t ReadAddress)
     return temp; // 返回的如果是0，1，2则与错误代码相同了，再考虑一下
 }
 
-u8 Single_WriteI2C2(u8 Slave_Address, u8 REG_Address, u8 REG_data)
+uint8_t Single_WriteI2C2(uint8_t Slave_Address, uint8_t REG_Address, uint8_t REG_data)
 {
     uint8_t i, temp;
     i = TWI_Start();
@@ -278,9 +281,9 @@ u8 Single_WriteI2C2(u8 Slave_Address, u8 REG_Address, u8 REG_data)
 //**************************************
 // 从IIC设备读取一个字节数据
 //**************************************
-u8 Single_ReadI2C2(u8 Slave_Address, u8 REG_Address)
+uint8_t Single_ReadI2C2(uint8_t Slave_Address, uint8_t REG_Address)
 {
-    u8 REG_data;
+    uint8_t REG_data;
     TWI_Start(); // 起始信号
 
     TWI_SendByte(Slave_Address); // 发送设备地址+写信号

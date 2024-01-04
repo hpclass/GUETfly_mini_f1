@@ -1,7 +1,9 @@
 /* Define to prevent recursive inclusion ------------------------------------ */
 
+#ifdef STM32F10X_MD
 #include "stm32f10x.h"
-
+#endif
+#include "stdint.h"
 /* Includes ------------------------------------------------------------------*/
 
 typedef unsigned short int uint;

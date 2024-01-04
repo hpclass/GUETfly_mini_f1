@@ -1,7 +1,11 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 #define ABS(x) ((x) > 0 ? (x) : -(x))
+#ifdef STM32F10X_MD
 #include "stm32f10x.h"
+#else
+#include "stdint.h"
+#endif
 // #define RC_CHANS 6
 enum rc
 {

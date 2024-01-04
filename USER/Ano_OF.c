@@ -17,8 +17,8 @@ void AnoOF_DataAnl(uint8_t *data_buf, uint8_t num);
 void AnoOF_GetOneByte(uint8_t data)
 {
     static uint8_t _datatemp[50];
-    static u8 _data_len = 0,_data_cnt = 0;
-    static u8 state = 0;
+    static uint8_t _data_len = 0,_data_cnt = 0;
+    static uint8_t state = 0;
 
     if(state==0&&data==0xAA)
     {
@@ -61,8 +61,8 @@ void AnoOF_GetOneByte(uint8_t data)
 
 void AnoOF_DataAnl(uint8_t *data_buf,uint8_t num)
 {
-    u8 sum = 0;
-    u8 i=0;
+    uint8_t sum = 0;
+    uint8_t i=0;
     for(i=0; i<(num-1); i++)
         sum += *(data_buf+i);
     if(!(sum==*(data_buf+num-1)))		return;
@@ -144,8 +144,8 @@ void AnoOF_DataAnl(uint8_t *data_buf,uint8_t num)
 void AnoOF_GetOneByte(uint8_t data)
 {
     static uint8_t _datatemp[50];
-    static u8 _data_len = 0, _data_cnt = 0;
-    static u8 state = 0;
+    static uint8_t _data_len = 0, _data_cnt = 0;
+    static uint8_t state = 0;
 
     if (state == 0 && data == 0xAA) // 头字节0xaa
     {
@@ -193,8 +193,8 @@ void AnoOF_GetOneByte(uint8_t data)
 
 void AnoOF_DataAnl(uint8_t *data_buf, uint8_t num)
 {
-    u8 sum = 0;
-    u8 i = 0;
+    uint8_t sum = 0;
+    uint8_t i = 0;
     for (i = 0; i < (num - 1); i++)
         sum += *(data_buf + i);
     if (!(sum == *(data_buf + num - 1)))

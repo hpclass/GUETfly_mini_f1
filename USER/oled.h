@@ -1,7 +1,9 @@
 #ifndef __OLED_I2C_H
 #define __OLED_I2C_H
 
+#ifdef STM32F10X_MD
 #include "stm32f10x.h"
+#endif
 
 #define OLED_ADDRESS 0x78 // 通过调整0R电阻,屏可以0x78和0x7A两个地址 -- 默认0x78
 

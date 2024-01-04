@@ -2,7 +2,10 @@
 #define __ANO_OF_H_
 
 // #include "stm32f1xx.h"
+#ifdef STM32F10X_MD
 #include "stm32f10x_it.h"
+#endif
+#include "stdint.h"
 // 以下为全局变量，在其他文件中，引用本h文件，即可在其他文件中访问到以下变量
 // 光流信息质量：QUA
 // 光照强度：LIGHT

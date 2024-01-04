@@ -1,7 +1,9 @@
 #ifndef SPL06_01_H
 #define SPL06_01_H
 
-#include <stm32f10x.h>
+#ifdef STM32F10X_MD
+#include "stm32f10x.h"
+#endif
 
 #define s32 int32
 #define int16 short

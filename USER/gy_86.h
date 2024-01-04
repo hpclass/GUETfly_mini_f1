@@ -1,7 +1,10 @@
 #ifndef _GY_86_H
 #define _GY_86_H
 // #include "stm32f10x.h"
+#ifdef STM32F10X_MD
 #include "stm32f10x_i2c.h"
+#endif
+#include "stdint.h"
 #include "math.h"
 #include "usart.h"
 #include "def.h"
@@ -70,10 +73,10 @@
 
 void I2C_GPIO_Config(void);
 static void I2C_Mode_Config(void);
-void I2C_SendByte(u8 dat);
+void I2C_SendByte(uint8_t dat);
 void I2C_Start(void);
 void I2C_Stop(void);
-void I2C_SendACK(u8 i);
+void I2C_SendACK(uint8_t i);
 bool I2C_WaitAck(void);
-u8 I2C_RecvByte(void);
+uint8_t I2C_RecvByte(void);
 #endif

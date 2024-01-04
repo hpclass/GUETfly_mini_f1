@@ -2,6 +2,7 @@
 #define __USART_H
 //#include "stdio.h"
 #include "sys.h"
+#include "stdint.h"
 //////////////////////////////////////////////////////////////////////////////////
 // 本程序只供学习使用，未经作者许可，不得用于其它任何用途
 // Mini STM32开发板
@@ -28,12 +29,12 @@
 #define USART_REC_LEN 200 // 定义最大接收字节数 200
 #define EN_USART1_RX 1    // 使能（1）/禁止（0）串口1接收
 
-// extern u8  USART_RX_BUF[USART_REC_LEN]; //接收缓冲,最大USART_REC_LEN个字节.末字节为换行符
+// extern uint8_t  USART_RX_BUF[USART_REC_LEN]; //接收缓冲,最大USART_REC_LEN个字节.末字节为换行符
 // extern u16 USART_RX_STA;         		//接收状态标记
 // 如果想串口中断接收，请不要注释以下宏定义
-void uart_init(u32 pclk2, u32 bound);
-void USART2_Configuration(u32 bound);
-void USART3_Configuration(u32 bound);
-int txd_fs2(u8 ch);
-void txd_fs1(u8 ch);
+void uart_init(uint32_t pclk2, uint32_t bound);
+void USART2_Configuration(uint32_t bound);
+void USART3_Configuration(uint32_t bound);
+int txd_fs2(uint8_t ch);
+void txd_fs1(uint8_t ch);
 #endif

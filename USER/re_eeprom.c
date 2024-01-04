@@ -1,7 +1,10 @@
 #include <string.h>
+#include "stdint.h"
 #include "config.h"
 #include "def.h"
+#ifdef STM32F10X_MD
 #include "stm32f10x_flash.h"
+#endif
 #include "EEPROM.h"
 
 #if !defined(USE_EX_EEPROM) // 不使用外置EEPROM而使用STM32的flash
@@ -41,7 +44,7 @@ ErrorStatus HSEStartUpStatus;
  * Return         : None
  *******************************************************************************/
 
-void Readflash(u32 *p, u8 start, u8 end) //
+void Readflash(u32 *p, uint8_t start, uint8_t end) //
 {
     int j = start;
     // FlashAddress = FLASH_WRITE_ADDR+4*start;
@@ -58,7 +61,7 @@ void Readflash(u32 *p, u8 start, u8 end) //
 // faddr:读地址(此地址必须为2的倍数!!)
 // 返回值:对应数据.
 
-u16 STMFLASH_ReadHalfWord(u32 faddr)
+uint16_t STMFLASH_ReadHalfWord(u32 faddr)
 {
     return *(vu16 *)faddr;
 }
@@ -66,12 +69,12 @@ u16 STMFLASH_ReadHalfWord(u32 faddr)
 // ReadAddr:起始地址
 // pBuffer:数据指针
 // NumToWrite:半字(16位)数
-void STMFLASH_Read(u32 ReadAddr, u16 *pBuffer, u16 NumToRead)
+void STMFLASH_Read(u32 ReadAddr, uint16_t *pBuffer, uint16_t NumToRead)
 {
-    u16 i;
-    u16 temp_data = 0, loop_times_ = 0;
-    u8 *temp_P = 0;
-    temp_P = (u8 *)pBuffer; // 转换地址
+    uint16_t i;
+    uint16_t temp_data = 0, loop_times_ = 0;
+    uint8_t *temp_P = 0;
+    temp_P = (uint8_t *)pBuffer; // 转换地址
     if (NumToRead % 2 != 0)
         loop_times_ = NumToRead / 2 + 1;
     else
@@ -159,22 +162,22 @@ void STMFLASH_Read(u32 ReadAddr, u16 *pBuffer, u16 NumToRead)
 // WriteAddr:起始地址
 // pBuffer:数据指针
 // NumToWrite:半字(16位)数
-void STMFLASH_Write_NoCheck(u32 WriteAddr, u16 *pBuffer, u16 NumToWrite)
+void STMFLASH_Write_NoCheck(u32 WriteAddr, uint16_t *pBuffer, uint16_t NumToWrite)
 {
-    u16 i;
+    uint16_t i;
     for (i = 0; i < NumToWrite; i++)
     {
         FLASH_ProgramHalfWord(WriteAddr, pBuffer[i]);
         WriteAddr += 2; // 地址增加2.
     }
 }
-void STMFLASH_Write_b(u32 WriteAddr, u16 *pBuffer, int32_t NumToWrite)
+void STMFLASH_Write_b(u32 WriteAddr, uint16_t *pBuffer, int32_t NumToWrite)
 {
-    u16 STMFLASH_BUF[STM_SECTOR_SIZE / 2]; // 最多是2K字节
+    uint16_t STMFLASH_BUF[STM_SECTOR_SIZE / 2]; // 最多是2K字节
     u32 secpos;                            // 扇区地址
-    u16 secoff;                            // 扇区内偏移地址(16位字计算)
-    u16 secremain;                         // 扇区内剩余地址(16位字计算)
-    u16 i;
+    uint16_t secoff;                            // 扇区内偏移地址(16位字计算)
+    uint16_t secremain;                         // 扇区内剩余地址(16位字计算)
+    uint16_t i;
     u32 offaddr; // 去掉0X08000000后的地址
     if (NumToWrite % 2 != 0)
         NumToWrite = NumToWrite / 2 + 1;
@@ -226,13 +229,13 @@ void STMFLASH_Write_b(u32 WriteAddr, u16 *pBuffer, int32_t NumToWrite)
     FLASH_Lock(); // 上锁
 }
 
-void STMFLASH_Write(u32 WriteAddr, u16 *pBuffer, int32_t NumToWrite)
+void STMFLASH_Write(u32 WriteAddr, uint16_t *pBuffer, int32_t NumToWrite)
 {
-    u16 STMFLASH_BUF[STM_SECTOR_SIZE / 2]; // 最多是2K字节
+    uint16_t STMFLASH_BUF[STM_SECTOR_SIZE / 2]; // 最多是2K字节
     u32 secpos;                            // 扇区地址
-    u16 secoff;                            // 扇区内偏移地址(16位字计算)
-    u16 secremain;                         // 扇区内剩余地址(16位字计算)
-    u16 i;
+    uint16_t secoff;                            // 扇区内偏移地址(16位字计算)
+    uint16_t secremain;                         // 扇区内剩余地址(16位字计算)
+    uint16_t i;
     u32 offaddr; // 去掉0X08000000后的地址
     if (NumToWrite % 2 != 0)
         NumToWrite = NumToWrite / 2 + 1;
@@ -293,7 +296,7 @@ void eeprom_write_block(void *buf, void *addr, size_t n)
         addr_ += 1;
     LED1_ON
     // delay_ms(500);
-    STMFLASH_Write(FLASH_EEPROM_BASS_ADDR + (u32)addr_, (u16 *)buf, n);
+    STMFLASH_Write(FLASH_EEPROM_BASS_ADDR + (u32)addr_, (uint16_t *)buf, n);
     LED1_OFF
 }
 void eeprom_read_block(void *buf, void *addr, size_t n) // 读取由指定地址开始的指定长度的EEPROM数据
@@ -302,7 +305,7 @@ void eeprom_read_block(void *buf, void *addr, size_t n) // 读取由指定地址
     if ((u32)addr_ % 2 != 0) // 补齐偶数地址
         addr_ += 1;
     LED2_ON
-    STMFLASH_Read(FLASH_EEPROM_BASS_ADDR + (u32)addr_, (u16 *)buf, n); // 读出flash
+    STMFLASH_Read(FLASH_EEPROM_BASS_ADDR + (u32)addr_, (uint16_t *)buf, n); // 读出flash
     LED2_OFF
 }
 
@@ -354,7 +357,7 @@ void EEPROM_I2C_GPIO_Config(void)
 ///////////IIC初始化//////////////
 
 ////////////粗略延时函数//////////
-void EEPROM_Delay_1us(u16 n) // 约1us,1100k
+void EEPROM_Delay_1us(uint16_t n) // 约1us,1100k
 {
     uint8_t i = 6; // i=10延时1.5us//这里可以优化速度 ，经测试最低到5还能写入
     while (n--)
@@ -398,7 +401,7 @@ void EEPROM_I2C_Stop(void)
 // IIC发送应答信号
 // 入口参数:ack (0:ACK 1:NAK)
 //**************************************
-void EEPROM_I2C_SendACK(u8 i)
+void EEPROM_I2C_SendACK(uint8_t i)
 {
     if (1 == i)
         EEPROM_SDA_H; // 写应答信号
@@ -441,7 +444,7 @@ bool EEPROM_I2C_WaitAck(void) // 返回为:=1有ACK,=0无ACK
 //**************************************
 // 向IIC总线发送一个字节数据
 //**************************************
-void EEPROM_I2C_SendByte(u8 dat)
+void EEPROM_I2C_SendByte(uint8_t dat)
 {
     unsigned int i;
     //	unsigned char ack=1;
@@ -466,10 +469,10 @@ void EEPROM_I2C_SendByte(u8 dat)
 //**************************************
 // 从IIC总线接收一个字节数据
 //**************************************
-u8 EEPROM_I2C_RecvByte()
+uint8_t EEPROM_I2C_RecvByte()
 {
-    u8 i;
-    u8 dat = 0;
+    uint8_t i;
+    uint8_t dat = 0;
     EEPROM_SDA_H;           // 使能内部上拉,准备读取数据,
     for (i = 0; i < 8; i++) // 8位计数器
     {
@@ -490,7 +493,7 @@ u8 EEPROM_I2C_RecvByte()
 //**************************************
 // 向IIC设备写入一个字节数据
 //**************************************
-bool EEPROM_Single_WriteI2C(u8 Slave_Address, u8 REG_Address, u8 REG_data)
+bool EEPROM_Single_WriteI2C(uint8_t Slave_Address, uint8_t REG_Address, uint8_t REG_data)
 {
     EEPROM_I2C_Start(); // 起始信号
 
@@ -521,9 +524,9 @@ bool EEPROM_Single_WriteI2C(u8 Slave_Address, u8 REG_Address, u8 REG_data)
 //**************************************
 // 从IIC设备读取一个字节数据
 //**************************************
-u8 EEPROM_Single_ReadI2C(u8 Slave_Address, u8 REG_Address)
+uint8_t EEPROM_Single_ReadI2C(uint8_t Slave_Address, uint8_t REG_Address)
 {
-    u8 REG_data;
+    uint8_t REG_data;
     EEPROM_I2C_Start(); // 起始信号
 
     EEPROM_I2C_SendByte(Slave_Address); // 发送设备地址+写信号
@@ -556,9 +559,9 @@ u8 EEPROM_Single_ReadI2C(u8 Slave_Address, u8 REG_Address)
     EEPROM_I2C_Stop(); // 停止信号
     return REG_data;
 }
-u8 AT24CXX_ReadOneByte(u16 ReadAddr)
+uint8_t AT24CXX_ReadOneByte(uint16_t ReadAddr)
 {
-    u8 temp = 0;
+    uint8_t temp = 0;
     EEPROM_I2C_Start();
     if (E2END > 2047)
     {
@@ -583,7 +586,7 @@ u8 AT24CXX_ReadOneByte(u16 ReadAddr)
 // 在AT24CXX指定地址写入一个数据
 // WriteAddr  :写入数据的目的地址
 // DataToWrite:要写入的数据
-void AT24CXX_WriteOneByte(u16 WriteAddr, u8 DataToWrite)
+void AT24CXX_WriteOneByte(uint16_t WriteAddr, uint8_t DataToWrite)
 {
     EEPROM_I2C_Start();
     if (E2END > 2047)
@@ -619,7 +622,7 @@ uint8_t AT24CXX_Check(void)
     }
     return 1;
 }
-u8 AT24CXX_write_Page(u8 *buf, u16 addr, size_t n)
+uint8_t AT24CXX_write_Page(uint8_t *buf, uint16_t addr, size_t n)
 {
     // http://ww1.microchip.com/downloads/en/devicedoc/21081G.pdf
     // 24C08的页读写只要2ms的等待时间，16字节一页
@@ -742,7 +745,7 @@ u8 AT24CXX_write_Page(u8 *buf, u16 addr, size_t n)
 不发送应答信号
 发送停止信号
 */
-void eeprom_Continuous_reading(u8 *buf, u16 addr, size_t n) // 连续读取
+void eeprom_Continuous_reading(uint8_t *buf, uint16_t addr, size_t n) // 连续读取
 {
     EEPROM_I2C_Start();
     if (E2END > 2047)
@@ -771,18 +774,18 @@ void eeprom_Continuous_reading(u8 *buf, u16 addr, size_t n) // 连续读取
     EEPROM_I2C_Stop();     // 产生一个停止条件
     // EEPROM_Delay_1us(1);
 }
-// u8 temp_wp[4096]=0;
+// uint8_t temp_wp[4096]=0;
 void eeprom_write_block(void *buf, void *addr, size_t n)
 {
     LED1_ON
-    AT24CXX_write_Page((u8 *)buf, (u16)addr, n);
+    AT24CXX_write_Page((uint8_t *)buf, (uint16_t)addr, n);
     LED1_OFF
     //		uint16_t i;
-    //	u8 *temp=(u8*)buf;
+    //	uint8_t *temp=(uint8_t*)buf;
     //		LED1_ON
     //	for(i=0;i<=n;i++)
     //	{
-    //		AT24CXX_WriteOneByte((u16)addr+i,*temp);
+    //		AT24CXX_WriteOneByte((uint16_t)addr+i,*temp);
     //		temp++;
     //		delay_ms(7);
     //	}
@@ -791,14 +794,14 @@ void eeprom_write_block(void *buf, void *addr, size_t n)
 void eeprom_read_block(void *buf, void *addr, size_t n) // 读取由指定地址开始的指定长度的EEPROM数据
 {
     LED2_ON
-    eeprom_Continuous_reading((u8 *)buf, (u16)addr, n); // 连续读取
+    eeprom_Continuous_reading((uint8_t *)buf, (uint16_t)addr, n); // 连续读取
     LED2_OFF
     //		uint16_t i;
-    //		u8 *temp=(u8*)buf;
+    //		uint8_t *temp=(uint8_t*)buf;
     //		LED2_ON
     //		for(i=0;i<=n;i++)
     //	{
-    //		*temp=(u8)AT24CXX_ReadOneByte((u16)addr+i);//单字节读取
+    //		*temp=(uint8_t)AT24CXX_ReadOneByte((uint16_t)addr+i);//单字节读取
     //		temp++;
     //	}
     //		LED2_OFF
