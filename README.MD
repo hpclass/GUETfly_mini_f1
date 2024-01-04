@@ -29,3 +29,9 @@ PB3 TRI
 PB4 echo
 
 20210302测试更改
+
+
+use :
+ export CROSS_COMPILE=arm-none-eabi-
+ make STM32
+ 
