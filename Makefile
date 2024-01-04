@@ -67,13 +67,11 @@ MultiWii_SOURCES = \
 HAL_SOURCES = \
     ./USER/AltHold.c \
     ./USER/SPL06_001.c \
-    ./USER/main.c \
     ./USER/re_eeprom.c \
     ./USER/system_stm32f10x.c \
     ./USER/Ano_OF.c \
     ./USER/math_.c \
     ./USER/soft_iic.c \
-    ./USER/test1.c \
     ./USER/DJI_Guidance_usat.c \
     ./USER/delay.c \
     ./USER/oled.c \
