@@ -6,6 +6,7 @@
 #include "usart.h"
 #else
 #include "gd32f3x0.h"
+#include "guetfly_data_types.h"
 #endif
 #include "config.h"
 #include "def.h"
@@ -48,18 +49,8 @@ void UartSendData(uint8_t port)
     // stm32 add
     switch (port)
     {
+#ifdef STM32F10X_MD
     case 0:
-
-        //            while(serialHeadTX[0] != serialTailTX[0]) {//多次调用效率低下
-        //                if (++serialTailTX[0] >= TX_BUFFER_SIZE) serialTailTX[0] = 0;
-        //                USB_send((uint8_t *)&serialBufferTX[0][serialTailTX[0]],1);
-        //            }
-
-        /*
-            USB_send((uint8_t *)&serialBufferTX[0][serialTailTX[0]+1],serialHeadTX[0]-serialTailTX[0]);
-            serialTailTX[0]=serialHeadTX[0];
-            if (serialTailTX[0] >= TX_BUFFER_SIZE) serialTailTX[0] = 0;
-        */
         if (serialHeadTX[0] != serialTailTX[0])
         {
             if (serialHeadTX[0] > serialTailTX[0]) // 头在尾前面，一次可以发完
@@ -131,6 +122,26 @@ void UartSendData(uint8_t port)
             UART5->DR = res;
         }
         break;
+#else
+    case 0:
+        while (serialHeadTX[5] != serialTailTX[5])
+        {
+            if (++serialTailTX[5] >= TX_BUFFER_SIZE)
+                serialTailTX[5] = 0;
+            res = (uint8_t)serialBufferTX[5][serialTailTX[5]];
+            uart_send_buff(HANDLE_usart_gps, res);
+        }
+        break;
+    case 1:
+        while (serialHeadTX[5] != serialTailTX[5])
+        {
+            if (++serialTailTX[5] >= TX_BUFFER_SIZE)
+                serialTailTX[5] = 0;
+            res = (uint8_t)serialBufferTX[5][serialTailTX[5]];
+            uart_send_buff(HANDLE_usart_radio, res);
+        }
+        break;
+#endif
     }
 }
 

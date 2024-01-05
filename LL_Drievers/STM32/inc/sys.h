@@ -4,23 +4,6 @@
 #include "stm32f10x.h"
 #endif
 #include "stdint.h"
-//////////////////////////////////////////////////////////////////////////////////
-// 本程序只供学习使用，未经作者许可，不得用于其它任何用途
-// ALIENTEK STM32开发板
-// 正点原子@ALIENTEK
-// 技术论坛:www.openedv.com
-// 修改日期:2012/8/18
-// 版本：V1.7
-// 版权所有，盗版必究。
-// Copyright(C) 广州市星翼电子科技有限公司 2009-2019
-// All rights reserved
-//////////////////////////////////////////////////////////////////////////////////
-
-// 0,不支持ucos
-// 1,支持ucos
-#define SYSTEM_SUPPORT_UCOS 0 // 定义系统文件夹是否支持UCOS
-
-// 位带操作,实现51类似的GPIO控制功能
 // 具体实现思想,参考<<CM3权威指南>>第五章(87页~92页).
 // IO口操作宏定义
 #define BITBAND(addr, bitnum) ((addr & 0xF0000000) + 0x2000000 + ((addr & 0xFFFFF) << 5) + (bitnum << 2))
@@ -72,8 +55,6 @@
 #define JTAG_SWD_ENABLE 0X00
 
 void NVIC_Configuration(void);
-/////////////////////////////////////////////////////////////////
-// void BKP_Write(uint8_t reg,uint16_t dat);	//写入后备寄存器
 void Stm32_Clock_Init(uint8_t PLL);                                                                      // 时钟初始化
 void Sys_Soft_Reset(void);                                                                          // 系统软复位
 void Sys_Standby(void);                                                                             // 待机模式
@@ -82,5 +63,5 @@ void MY_NVIC_PriorityGroupConfig(uint8_t NVIC_Group);                           
 void MY_NVIC_Init(uint8_t NVIC_PreemptionPriority, uint8_t NVIC_SubPriority, uint8_t NVIC_Channel, uint8_t NVIC_Group); // 设置中断
 void Ex_NVIC_Config(uint8_t GPIOx, uint8_t BITx, uint8_t TRIM);                                                    // 外部中断配置函数(只对GPIOA~G)
 void JTAG_Set(uint8_t mode);
-
+void BSP_init(void);
 #endif

@@ -1,5 +1,6 @@
 #ifdef STM32F10X_MD
 #include "stm32f10x.h"
+#include "usart.h"
 #else
 #include "gd32f3x0.h"
 #endif
@@ -11,7 +12,6 @@
 #include "MultiWii.h"
 #include "Alarms.h"
 #include "timer.h"
-#include "usart.h"
 /**************************************************************************************/
 /***************             Global RX related variables           ********************/
 /**************************************************************************************/
@@ -324,12 +324,12 @@ void readSerial_RX(void)
     }
 }
 #endif
-extern u16 ppm_rx[12];
+extern uint16_t ppm_rx[12];
 
 uint16_t readRawRC(uint8_t chan)
 {
     uint16_t data;
-    extern u16 ppm_rx[12];
+    extern uint16_t ppm_rx[12];
 #if defined(SPEKTRUM) || defined(SBUS) || defined(SUMD)
     if (chan < RC_CHANS)
     {

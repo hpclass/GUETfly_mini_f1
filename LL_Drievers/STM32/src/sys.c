@@ -1,6 +1,7 @@
 #include <stm32f10x_lib.h>
 #include "stm32f10x_conf.h"
 #include "sys.h"
+#include "config.h"
 //////////////////////////////////////////////////////////////////////////////////
 // 本程序只供学习使用，未经作者许可，不得用于其它任何用途
 // Mini STM32开发板
@@ -242,4 +243,144 @@ void Stm32_Clock_Init(uint8_t PLL)
         temp = RCC->CFGR >> 2;
         temp &= 0x03;
     }
+}
+void GPIO_Configuration(void)
+{
+#if defined(GUET_FLY_MINI_V1)
+    RCC->APB2ENR |= 1 << 2;   // 使能PORTA时钟
+    GPIOA->CRL &= 0XFFFFFF00; // 清零相应位
+    GPIOA->CRL |= 0X00000033; // 推完输出
+
+#elif defined(GUET_FLY_V1)
+    RCC->APB2ENR |= 1 << 4;   // 使能PORTC时钟
+    GPIOC->CRL &= 0XFFF0FFFF; // 清零相应位
+    GPIOC->CRL |= 0X00030000; // 推完输出
+
+    RCC->APB2ENR |= 1 << 3;   // 使能PORTB时钟
+    GPIOB->CRH &= 0XF0F0FFFF; // 清零相应位
+    GPIOB->CRH |= 0X03030000; // 推完输出
+
+    PBout(12) = 1; // IIC_SPI_CH
+    PBout(14) = 0; // MISO
+
+    // 器件片选
+    RCC->APB2ENR |= 1 << 5; // 使能PORTD时钟
+
+    GPIOD->CRL &= 0XFFF00000; // 清零相应位
+    GPIOD->CRL |= 0X00033333; // 推完输出
+
+    GPIOD->CRH &= 0XFFFFF00F; // 清零相应位
+    GPIOD->CRH |= 0X00000330; // 推完输出
+
+    PDout(10) = 1; //
+    PDout(11) = 1; //
+
+    // LED
+    RCC->APB2ENR |= 1 << 6;   // 使能PORTE时钟
+    GPIOE->CRL &= 0XFF000000; // 清零相应位
+    GPIOE->CRL |= 0X00333333; // 推完输出
+    GPIOE->ODR &= ~0xffc1;
+#else
+    RCC->APB2ENR |= 1 << 4;   // 使能PORTC时钟
+    GPIOC->CRH &= 0XFF0FFFFF; // 清零相应位
+    GPIOC->CRH |= 0X00300000; // 推完输出
+#endif
+}
+void BSP_init()
+{
+    // 基础初始化，硬件底层部分的初始化一般不用修改
+    Stm32_Clock_Init(9);   // 系统时钟设置倍频
+    SysTick_Config(72000); // 新修改1ms定时，减少系统负担
+    JTAG_Set(SWD_ENABLE);  // 修改SWD模式，释放被占用的IO口
+    // #if !defined(GUET_FLY_MINI_V1)//mini板不带USB
+    USB_CH341_Init(); // 虚拟串口
+// #endif
+#if !defined(SBUS__)
+    TIM1_Cap_Init(0XFFFF, 72 - 1); // 以1Mhz的频率计数，这个是PPM捕获使用的
+#endif
+    GPIO_Configuration(); // LED初始化
+    I2C_GPIO_Config();
+#if defined(USE_EX_EEPROM)
+    EEPROM_I2C_GPIO_Config(); // EEPROM的IIC
+    while (AT24CXX_Check())
+    {
+        delay_ms(1000);
+        EEPROM_I2C_GPIO_Config(); // EEPROM的IIC
+    }
+#endif
+    LED_init(1);
+//    /****************/
+//    //定时器分频，前面是计数，后面是分频，默认前面不更改，更改后面部分，72代表400hz（电调使用），720-1代表50Hz（舵机使用）
+//    //TIM1_PWM_Init(1999,720-1);//高级定时器，//50hz  720分频，计数2000，，=>10us计数，10us*2000=20ms
+//
+//    //IIC、串口等高级接口初始化
+//
+//    //关于串口，0-3号串口收到的数据都在堆栈里，4-5号串口收到数据暂时没设计进入堆栈，详情看UART5_IRQHandler()
+#if defined(GPS_SERIAL)
+
+#if (GPS_SERIAL == 1)
+#undef SERIAL1_COM_SPEED
+#define SERIAL1_COM_SPEED GPS_BAUD
+#endif
+
+#if (GPS_SERIAL == 1)
+#undef SERIAL1_COM_SPEED
+#define SERIAL1_COM_SPEED GPS_BAUD
+#endif
+
+#if (GPS_SERIAL == 2)
+#undef SERIAL2_COM_SPEED
+#define SERIAL2_COM_SPEED GPS_BAUD
+#endif
+
+#if (GPS_SERIAL == 3)
+#undef SERIAL3_COM_SPEED
+#define SERIAL3_COM_SPEED GPS_BAUD
+#endif
+
+#if (GPS_SERIAL == 4)
+#undef SERIAL4_COM_SPEED
+#define SERIAL4_COM_SPEED GPS_BAUD
+#endif
+
+#if (GPS_SERIAL == 5)
+#undef SERIAL5_COM_SPEED
+#define SERIAL5_COM_SPEED GPS_BAUD
+#endif
+#endif
+    uart_init(72, SERIAL1_COM_SPEED);        // 串口1
+    USART2_Configuration(SERIAL2_COM_SPEED); // 串口2
+#if !defined(SBUS__)
+    USART3_Configuration(SERIAL3_COM_SPEED); // 串口3
+#else
+    USART3_Configuration(100000);
+#endif
+#if defined(STM32F10X_HD)
+    USART4_Configuration(SERIAL4_COM_SPEED);
+    USART5_Configuration(SERIAL5_COM_SPEED);
+#endif
+#ifdef STM32F10X_MD
+    while ((USART1->SR & 0X40) == 0)
+        ; // 循环发送,直到发送完毕
+    USART1->DR = 0x65;
+    while ((USART2->SR & 0X40) == 0)
+        ; // 循环发送,直到发送完毕
+    USART2->DR = 0x65;
+    while ((USART3->SR & 0X40) == 0)
+        ; // 循环发送,直到发送完毕
+    USART3->DR = 0x65;
+#if defined(STM32F10X_HD)
+    while ((UART4->SR & 0X40) == 0)
+        ; // 循环发送,直到发送完毕
+    UART4->DR = 0x65;
+    while ((UART5->SR & 0X40) == 0)
+        ; // 循环发送,直到发送完毕
+    UART5->DR = 0x65;
+#endif
+#endif
+    //  OLED_ShowStr(0,3,"Init USARTS Done!",1);
+    // LED1_ON;
+    // test_Uart();
+    LED_init(2);
+    // Adc_Init();
 }

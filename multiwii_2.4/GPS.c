@@ -1,6 +1,7 @@
 
 #ifdef STM32F10X_MD
 #include "stm32f10x.h"
+#include "delay.h"
 #else
 #include "gd32f3x0.h"
 #endif
@@ -14,7 +15,6 @@
 #include "EEPROM.h"
 #include <math.h>
 #include "timer.h"
-#include "delay.h"
 #include <ctype.h>
 
 #if GPS
@@ -62,7 +62,7 @@ int32_t nav_bearing;
 
 static int32_t GPS_coord_lead[2]; // Lead filtered gps coordinates
 
-static int32_t get_position(u8 w, int32_t pos, int16_t vel, float lag_in_seconds)
+static int32_t get_position(uint8_t w, int32_t pos, int16_t vel, float lag_in_seconds)
 {
     if (w == 1)
     {
@@ -1559,7 +1559,7 @@ static union
 uint32_t init_speed[5] = {9600, 19200, 38400, 57600, 115200};
 
 // GPS数据包解析
-u8 GPS_newFrame(u8 data)
+uint8_t GPS_newFrame(uint8_t data)
 {
     static uint8_t _step = 0; // State machine state
     static uint8_t _msg_id;
@@ -1568,7 +1568,7 @@ u8 GPS_newFrame(u8 data)
     static uint8_t _ck_a; // Packet checksum accumulators
     static uint8_t _ck_b;
 
-    u8 ret = FALSE;
+    uint8_t ret = FALSE;
     uint8_t st = _step + 1;
     // temp_t++;
     // temp_GPS[temp_t]=data;
