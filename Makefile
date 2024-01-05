@@ -18,7 +18,7 @@ OBJCOPY = ${CROSS_COMPILE}objcopy
 
 DEFS  := $(DDEFS) -DRUN_FROM_FLASH=1 -DHSE_VALUE=8000000 -DUSE_STDPERIPH_DRIVER 
 
-MCU   := cortex-m3
+
 
 OPT   += -Os
 OPT   += -fsingle-precision-constant
@@ -27,16 +27,13 @@ OPT   += -ffunction-sections
 OPT   += -fdata-sections
 
 SPECS := --specs=rdimon.specs -u _printf_float
-LINK_SCRIPT := stm32f10x_flash.lds
 
 # Directories
 SRC_DIR = ./multiwii_2.4
 USER_DIR = ./USER 
 CMSIS_DIR = ./Libraries/CMSIS/CM3/CoreSupport
 
-# Source files
-ASM_FILES = ./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/gcc_ride7/startup_stm32f10x_hd.s
-CMSIS_FILES = $(CMSIS_DIR)/core_cm3.c
+
 
 # Header files
 INC_STM32_LIB := -I./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/ \
@@ -148,15 +145,24 @@ SOURCES_GD32_LIBS := \
 
 # 在OBJECTS的定义中，使用grep过滤大小写不同的.s文件
 ifeq ($(MAKECMDGOALS),GD32)
+# Source files
+	ASM_FILES = ./Libraries/CMSIS/GD32F3x0/Source/GNU/startup_gd32f3x0.s
 	SOURCES := $(SOURCES_GD32_LIBS) $(HAL_SOURCES) $(MultiWii_SOURCES) $(USB_SOURCES)
 	TARGET := $(PROJECT)_GD32
 	INC_DIRS += $(INC_GD32_LIB)
 	DEFS += -DGD32F330
+	MCU   := cortex-m4
+	LINK_SCRIPT := gd32f3x0_flash.lds
 else
+# Source files
+	ASM_FILES = ./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/gcc_ride7/startup_stm32f10x_hd.s
+	CMSIS_FILES = $(CMSIS_DIR)/core_cm3.c
 	SOURCES := $(SOURCES_STM32_LIBS) $(HAL_SOURCES) $(MultiWii_SOURCES) $(USB_SOURCES)
 	TARGET := $(PROJECT)_STM32
 	INC_DIRS += $(INC_STM32_LIB)
 	DEFS += -DSTM32F10X_MD
+	MCU   := cortex-m3
+	LINK_SCRIPT := stm32f10x_flash.lds
 endif
 
 

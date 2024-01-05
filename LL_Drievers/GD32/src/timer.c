@@ -22,6 +22,7 @@ int16_t tmp_buff[256];
 uint8_t tmp_flag=0;
 uint16_t Cap_CH[13];
 uint8_t SBUS_FLAG_;
+extern uint16_t rcData[16]; 
 void systick_config(void)//嘀嗒时钟
 {
     sys_tick_base_div=(SystemCoreClock/ 1000U/ 1000U);
@@ -449,3 +450,57 @@ void Capture()
 {
 
 }
+void cover_sbus_buff_to_ch(uint8_t *buff)//传入一个存有25byte数据的指针。
+{
+
+    //参考：https://os.mbed.com/users/Digixx/notebook/futaba-s-bus-controlled-by-mbed/
+    /*
+    S-BUS protocol
+    The protocol is 25 Byte long and is send every 14ms (analog mode) or 7ms (highspeed mode).
+    One Byte = 1 startbit + 8 databit + 1 paritybit + 2 stopbit (8E2), baudrate = 100'000 bit/s
+    The highest bit is send first. The logic is inverted (Level High = 1)
+
+    [startbyte] [data1] [data2] .... [data22] [flags][endbyte]
+
+    startbyte = 11110000b (0xF0)
+
+    data 1-22 = [ch1, 11bit][ch2, 11bit] .... [ch16, 11bit] (ch# = 0 bis 2047)
+    channel 1 uses 8 bits from data1 and 3 bits from data2
+    channel 2 uses last 5 bits from data2 and 6 bits from data3
+    etc.
+
+    flags = bit7 = ch17 = digital channel (0x80)
+    bit6 = ch18 = digital channel (0x40)
+    bit5 = Frame lost, equivalent red LED on receiver (0x20)
+    bit4 = failsafe activated (0x10)
+    bit3 = n/a
+    bit2 = n/a
+    bit1 = n/a
+    bit0 = n/a
+
+    endbyte = 00000000b
+    */
+    if(buff[0]!=0x0f)
+        return ;
+    rcData[0]  = ((buff[1]|buff[2]<< 8) & 0x07FF);
+    rcData[1]  = ((buff[2]>>3 |buff[3] <<5) & 0x07FF);
+    rcData[2]  = ((buff[3]>>6 |buff[4] <<2|buff[5]<<10) & 0x07FF);
+    rcData[3]  = ((buff[5]>>1 |buff[6] <<7) & 0x07FF);
+    rcData[4]  = ((buff[6]>>4 |buff[7] <<4) & 0x07FF);
+    rcData[5]  = ((buff[7]>>7 |buff[8] <<1|buff[9]<<9) & 0x07FF);
+    rcData[6]  = ((buff[9]>>2 |buff[10]<<6) & 0x07FF);
+    rcData[7]  = ((buff[10]>>5|buff[11]<<3) & 0x07FF) ;
+    rcData[8]  = ((buff[12]|buff[13]<< 8) & 0x07FF);
+    rcData[9]  = ((buff[13]>>3|buff[14]<<5) & 0x07FF);
+    rcData[10] = ((buff[14]>>6|buff[15]<<2|buff[16]<<10) & 0x07FF);
+    rcData[11] = ((buff[16]>>1|buff[17]<<7) & 0x07FF);
+    rcData[12] = ((buff[17]>>4|buff[18]<<4) & 0x07FF);
+    rcData[13] = ((buff[18]>>7|buff[19]<<1|buff[20]<<9) & 0x07FF);
+    rcData[14] = ((buff[20]>>2|buff[21]<<6) & 0x07FF);
+    rcData[15] = ((buff[21]>>5|buff[22]<<3) & 0x07FF);
+    //下面两个通道为失控保护等模式，暂时用不到
+    //rcValue[16]= ((buff[23]) & 0x0001)!=0?1000:2000;
+    //rcValue[16]= ((buff[23] >> 1) & 0x0001) !=0?1000:2000;
+
+}
+
