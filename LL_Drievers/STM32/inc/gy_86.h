@@ -2,11 +2,12 @@
 #define _GY_86_H
 // #include "stm32f10x.h"
 #ifdef STM32F10X_MD
+#include "stm32f10x.h"
 #include "stm32f10x_i2c.h"
+#include "usart.h"
 #endif
 #include "stdint.h"
 #include "math.h"
-#include "usart.h"
 #include "def.h"
 #include "config.h"
 // IIC总线引脚配置

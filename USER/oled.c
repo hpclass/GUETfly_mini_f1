@@ -40,12 +40,18 @@
  *
  *************************************************************************************/
 
-#include "oled.h"
+#if defined(STM32F10X_MD)
 #include "delay.h"
-#include "codetab.h"
 #include "stm32f10x_i2c.h"
 #include "stm32f10x_rcc.h"
 #include "soft_iic.h"
+#else
+#include "gd32f3x0.h"
+#include "timer.h"
+#endif
+
+#include "oled.h"
+#include "codetab.h" 
 #define OLED_ADDR 0x78
 
 void WriteCmd(unsigned char I2C_Command) // 写命令

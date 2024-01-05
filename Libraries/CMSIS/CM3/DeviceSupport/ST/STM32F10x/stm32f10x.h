@@ -8323,6 +8323,7 @@ typedef struct
 }
 #endif
 
+typedef enum {FALSE = 0, TRUE = !FALSE} bool;
 #endif /* __STM32F10x_H */
 
 /**

@@ -68,6 +68,8 @@
         "stm32f10x_conf.h": "c",
         "config.h": "c",
         "kalman_f.h": "c",
-        "gy_86.h": "c"
+        "gy_86.h": "c",
+        "timer.h": "c",
+        "guetfly_data_types.h": "c"
     }
 }

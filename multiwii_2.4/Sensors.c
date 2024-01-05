@@ -1,4 +1,11 @@
-// #include "stm32f10x.h"
+#if defined(STM32F10X_MD)
+#include "soft_iic.h"
+#include "delay.h"
+#include "gy_86.h"
+#endif
+#if defined(GD32F330)
+#include "gd32f3x0.h"
+#endif
 #include "math.h"
 #include "config.h"
 #include "def.h"
@@ -9,10 +16,6 @@
 #include "IMU.h"
 #include "LCD.h"
 #include "Sensors.h"
-#include "delay.h"
-#include "soft_iic.h"
-#include "gy_86.h"
-
 // static void Baro_init();
 #if MAG
 static void Mag_init();
@@ -140,7 +143,7 @@ void i2c_writeReg(uint8_t add, uint8_t reg, uint8_t val)
 }
 uint8_t i2c_readReg(uint8_t add, uint8_t reg)
 {
-    u8 REG_data;
+    uint8_t REG_data;
     i2c_rep_start(add << 1);       // I2C write direction
     i2c_write(reg);                // register selection
     i2c_rep_start((add << 1) | 1); // I2C read direction
@@ -184,7 +187,7 @@ void EX_I2C_Stop(void)
 // IIC发送应答信号
 // 入口参数:ack (0:ACK 1:NAK)
 //**************************************
-void EX_I2C_SendACK(u8 i)
+void EX_I2C_SendACK(uint8_t i)
 {
     if (1 == i)
         EX_SDA_H; // 写应答信号
@@ -227,7 +230,7 @@ bool EX_I2C_WaitAck(void) // 返回为:=1有ACK,=0无ACK
 //**************************************
 // 向IIC总线发送一个字节数据
 //**************************************
-void EX_I2C_SendByte(u8 dat)
+void EX_I2C_SendByte(uint8_t dat)
 {
     unsigned int i;
     //	unsigned char ack=1;
@@ -252,10 +255,10 @@ void EX_I2C_SendByte(u8 dat)
 //**************************************
 // 从IIC总线接收一个字节数据
 //**************************************
-u8 EX_I2C_RecvByte()
+uint8_t EX_I2C_RecvByte()
 {
-    u8 i;
-    u8 dat = 0;
+    uint8_t i;
+    uint8_t dat = 0;
     EX_SDA_H;               // 使能内部上拉,准备读取数据,
     for (i = 0; i < 8; i++) // 8位计数器
     {
@@ -276,7 +279,7 @@ u8 EX_I2C_RecvByte()
 //**************************************
 // 向IIC设备写入一个字节数据
 //**************************************
-bool EX_Single_WriteI2C(u8 Slave_Address, u8 REG_Address, u8 REG_data)
+bool EX_Single_WriteI2C(uint8_t Slave_Address, uint8_t REG_Address, uint8_t REG_data)
 {
     EX_I2C_Start(); // 起始信号
 
@@ -307,9 +310,9 @@ bool EX_Single_WriteI2C(u8 Slave_Address, u8 REG_Address, u8 REG_data)
 //**************************************
 // 从IIC设备读取一个字节数据
 //**************************************
-u8 EX_Single_ReadI2C(u8 Slave_Address, u8 REG_Address)
+uint8_t EX_Single_ReadI2C(uint8_t Slave_Address, uint8_t REG_Address)
 {
-    u8 REG_data;
+    uint8_t REG_data;
     EX_I2C_Start(); // 起始信号
 
     EX_I2C_SendByte(Slave_Address); // 发送设备地址+写信号
@@ -371,14 +374,14 @@ void EX_i2c_write(uint8_t data)
 }
 uint8_t EX_i2c_readAck()
 {
-    u8 REG_data;
+    uint8_t REG_data;
     REG_data = EX_I2C_RecvByte();
     EX_I2C_SendACK(0); // ACK
     return REG_data;
 }
 uint8_t EX_i2c_readNak()
 {
-    u8 REG_data;
+    uint8_t REG_data;
     REG_data = I2C_RecvByte();
     EX_I2C_SendACK(1); // NACK
     EX_I2C_Stop();
@@ -469,14 +472,14 @@ void i2c_write(uint8_t data)
 }
 uint8_t i2c_readAck()
 {
-    u8 REG_data;
+    uint8_t REG_data;
     REG_data = I2C_RecvByte();
     I2C_SendACK(0); // ACK
     return REG_data;
 }
 uint8_t i2c_readNak()
 {
-    u8 REG_data;
+    uint8_t REG_data;
     REG_data = I2C_RecvByte();
     I2C_SendACK(1); // NACK
     I2C_Stop();

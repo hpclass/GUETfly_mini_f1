@@ -1,4 +1,8 @@
+#ifdef STM32F10X_MD
 #include "stm32f10x.h"
+#else
+#include "gd32f3x0.h"
+#endif
 #include "config.h"
 #include "def.h"
 #include "types.h"

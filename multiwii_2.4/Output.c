@@ -1,10 +1,14 @@
+#ifdef STM32F10X_MD
 #include "stm32f10x.h"
+#include "delay.h"
+#else
+#include "gd32f3x0.h"
+#endif
 #include "config.h"
 #include "def.h"
 #include "types.h"
 #include "MultiWii.h"
 #include "Alarms.h"
-#include "delay.h"
 #include "timer.h"
 #include "GPS.h"
 long map(long x, long in_min, long in_max, long out_min, long out_max)
@@ -143,24 +147,6 @@ volatile uint16_t atomicServo[8] = {8000, 8000, 8000, 8000, 8000, 8000, 8000, 80
 /**************************************************************************************/
 void writeServos()
 {
-
-    //		uint8_t i ;
-    //    for (i =0; i<8; i++) {
-    //        servo[i]=map(servo[i],1000,2000,100,200);
-    //    }
-
-    //    //PC6、7、8、9
-    //    TIM8->CCR4=servo[0];//PC9
-    //    TIM8->CCR3=servo[1];//PC8
-    //    TIM8->CCR2=servo[2];//PC7
-    //    TIM8->CCR1=servo[3];//PC6
-    //    //PD12,13,14,15
-    //
-    //    TIM4->CCR4=servo[4];//PD12
-    //    TIM4->CCR3=servo[5];//PD13
-    //    TIM4->CCR2=servo[6];//PD14
-    //    TIM4->CCR1=servo[7];//PD15
-    //    //PC6、7、8、9
 #if defined(GUET_FLY_V1)
     TIM8->CCR4 = servo[0]; // PC9
     TIM8->CCR3 = servo[1]; // PC8
@@ -173,12 +159,16 @@ void writeServos()
     TIM4->CCR2 = servo[6]; // PD14
     TIM4->CCR1 = servo[7]; // PD15
 #elif defined(GUET_FLY_MINI_V1)
+#ifdef STM32F10X_MD
     TIM4->CCR1 = servo[3]; // PD12
     TIM4->CCR2 = servo[4]; // PD13
     TIM4->CCR3 = servo[5]; // PD14
     TIM4->CCR4 = servo[6]; // PD15
     TIM3->CCR3 = servo[0]; // 投弹通道1
-    TIM3->CCR4 = servo[1]; // 投弹通道2
+    TIM3->CCR4 = servo[1]; // 投弹通道2    TIM_SetCompare1(TIM3, motor[0]);
+#else
+   servos_output(servo);
+#endif
 #else
     TIM4->CCR4 = servo[2]; // PD12
     TIM4->CCR3 = servo[5]; // PD13
@@ -192,8 +182,15 @@ void writeServos()
 /**************************************************************************************/
 void writeMotors()
 { // [1000;2000] => [125;250]
+#ifdef STM32F10X_MD
     TIM_SetCompare1(TIM3, motor[0]);
     TIM_SetCompare2(TIM3, motor[1]);
+#else
+    timer_channel_output_pulse_value_config(TIMER2, TIMER_CH_0, motor[0]);
+    timer_channel_output_pulse_value_config(TIMER2, TIMER_CH_1, motor[1]);
+    timer_channel_output_pulse_value_config(TIMER2, TIMER_CH_2, motor[2]);
+    timer_channel_output_pulse_value_config(TIMER2, TIMER_CH_3, motor[3]);
+#endif
     //    TIM_SetCompare3(TIM3,motor[2]);
     //    TIM_SetCompare4(TIM3,motor[3]);
 }

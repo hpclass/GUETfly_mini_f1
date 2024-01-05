@@ -7,7 +7,11 @@ March  2015     V2.4
  the Free Software Foundation, either version 3 of the License, or
  any later version. see <http://www.gnu.org/licenses/>
 */
+#ifdef STM32F10X_MD
 #include "stm32f10x.h"
+#else
+#include "gd32f3x0.h"
+#endif
 #include "math.h"
 #include "config.h"
 #include "def.h"
@@ -1240,7 +1244,7 @@ void loop()
         for (i = 0; i < CHECKBOXITEMS; i++)
             rcOptions[i] = (auxState & conf.activate[i]) > 0;
 
-            // note: if FAILSAFE is disable, failsafeCnt > 5*FAILSAFE_DELAY is always false
+            // note: if FAILSAFE is disable, failsafeCnt > 5*FAILSAFE_DELAY is always FALSE
 #if ACC
         if (rcOptions[BOXANGLE] || (failsafeCnt > 5 * FAILSAFE_DELAY))
         {
@@ -1407,10 +1411,10 @@ void loop()
 #if defined(FIXEDWING)
         // f.CRUISE_MODE = (rcOptions[BOXCRUISE];   //原来的
         // f.CRUISE_MODE = (rcOptions[BOXCRUISE] && !f.FAILSAFE_RTH_ENABLE && !rcOptions[BOXGPSHOME]);  //在失控情况下应该关闭此模式   f.FAILSAFE_RTH_ENABLE == 1  ========================
-        // if (f.GPS_mode == GPS_MODE_RTH) rcOptions[BOXGPSHOME] = true; //后加的，用于fence返航时，rcOptions[BOXGPSHOME]开关并没打开时，状态f.GPS_mode == GPS_MODE_RTH不被修改
+        // if (f.GPS_mode == GPS_MODE_RTH) rcOptions[BOXGPSHOME] = TRUE; //后加的，用于fence返航时，rcOptions[BOXGPSHOME]开关并没打开时，状态f.GPS_mode == GPS_MODE_RTH不被修改
         f.CRUISE_MODE = (rcOptions[BOXCRUISE] && !f.FAILSAFE_RTH_ENABLE && !rcOptions[BOXGPSHOME] && (f.GPS_mode != GPS_MODE_RTH)); // 在失控情况下应该关闭此模式   f.FAILSAFE_RTH_ENABLE == 1  =====================
         if (f.CRUISE_MODE)
-            rcOptions[BOXGPSHOLD] = true; //=通过rcOptions[BOXGPSHOLD]不断设置新的航点,见GPS.cpp中680行===================================
+            rcOptions[BOXGPSHOLD] = TRUE; //=通过rcOptions[BOXGPSHOLD]不断设置新的航点,见GPS.cpp中680行===================================
 #endif
         uint8_t gps_modes_check = (rcOptions[BOXLAND] << 3) + (rcOptions[BOXGPSHOME] << 2) + (rcOptions[BOXGPSHOLD] << 1) + (rcOptions[BOXGPSNAV]);
 
@@ -1426,7 +1430,7 @@ void loop()
                         GPS_set_next_wp(&GPS_coord[LAT], &GPS_coord[LON], &GPS_coord[LAT], &GPS_coord[LON]); // Move HoldPos
 #endif
                     if (f.Fixed_Wing_Nav && (f.GPS_mode != GPS_MODE_NONE && (!f.HORIZON_MODE && !f.ANGLE_MODE)))
-                        f.ANGLE_MODE = true;
+                        f.ANGLE_MODE = TRUE;
                     if (f.USER_RTH_FLAG) // 地面要求返航
                     {
                         f.USER_RTH_FLAG = 0;
@@ -1462,7 +1466,7 @@ void loop()
                                 NAV_paused_at = mission_step.number;
                             f.GPS_mode = GPS_MODE_HOLD;
                             clearNav();                                                                          //==后加，每次进入时都清除以前的I值======================
-                            f.GPS_BARO_MODE = true;                                                              // f.GPS_BARO_MODE = false;
+                            f.GPS_BARO_MODE = TRUE;                                                              // f.GPS_BARO_MODE = FALSE;
                             GPS_set_next_wp(&GPS_coord[LAT], &GPS_coord[LON], &GPS_coord[LAT], &GPS_coord[LON]); // hold at the current position
                             set_new_altitude(SET_ALT_ROI);                                                       //==单位米===
                             NAV_state = NAV_STATE_HOLD_INFINIT;
@@ -1474,7 +1478,7 @@ void loop()
 #ifndef SLIM_WING // 大展弦比机翼？？？ 滑翔机？？？//超薄翼型
 //            else if (rcOptions[BOXLAND]) {                               //Land now (It has priority over Navigation)
 //              f.GPS_mode = GPS_MODE_HOLD;    //f.GPS_mode  控制否进入固定翼导航代码FW_NAV()  if (( f.GPS_mode != GPS_MODE_NONE ) && f.GPS_FIX_HOME ) {
-//              f.GPS_BARO_MODE = true;
+//              f.GPS_BARO_MODE = TRUE;
 //              GPS_set_next_wp(&GPS_coord[LAT], &GPS_coord[LON],&GPS_coord[LAT], & GPS_coord[LON]);
 //              set_new_altitude(alt.EstAlt);
 //              NAV_state = NAV_STATE_LAND_START;
@@ -1484,7 +1488,7 @@ void loop()
                         else if (rcOptions[BOXGPSNAV])
                         {                              // Start navigation
                             f.GPS_mode = GPS_MODE_NAV; // Nav mode start
-                            f.GPS_BARO_MODE = true;
+                            f.GPS_BARO_MODE = TRUE;
                             GPS_prev[LAT] = GPS_coord[LAT];
                             GPS_prev[LON] = GPS_coord[LON];
                             if (NAV_paused_at != 0)
@@ -1502,8 +1506,8 @@ void loop()
                         else
                         { // None of the GPS Boxes are switched on
                             f.GPS_mode = GPS_MODE_NONE;
-                            f.GPS_BARO_MODE = false;
-                            f.THROTTLE_IGNORED = false;
+                            f.GPS_BARO_MODE = FALSE;
+                            f.THROTTLE_IGNORED = FALSE;
                             f.LAND_IN_PROGRESS = 0;
                             f.THROTTLE_IGNORED = 0;
                             user_mission_dorp.drop_status = 0;
@@ -1544,7 +1548,7 @@ void loop()
                         f.GPS_mode = GPS_MODE_NONE;
                         NAV_state = NAV_STATE_NONE;
                         NAV_error = NAV_ERROR_SPOILED_GPS;
-                        f.GPS_BARO_MODE = false;
+                        f.GPS_BARO_MODE = FALSE;
                         prv_gps_modes = 0xff; // invalidates mode check, to allow re evaluate rcOptions when numsats raised again
                     }
                     nav[0] = 0;
@@ -1566,8 +1570,8 @@ void loop()
         { // copter is armed
             // copter is disarmed
             f.GPS_mode = GPS_MODE_NONE;
-            f.GPS_BARO_MODE = false;
-            f.THROTTLE_IGNORED = false;
+            f.GPS_BARO_MODE = FALSE;
+            f.THROTTLE_IGNORED = FALSE;
             NAV_state = NAV_STATE_NONE;
             NAV_paused_at = 0;
             NAV_error = NAV_ERROR_DISARMED;

@@ -2,7 +2,6 @@
 #define DEF_H_
 #include "config.h"
 #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt))) //定义自定程序
-//typedef enum {FALSE = 0, TRUE = !FALSE} bool;
 /**************************************************************************************/
 /***************             test configurations                   ********************/
 /**************************************************************************************/
@@ -301,10 +300,19 @@
 #define LEDPIN_ON									GPIO_ResetBits(GPIOD,GPIO_Pin_1)
 #define LEDPIN_TOGGLE								PDout(1)=~PDin(1);
 #elif defined(GUET_FLY_MINI_V1)
+#ifdef STM32F10X_MD
 #define OVERRIDE_LEDPIN_TOGGLE 		 PAout(0)=~PAin(0);
 #define LEDPIN_OFF								GPIO_SetBits(GPIOA,GPIO_Pin_0)
 #define LEDPIN_ON									GPIO_ResetBits(GPIOA,GPIO_Pin_0)
 #define LEDPIN_TOGGLE								PAout(0)=~PAin(0);;
+#else
+
+#define OVERRIDE_LEDPIN_TOGGLE 		 LED1_TOGOGLE
+#define LEDPIN_OFF					 LED1_ON
+#define LEDPIN_ON					LED1_OFF
+#define LEDPIN_TOGGLE				LED1_TOGOGLE
+
+#endif
 #else
 #define OVERRIDE_LEDPIN_TOGGLE 		 PDout(1)=~PDin(1);
 #define LEDPIN_OFF                 PCout(13)=1;
@@ -1818,6 +1826,7 @@
 #define USE_FLASH_SIZE 20  //使用FLASH模拟允许使用10k
 #define E2END 1024*USE_FLASH_SIZE-1
 #endif
+#if defined(STM32F10X_MD)
 #define LED1_ON GPIOA->BRR = GPIO_Pin_0;
 #define LED2_ON GPIOA->BRR = GPIO_Pin_1;
 #define LED3_ON ;
@@ -1838,7 +1847,25 @@
 #define GPS_TOGGLE PAout(1)=~PAin(1);
 #define GPS_LED_ON	LED2_ON
 #define GPS_LED_OFF	LED2_OFF
+#else
+#include "leds.h"
+#define LED3_ON ;
+#define LED4_ON ;
+#define LED5_ON ;
 
+#define LED3_OFF ;
+#define LED4_OFF ;
+#define LED5_OFF ;
+
+#define OVERRIDE_LEDPIN_TOGGLE LED1_TOGOGLE
+#if !defined(LEDPIN_TOGGLE)
+#define LEDPIN_TOGGLE 	OVERRIDE_LEDPIN_TOGGLE
+#endif
+
+#define GPS_TOGGLE LED2_TOGOGLE
+#define GPS_LED_ON	LED2_ON
+#define GPS_LED_OFF	LED2_OFF
+#endif
 #define MPU6050
 #if defined(USE_EX_MAG)
 #define HMC5883 // mag ex
@@ -2221,7 +2248,6 @@
     defined( ITG3200_LPF_20HZ)  || defined( ITG3200_LPF_10HZ)
 #error "you use one feature that is no longer supported or has undergone a name change"
 #endif
-typedef enum {false = 0, true = !false} bool;
 
 
 

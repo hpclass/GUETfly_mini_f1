@@ -1,4 +1,8 @@
+#ifdef STM32F10X_MD
 #include "stm32f10x.h"
+#else 
+#include "gd32f3x0.h"
+#endif
 #include "optic_.h"
 uint8_t Mini_Flow_SSI, Mini_Flow_SSI_CNT;
 uint8_t mini_flow_flag;
@@ -47,8 +51,8 @@ void Player_Flow_Receive(uint8_t data)
             {
                 Mini_Flow_SSI_CNT++; // 测试光流数据帧率
 
-                flow.x = ((s16)(*(RxBuffer + 3) << 8) | *(RxBuffer + 2));
-                flow.y = ((s16)(*(RxBuffer + 5) << 8) | *(RxBuffer + 4));
+                flow.x = ((int16_t)(*(RxBuffer + 3) << 8) | *(RxBuffer + 2));
+                flow.y = ((int16_t)(*(RxBuffer + 5) << 8) | *(RxBuffer + 4));
                 mini_flow_flag = 1;
             }
         }

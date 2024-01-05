@@ -1,5 +1,4 @@
 #include "gy_86.h"
-#include "stm32f10x.h"
 /*硬件IIC*/
 extern int16_t i2c_errors_count;
 #if defined(USE_STM32_I2C1)
@@ -69,7 +68,7 @@ void i2c_stop()
     I2C1->CR1 |= 1 << 9; // I2C1产生停止条件
 }
 
-void i2c_write(u8 data)
+void i2c_write(uint8_t data)
 {
     uint16_t i = 50;
     I2C1->DR = data;
@@ -85,7 +84,7 @@ void i2c_write(u8 data)
     }
 }
 
-u8 i2c_readAck()
+uint8_t i2c_readAck()
 {
     uint16_t i = 50;
     I2C1->CR1 |= 1 << 10; // 打开ACK应答,在接收到一个字节后返回一个应答
@@ -98,7 +97,7 @@ u8 i2c_readAck()
     return I2C1->DR;
 }
 
-u8 i2c_readNak()
+uint8_t i2c_readNak()
 {
     uint16_t i = 50;
     I2C1->CR1 &= ~(1 << 10);           // 关闭ACK应答,在接收到一个字节后返回一个应答
@@ -112,7 +111,7 @@ void I2c_End() // 关闭I2C
 {
     I2C1->CR1 &= ~(1 << 0);
 }
-bool Single_WriteI2C(u8 Slave_Address, u8 REG_Address, u8 REG_data)
+bool Single_WriteI2C(uint8_t Slave_Address, uint8_t REG_Address, uint8_t REG_data)
 {
 }
 void I2C1_EV_IRQHandler()
@@ -187,13 +186,13 @@ void I2C_GPIO_Config(void)
 ///////////IIC初始化//////////////
 
 ////////////粗略延时函数//////////
-void Delay_1us(u16 n) // 约1us,1100k
+void Delay_1us(uint16_t n) // 约1us,1100k
 {
     uint8_t i = 10; // i=10延时1.5us//这里可以优化速度 ，经测试最低到5还能写入
     while (i--)
         ;
 }
-void EX_Delay_1us(u16 n) // 约1us,1100k
+void EX_Delay_1us(uint16_t n) // 约1us,1100k
 {
     uint8_t i = 10; // i=10延时1.5us//这里可以优化速度 ，经测试最低到5还能写入
     while (i--)
@@ -233,7 +232,7 @@ void I2C_Stop(void)
 // IIC发送应答信号
 // 入口参数:ack (0:ACK 1:NAK)
 //**************************************
-void I2C_SendACK(u8 i)
+void I2C_SendACK(uint8_t i)
 {
     if (1 == i)
         SDA_H; // 写应答信号
@@ -265,18 +264,18 @@ bool I2C_WaitAck(void) // 返回为:=1有ACK,=0无ACK
     {
         SCL_L;
         Delay_1us(1);
-        return false;
+        return FALSE;
     }
 
     SCL_L;
     Delay_1us(1);
-    return true;
+    return TRUE;
 }
 
 //**************************************
 // 向IIC总线发送一个字节数据
 //**************************************
-void I2C_SendByte(u8 dat)
+void I2C_SendByte(uint8_t dat)
 {
     unsigned int i;
     //	unsigned char ack=1;
@@ -302,10 +301,10 @@ void I2C_SendByte(u8 dat)
 //**************************************
 // 从IIC总线接收一个字节数据
 //**************************************
-u8 I2C_RecvByte()
+uint8_t I2C_RecvByte()
 {
-    u8 i;
-    u8 dat = 0;
+    uint8_t i;
+    uint8_t dat = 0;
     SDA_H;                  // 使能内部上拉,准备读取数据,
     for (i = 0; i < 8; i++) // 8位计数器
     {
@@ -326,7 +325,7 @@ u8 I2C_RecvByte()
 //**************************************
 // 向IIC设备写入一个字节数据
 //**************************************
-bool Single_WriteI2C(u8 Slave_Address, u8 REG_Address, u8 REG_data)
+bool Single_WriteI2C(uint8_t Slave_Address, uint8_t REG_Address, uint8_t REG_data)
 {
     I2C_Start(); // 起始信号
 
@@ -335,7 +334,7 @@ bool Single_WriteI2C(u8 Slave_Address, u8 REG_Address, u8 REG_data)
     {
         i2c_errors_count++;
         I2C_Stop();
-        return false;
+        return FALSE;
     }
 
     I2C_SendByte(REG_Address); // 内部寄存器地址，
@@ -343,7 +342,7 @@ bool Single_WriteI2C(u8 Slave_Address, u8 REG_Address, u8 REG_data)
     {
         i2c_errors_count++;
         I2C_Stop();
-        return false;
+        return FALSE;
     }
 
     I2C_SendByte(REG_data); // 内部寄存器数据，
@@ -351,18 +350,18 @@ bool Single_WriteI2C(u8 Slave_Address, u8 REG_Address, u8 REG_data)
     {
         i2c_errors_count++;
         I2C_Stop();
-        return false;
+        return FALSE;
     }
 
     I2C_Stop(); // 发送停止信号
-    return true;
+    return TRUE;
 }
 //**************************************
 // 从IIC设备读取一个字节数据
 //**************************************
-u8 Single_ReadI2C(u8 Slave_Address, u8 REG_Address)
+uint8_t Single_ReadI2C(uint8_t Slave_Address, uint8_t REG_Address)
 {
-    u8 REG_data;
+    uint8_t REG_data;
     I2C_Start(); // 起始信号
 
     I2C_SendByte(Slave_Address); // 发送设备地址+写信号
@@ -370,7 +369,7 @@ u8 Single_ReadI2C(u8 Slave_Address, u8 REG_Address)
     {
         i2c_errors_count++;
         I2C_Stop();
-        return false;
+        return FALSE;
     }
 
     I2C_SendByte(REG_Address); // 发送存储单元地址，从0开始
@@ -378,7 +377,7 @@ u8 Single_ReadI2C(u8 Slave_Address, u8 REG_Address)
     {
         i2c_errors_count++;
         I2C_Stop();
-        return false;
+        return FALSE;
     }
 
     I2C_Start(); // 起始信号
@@ -388,7 +387,7 @@ u8 Single_ReadI2C(u8 Slave_Address, u8 REG_Address)
     {
         i2c_errors_count++;
         I2C_Stop();
-        return false;
+        return FALSE;
     }
 
     REG_data = I2C_RecvByte(); // 读出寄存器数据

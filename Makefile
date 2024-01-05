@@ -42,10 +42,12 @@ CMSIS_FILES = $(CMSIS_DIR)/core_cm3.c
 INC_STM32_LIB := -I./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/ \
            -I./Libraries/STM32F10x_StdPeriph_Driver/inc/ \
 		   -I./USB \
+		   -I./LL_Drievers/STM32/inc \
 
 INC_GD32_LIB := -I./Libraries/GD32F3x0_standard_peripheral/Include/ \
 				-I./Libraries/CMSIS/GD32F3x0/Include/ \
 				-I./Libraries/CMSIS/ \
+				-I./LL_Drievers/GD32/inc \
 				
 INC_DIRS := -I$(SRC_DIR) -I$(USER_DIR) -I$(CMSIS_DIR) \
 
@@ -68,26 +70,26 @@ HAL_SOURCES = \
     ./USER/AltHold.c \
     ./USER/SPL06_001.c \
     ./USER/re_eeprom.c \
-    ./USER/system_stm32f10x.c \
     ./USER/Ano_OF.c \
     ./USER/math_.c \
-    ./USER/soft_iic.c \
     ./USER/DJI_Guidance_usat.c \
-    ./USER/delay.c \
     ./USER/oled.c \
-    ./USER/spi.c \
-    ./USER/timer.c \
-    ./USER/IIC_SOFTWARE.c \
-    ./USER/gy_86.c \
     ./USER/optic_.c \
-    ./USER/stm32f10x_it.c \
     ./USER/INS.c \
     ./USER/ov7670_Dir.c \
-    ./USER/sys.c \
-    ./USB/usart.c \
-    ./USB/USB_CH341.c \
 
 SOURCES_STM32_LIBS := \
+    ./USB/USB_CH341.c \
+    ./LL_Drievers/STM32/src/system_stm32f10x.c \
+	./LL_Drievers/STM32/src/delay.c \
+	./LL_Drievers/STM32/src/sys.c \
+	./LL_Drievers/STM32/src/timer.c \
+	./LL_Drievers/STM32/src/soft_iic.c \
+	./LL_Drievers/STM32/src/IIC_SOFTWARE.c \
+	./LL_Drievers/STM32/src/spi.c \
+	./LL_Drievers/STM32/src/usart2.c \
+	./LL_Drievers/STM32/src/gy_86.c \
+	./LL_Drievers/STM32/src/stm32f10x_it.c \
     ./Libraries/CMSIS/CM3/CoreSupport/core_cm3.c \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_can.c \
@@ -114,6 +116,12 @@ SOURCES_STM32_LIBS := \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_wwdg.c \
 
 SOURCES_GD32_LIBS := \
+	./LL_Drievers/GD32/src/i2c.c \
+	./LL_Drievers/GD32/src/spi.c   \
+	./LL_Drievers/GD32/src/uart.c \
+	./LL_Drievers/GD32/src/leds.c  \
+	./LL_Drievers/GD32/src/timer.c \
+	./LL_Drievers/GD32/src/sys.c \
 	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_adc.c \
 	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_cec.c \
 	./Libraries/GD32F3x0_standard_peripheral/Source/gd32f3x0_cmp.c \

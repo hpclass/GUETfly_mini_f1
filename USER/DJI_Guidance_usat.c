@@ -1,4 +1,9 @@
+
+#if defined(STM32F10X_MD)
 #include "stm32f10x.h"
+#else
+#include "gd32f3x0.h"
+#endif
 #include "DJI_Guidance_usat.h"
 /*
 桂林电子科技大学--黄鹏

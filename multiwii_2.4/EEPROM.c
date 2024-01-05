@@ -1,4 +1,11 @@
-// #include <avr/eeprom.h>
+#if defined(STM32F10X_MD)
+#include "soft_iic.h"
+#include "delay.h"
+#include "gy_86.h"
+#endif
+#if defined(GD32F330)
+#include "gd32f3x0.h"
+#endif
 #include "sys.h"
 #include "config.h"
 #include "def.h"
@@ -51,7 +58,7 @@ bool readEEPROM()
         blinkLED(6, 100, 3);
         SET_ALARM_BUZZER(ALRM_FAC_CONFIRM, ALRM_LVL_CONFIRM_ELSE);
         LoadDefaults(); // force load defaults
-        return false;   // defaults loaded, don't reload constants (EEPROM life saving)
+        return FALSE;   // defaults loaded, don't reload constants (EEPROM life saving)
     }
     // 500/128 = 3.90625    3.9062 * 3.9062 = 15.259   1526*100/128 = 1192
     for (i = 0; i < 5; i++)
@@ -77,7 +84,7 @@ bool readEEPROM()
 #if defined(ARMEDTIMEWARNING)
     ArmedTimeWarningMicroSeconds = (conf.armedtimewarning * 1000000);
 #endif
-    return true; // setting is OK
+    return TRUE; // setting is OK
 }
 
 void writeGlobalSet(uint8_t b)
@@ -189,7 +196,7 @@ void LoadDefaults()
 
         conf.servoConf[i].rate = sr[i];
     }
-#else // if no servo defined then zero out the config variables to prevent passing false data to the gui.
+#else // if no servo defined then zero out the config variables to prevent passing FALSE data to the gui.
     for (i = 0; i < 8; i++)
     {
         conf.servoConf[i].min = 0;
@@ -324,9 +331,9 @@ bool recallGPSconf(void)
     if (calculate_sum((uint8_t *)&GPS_conf, sizeof(GPS_conf) - 1) != GPS_conf.checksum)
     {
         loadGPSdefaults();
-        return false;
+        return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
 // Load gps_config_defaults and writes back to EEPROM just to make it sure
@@ -374,13 +381,13 @@ void loadGPSdefaults(void)
     writeGPSconf();
 }
 #if !defined(USE_EX_EEPROM)        // 将航点信息存到buff中，满一页再写入buff
-static u8 msp_wp_buff[7112] = {0}; // 用于缓存航点信息
-static u16 msp_wp_buff_num = 0;    // 记录航点个数,虽然航点只有254个，但是省事用u16
-static u16 temp_i = 7;
+static uint8_t msp_wp_buff[7112] = {0}; // 用于缓存航点信息
+static uint16_t msp_wp_buff_num = 0;    // 记录航点个数,虽然航点只有254个，但是省事用u16
+static uint16_t temp_i = 7;
 static void buff_read_block(void *buf, void *addr, size_t n)
 {
 
-    u8 *pbuff = (u8 *)buf; // 内存中的地址
+    uint8_t *pbuff = (uint8_t *)buf; // 内存中的地址
     u32 i = (u32)addr;     // 地址转换成指针下标
     if (msp_wp_buff[0] != 1)
         //__breakpoint(0);
@@ -396,7 +403,7 @@ static void buff_read_block(void *buf, void *addr, size_t n)
 }
 static void buff_write_block(void *buf, void *addr, size_t n)
 {
-    u8 *pbuff = (u8 *)buf; // 内存中的地址
+    uint8_t *pbuff = (uint8_t *)buf; // 内存中的地址
     u32 i = (u32)addr;     // 地址转换成指针下标
     LED1_ON
     while (n--)
@@ -423,14 +430,14 @@ void storeWP()
 }
 
 // Read the given number of WP from the eeprom, supposedly we can use this during flight.
-// Returns true when reading is successfull and returns false if there were some error (for example checksum)
+// Returns TRUE when reading is successfull and returns FALSE if there were some error (for example checksum)
 bool recallWP(uint8_t wp_number)
 {
-    u8 c = 0;
+    uint8_t c = 0;
     if (mission_step.number == temp_i)
         1 == 1;
     if (wp_number > 254)
-        return false;
+        return FALSE;
     //		if(wp_number==0x09)
     //			1==1;
     if (msp_wp_buff_num) // 节点数不为0在内存中有读数
@@ -449,20 +456,20 @@ bool recallWP(uint8_t wp_number)
     }
     c = calculate_sum((uint8_t *)&mission_step, sizeof(mission_step) - 3); // 由于STM32的内存4字节对齐，该结构体会多出三个字节
     if (c != mission_step.checksum)
-        return false;
-    return true;
+        return FALSE;
+    return TRUE;
 }
 #else
 // #define USE_MSP_WP_TEMP  //启用航点内存缓存
 #if defined(USE_MSP_WP_TEMP)
-static u8 msp_wp_buff_last[28] = {0};
-static u8 msp_wp_buff[7112] = {0}; // 用于缓存航点信息
-static u16 msp_wp_buff_num = 0;    // 记录航点个数,虽然航点只有254个，但是省事用u16
-u8 temp_i = 5;
+static uint8_t msp_wp_buff_last[28] = {0};
+static uint8_t msp_wp_buff[7112] = {0}; // 用于缓存航点信息
+static uint16_t msp_wp_buff_num = 0;    // 记录航点个数,虽然航点只有254个，但是省事用u16
+uint8_t temp_i = 5;
 static void buff_read_block(void *buf, void *addr, size_t n)
 {
 
-    u8 *pbuff = (u8 *)buf; // 内存中的地址
+    uint8_t *pbuff = (uint8_t *)buf; // 内存中的地址
     u32 i = (u32)addr;     // 地址转换成指针下标
     if (msp_wp_buff[0] != 1)
         //__breakpoint(0);
@@ -478,8 +485,8 @@ static void buff_read_block(void *buf, void *addr, size_t n)
 }
 static void buff_write_block(void *buf, void *addr, size_t n)
 {
-    u8 *pbuff = (u8 *)buf; // 内存中的地址
-    u8 *last_buff = msp_wp_buff_last;
+    uint8_t *pbuff = (uint8_t *)buf; // 内存中的地址
+    uint8_t *last_buff = msp_wp_buff_last;
     u32 i = (u32)addr; // 地址转换成指针下标
     LED1_ON
     while (n--)
@@ -493,7 +500,7 @@ static void buff_write_block(void *buf, void *addr, size_t n)
     LED1_OFF
 }
 
-// u8 last_cu_w=0;
+// uint8_t last_cu_w=0;
 // Stores the WP data in the wp struct in the EEPROM
 void storeWP()
 {
@@ -515,15 +522,15 @@ void storeWP()
 }
 
 // Read the given number of WP from the eeprom, supposedly we can use this during flight.
-// Returns true when reading is successfull and returns false if there were some error (for example checksum)
-// u8 last_cun=0;
+// Returns TRUE when reading is successfull and returns FALSE if there were some error (for example checksum)
+// uint8_t last_cun=0;
 bool recallWP(uint8_t wp_number)
 {
-    u8 c = 0;
+    uint8_t c = 0;
     //    if(mission_step.number==temp_i)
     //        1==1;
     if (wp_number > 254)
-        return false;
+        return FALSE;
     //		if(wp_number==0x09)
     //			1==1;
     //    last_cun++;
@@ -546,14 +553,14 @@ bool recallWP(uint8_t wp_number)
     c = calculate_sum((uint8_t *)&mission_step, sizeof(mission_step) - 3); // 由于STM32的内存4字节对齐，该结构体会多出三个字节
 
     if (c != mission_step.checksum)
-        return false;
-    return true;
+        return FALSE;
+    return TRUE;
 }
 
 #else
 #define WP_ADDR_START (PROFILES * sizeof(conf) + sizeof(global_conf) + sizeof(GPS_conf) + 1)
-u16 addr_ = (u16)WP_ADDR_START;
-u16 addr_1 = (u16)sizeof(mission_step);
+uint16_t addr_ = (uint16_t)WP_ADDR_START;
+uint16_t addr_1 = (uint16_t)sizeof(mission_step);
 void storeWP()
 {
 
@@ -564,17 +571,17 @@ void storeWP()
 }
 
 // Read the given number of WP from the eeprom, supposedly we can use this during flight.
-// Returns true when reading is successfull and returns false if there were some error (for example checksum)
-// u8 last_cun=0;
+// Returns TRUE when reading is successfull and returns FALSE if there were some error (for example checksum)
+// uint8_t last_cun=0;
 bool recallWP(uint8_t wp_number)
 {
     if (wp_number > 254)
-        return false;
+        return FALSE;
     eeprom_read_block((void *)&mission_step, (void *)(WP_ADDR_START + (sizeof(mission_step) * (wp_number - 1))), sizeof(mission_step));
     // c=calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3); //由于STM32的内存4字节对齐，该结构体会多出三个字节
     if (mission_step.checksum != calculate_sum((uint8_t *)&mission_step, sizeof(mission_step) - 3))
-        return false;
-    return true;
+        return FALSE;
+    return TRUE;
 }
 
 #endif
@@ -587,15 +594,15 @@ bool recallWP(uint8_t wp_number)
 // }
 
 //// Read the given number of WP from the eeprom, supposedly we can use this during flight.
-//// Returns true when reading is successfull and returns false if there were some error (for example checksum)
+//// Returns TRUE when reading is successfull and returns FALSE if there were some error (for example checksum)
 // bool recallWP(uint8_t wp_number) {
-//     u8 c=0;
-//     if (wp_number > 254) return false;
+//     uint8_t c=0;
+//     if (wp_number > 254) return FALSE;
 //     eeprom_read_block((void*)&mission_step,(void*)(PROFILES * sizeof(conf) + sizeof(global_conf)+sizeof(GPS_conf)+(sizeof(mission_step)*wp_number)), sizeof(mission_step)-2);
 //     c=calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3); //由于STM32的内存4字节对齐，该结构体会多出三个字节
 //     if(c!= mission_step.checksum)
-//			return false;
-//     return true;
+//			return FALSE;
+//     return TRUE;
 // }
 #endif
 // Returns the maximum WP number that can be stored in the EEPROM, calculated from conf and plog sizes, and the eeprom size

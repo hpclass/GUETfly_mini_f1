@@ -49,7 +49,7 @@ void time_init()
 定时器3，输出管脚：
 PA6、PA7、PB0、PB1
 ***********************************************/
-void TIM3_PWM_Init(u16 arr, u16 psc)
+void TIM3_PWM_Init(uint16_t arr, uint16_t psc)
 {
 
     RCC->APB1ENR |= 1 << 1; // TIM3时钟使能
@@ -101,7 +101,7 @@ PD12,13,14,15 （重映射）
 PB6,7,8,9
 ***********************************************/
 
-void TIM4_PWM_Init(u16 arr, u16 psc)
+void TIM4_PWM_Init(uint16_t arr, uint16_t psc)
 {
 #if defined(GUET_FLY_V1)
     RCC->APB1ENR |= 1 << 2;   // TIM4时钟使能
@@ -147,7 +147,7 @@ void TIM4_PWM_Init(u16 arr, u16 psc)
 PA0、PA1、PA2、PA3
 ***********************************************/
 
-void TIM2_PWM_Init(u16 arr, u16 psc)
+void TIM2_PWM_Init(uint16_t arr, uint16_t psc)
 {
     RCC->APB1ENR |= 1 << 0;   // TIM2时钟使能
     RCC->APB2ENR |= 1 << 1;   // 使能PORTA时钟
@@ -174,7 +174,7 @@ void TIM2_PWM_Init(u16 arr, u16 psc)
 定时器8，输出管脚：
 PC6、PC7、PC8、PC9
 ***********************************************/
-void TIM8_PWM_Init(u16 arr, u16 psc)
+void TIM8_PWM_Init(uint16_t arr, uint16_t psc)
 {
     RCC->APB2ENR |= 1 << 13;  // TIM8时钟使能
     RCC->APB2ENR |= 1 << 4;   // 使能PORTC时钟
@@ -200,7 +200,7 @@ void TIM8_PWM_Init(u16 arr, u16 psc)
     TIM8->CR1 |= 0x01;        // 使能定时器
     TIM8->BDTR |= 1 << 15;    // 开启OC和OCN输出
 }
-void TIM1_PWM_Init(u16 arr, u16 psc)
+void TIM1_PWM_Init(uint16_t arr, uint16_t psc)
 {
     RCC->APB1ENR |= 1 << 11;  // TIM1时钟使能
     RCC->APB2ENR |= 1 << 6;   // 使能PORTD时钟
@@ -246,7 +246,7 @@ void TIM1_PWM_Init(u16 arr, u16 psc)
 // 定时器1通道1输入捕获配置
 #if !defined(SBUS__)
 
-void TIM1_Cap_Init(u16 arr, u16 psc)
+void TIM1_Cap_Init(uint16_t arr, uint16_t psc)
 {
     TIM_ICInitTypeDef TIM1_ICInitStructure;
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -289,9 +289,9 @@ void TIM1_Cap_Init(u16 arr, u16 psc)
 }
 
 u32 temp = 0;
-u8 TIM1CH1_CAPTURE_STA = 0, ppm_rx_sta = 0, ppm_rx_num = 0; // 输入捕获状态
-u16 TIM1CH1_CAPTURE_VAL;                                    // 输入捕获值
-u16 ppm_rx[RC_CHANS + 2];                                   // ppm_rx[0]   1   接收到ppm数据
+uint8_t TIM1CH1_CAPTURE_STA = 0, ppm_rx_sta = 0, ppm_rx_num = 0; // 输入捕获状态
+uint16_t TIM1CH1_CAPTURE_VAL;                                    // 输入捕获值
+uint16_t ppm_rx[RC_CHANS + 2];                                   // ppm_rx[0]   1   接收到ppm数据
 // extern volatile uint16_t rcValue[RC_CHANS];
 // 定时器1中断服务程序
 
@@ -360,7 +360,7 @@ void TIM1_CC_IRQHandler(void)
     TIM_ClearITPendingBit(TIM1, TIM_IT_CC1 | TIM_IT_Update); // 清除中断标志位
 }
 #endif
-void TIM2_Cap_Init(u16 arr, u16 psc)
+void TIM2_Cap_Init(uint16_t arr, uint16_t psc)
 {
     TIM_ICInitTypeDef TIM2_ICInitStructure;
     GPIO_InitTypeDef GPIO_InitStructure;

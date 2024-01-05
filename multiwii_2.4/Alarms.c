@@ -8,7 +8,15 @@
 #include "LCD.h"
 #include "Sensors.h"
 #include "Alarms.h"
+#if defined(STM32F10X_MD)
+#include "stm32f10x_flash.h"
 #include "delay.h"
+#endif
+#if defined(GD32F330)
+#include "gd32f3x0.h"
+#include "guetfly_data_types.h"
+#include "i2c.h"
+#endif
 
 void alarmPatternComposer();
 void patternDecode(uint8_t resource, uint16_t first, uint16_t second, uint16_t third, uint16_t cyclepause, uint16_t endpause);

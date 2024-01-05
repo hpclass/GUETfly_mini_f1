@@ -1,8 +1,6 @@
 #ifndef __OV7670_Dir_H_
 #define __OV7670_Dir_H_
 
-// #include "stm32f1xx.h"
-#include "stm32f10x_it.h"
 
 extern double XPosition, YPosition;             // 位置信息
 extern double DirectionXSpeed, DirectionYSpeed; // 位移信息

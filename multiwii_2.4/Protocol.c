@@ -1,4 +1,8 @@
+#ifdef STM32F10X_MD
 #include "stm32f10x.h"
+#else
+#include "gd32f3x0.h"
+#endif
 #include "config.h"
 #include "def.h"
 #include "types.h"
@@ -167,14 +171,14 @@ static void tailSerialReply()
     UartSendData(CURRENTPORT);
 }
 // stm32 add
-u8 pgm_read_byte_near(PGM_P address_short)
+uint8_t pgm_read_byte_near(PGM_P address_short)
 {
-    u8 c = *address_short;
+    uint8_t c = *address_short;
     return c;
 }
 size_t strlen_P(PGM_P src)
 {
-    u8 i = 0;
+    uint8_t i = 0;
     while (*(src + i) != 0)
         i++;
     return i;
@@ -182,7 +186,7 @@ size_t strlen_P(PGM_P src)
 static void serializeNames(PGM_P s)
 { // add stm32
     PGM_P c = s;
-    u16 tmp;
+    uint16_t tmp;
     headSerialReply(strlen_P(s));
     for (; pgm_read_byte_near(c) != 0; c++)
         serialize8(pgm_read_byte_near(c));
@@ -352,7 +356,7 @@ void serialCom()
             } // while
         }     // for
     }
-    // u8 test_[16]= {0x01,0x09,0x41,0xcf,0xd9,0x94,0x0f,0x17,0x32,0x5f,0xca,0x00,0x02,0x00,0x00}; //测试添加
+    // uint8_t test_[16]= {0x01,0x09,0x41,0xcf,0xd9,0x94,0x0f,0x17,0x32,0x5f,0xca,0x00,0x02,0x00,0x00}; //测试添加
     // test_[16]={0x01,0x07,0x41,0xcf,0xd9,0x94,0x0f,0x17,0x32,0x5f,0xc8,0x00,0x01,0x00,0x50,0x00};
     static struct struct_
     {
@@ -858,7 +862,7 @@ void serialCom()
                     serialize8(mission_step.action);
                     serialize32(mission_step.pos[LAT]);
                     serialize32(mission_step.pos[LON]);
-                    if (success == true)
+                    if (success == TRUE)
                         flag = mission_step.flag;
                     else
                         flag = MISSION_FLAG_CRC_ERROR; // CRC error
@@ -1032,7 +1036,7 @@ void serialCom()
             if (f.ARMED)
             {
                 f.USER_RTH_FLAG = 1;
-                f.GPS_BARO_MODE = true;
+                f.GPS_BARO_MODE = TRUE;
             }
             mspAck();
             break;

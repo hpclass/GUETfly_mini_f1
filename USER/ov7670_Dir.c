@@ -1,9 +1,13 @@
+#ifdef STM32F10X_MD
 #include "stm32f10x.h"
+#include "sys.h"
+#else 
+#include "gd32f3x0.h"
+#endif
 #include "types.h"
 #include "config.h"
 #include "def.h"
 #include "ov7670_Dir.h"
-#include "sys.h"
 
 double XPosition, YPosition;             // 位置信息
 double DirectionXSpeed, DirectionYSpeed; // 位移信息

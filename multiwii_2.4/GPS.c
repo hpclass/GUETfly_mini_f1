@@ -1,7 +1,12 @@
+
+#ifdef STM32F10X_MD
+#include "stm32f10x.h"
+#else
+#include "gd32f3x0.h"
+#endif
 #include "config.h"
 #include "def.h"
 #include "types.h"
-#include "stm32f10x.h"
 #include "GPS.h"
 #include "Serial.h"
 #include "Sensors.h"
@@ -290,7 +295,7 @@ uint8_t GPS_Compute(void)
         // TODO: autolanding
         if ((GPS_conf.fence > 0) && (GPS_conf.fence < GPS_distanceToHome) && (f.GPS_mode != GPS_MODE_RTH))
         {
-            rcOptions[BOXGPSHOME] = true; // 应该加上
+            rcOptions[BOXGPSHOME] = TRUE; // 应该加上
             init_RTH();
         }
 
@@ -1327,7 +1332,7 @@ uint8_t hex_c(uint8_t n)
 void init_RTH()
 {
     f.GPS_mode = GPS_MODE_RTH; // Set GPS_mode to RTH
-    f.GPS_BARO_MODE = true;
+    f.GPS_BARO_MODE = TRUE;
     GPS_hold[LAT] = GPS_coord[LAT]; // All RTH starts with a poshold
     GPS_hold[LON] = GPS_coord[LON]; // This allows to raise to rth altitude//原地爬升高度
     GPS_set_next_wp(&GPS_hold[LAT], &GPS_hold[LON], &GPS_hold[LAT], &GPS_hold[LON]);
@@ -1563,7 +1568,7 @@ u8 GPS_newFrame(u8 data)
     static uint8_t _ck_a; // Packet checksum accumulators
     static uint8_t _ck_b;
 
-    u8 ret = false;
+    u8 ret = FALSE;
     uint8_t st = _step + 1;
     // temp_t++;
     // temp_GPS[temp_t]=data;
@@ -1638,7 +1643,7 @@ u8 GPS_newFrame(u8 data)
                         GPS_altitude_cel = GPS_altitude; // 解锁后减去差值
                     // GPS_time       = _buffer.posllh.time; //not used for the moment
                 }
-                ret = true; // POSLLH message received, allow blink GUI icon and LED, frame available for nav computation
+                ret = TRUE; // POSLLH message received, allow blink GUI icon and LED, frame available for nav computation
             }
             else if (_msg_id == MSG_SOL)
             {

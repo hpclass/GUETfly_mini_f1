@@ -2,7 +2,6 @@
 #define GPS_H_
 
 // Function prototypes for GPS frame parsing
-#include "sys.h"
 #include "config.h"
 // Based on average Earth radius: lat_lon_to_cm = pi/180 * Earth_radius / 10^7, where volumetric mean radius 6371 km
 #define LAT_LON_TO_CM 1.11318845f
@@ -35,11 +34,11 @@ void GPS_adjust_heading();
 void init_RTH(void);
 void check_land(void);
 // bool GPS_newFrame(uint8_t c);
-u8 GPS_newFrame(u8 data);
+uint8_t GPS_newFrame(uint8_t data);
 #if defined(I2C_GPS)
 uint8_t GPS_NewData(void);
 #endif
-u8 GPS_newFrame(u8 data);
+uint8_t GPS_newFrame(uint8_t data);
 extern uint32_t wp_distance;
 extern int32_t target_bearing;
 extern int16_t servo0, servo5;

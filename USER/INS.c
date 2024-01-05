@@ -1,3 +1,8 @@
+#if defined(STM32F10X_MD)
+#endif
+#if defined(GD32F330)
+#include "gd32f3x0.h"
+#endif
 #include "math.h"
 #include "config.h"
 #include "def.h"
@@ -26,7 +31,7 @@ bool calculateZ_INS()
 {
 
     static timer_t calculateZ_INSTimer;
-    static bool isActivated = false;
+    static bool isActivated = FALSE;
     float dt;
     if (updateTimer(&calculateZ_INSTimer, HZ2US(INS_UPDATE_RATE)))
     {
@@ -42,7 +47,7 @@ bool calculateZ_INS()
 
             if (!isActivated)
             {
-                isActivated = true;
+                isActivated = TRUE;
                 resetZState(); //==??Armed??????????=====histZCount = 0;...======
             }
 
@@ -56,18 +61,18 @@ bool calculateZ_INS()
 
             saveZPositionToHistory();
 
-            return true;
+            return TRUE;
         }
         else
         {
             if (isActivated)
             {
-                isActivated = false;
+                isActivated = FALSE;
             }
         }
     }
 
-    return false;
+    return FALSE;
 }
 
 // Set the Acc weight for Acc/Baro complementary filter (CF)
@@ -222,7 +227,7 @@ bool calculateXY_INS()
 
         // debug[1] = calculateXY_INSTimer.dTime/10;
         float dt;
-        static bool isActivated = false;
+        static bool isActivated = FALSE;
 
         updateAccelEF_Filtered(LAT); //===??????????????ACC=======
         updateAccelEF_Filtered(LON);
@@ -236,7 +241,7 @@ bool calculateXY_INS()
 
             if (!isActivated)
             {
-                isActivated = true;
+                isActivated = TRUE;
 
                 resetXYState();
             }
@@ -249,13 +254,13 @@ bool calculateXY_INS()
 
             saveXYPositionToHistory(); //===?????μ???????????λ????′�?????===========
 
-            return true;
+            return TRUE;
         }
         else
         {
             if (isActivated)
             {
-                isActivated = false;
+                isActivated = FALSE;
             }
         }
 
@@ -265,7 +270,7 @@ bool calculateXY_INS()
         // debug[3] = (int16_t)ins.positionEF[LAT]; // Positive when moving North (LAT)
     }
 
-    return false;
+    return FALSE;
 }
 
 // Set the Acc weight for Acc/GPS complementary filter (CF)

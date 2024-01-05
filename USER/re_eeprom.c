@@ -1,13 +1,19 @@
+#if defined(STM32F10X_MD)
+#include "stm32f10x_flash.h"
+#include "delay.h"
+#endif
+#if defined(GD32F330)
+#include "gd32f3x0.h"
+#include "guetfly_data_types.h"
+#include "i2c.h"
+#endif
 #include <string.h>
 #include "stdint.h"
 #include "config.h"
 #include "def.h"
-#ifdef STM32F10X_MD
-#include "stm32f10x_flash.h"
-#endif
 #include "EEPROM.h"
 #include "timer.h"
-#include "delay.h"
+
 
 #if !defined(USE_EX_EEPROM) // 不使用外置EEPROM而使用STM32的flash
 volatile FLASH_Status FLASHStatus;
@@ -330,6 +336,7 @@ PA5 ->SCL
 
 #elif defined(GUET_FLY_MINI_V1)
 #define EEPROM_ADDR
+#ifdef STM32F10X_MD
 #define EEPROM_SCL_H GPIOB->BSRR |= GPIO_Pin_12
 #define EEPROM_SCL_L GPIOB->BRR |= GPIO_Pin_12
 
@@ -338,7 +345,15 @@ PA5 ->SCL
 
 #define EEPROM_SCL_read GPIOB->IDR &GPIO_Pin_12
 #define EEPROM_SDA_read GPIOB->IDR &GPIO_Pin_13
+#else
+#define EEPROM_SCL_H I2C_SCL2_H
+#define EEPROM_SCL_L I2C_SCL2_L
 
+#define EEPROM_SDA_H I2C_SDA2_H
+#define EEPROM_SDA_L I2C_SDA2_L
+
+#define EEPROM_SDA_read (I2C_READ2_SDA)
+#endif
 #endif
 // 大小定义
 
@@ -350,11 +365,15 @@ void EEPROM_I2C_GPIO_Config(void)
     GPIOA->CRL |= 0X00370000; //
     GPIOA->ODR = 0X000000C0;
 #elif defined(GUET_FLY_MINI_V1)
+#if  defined(STM32F10X_MD)
     RCC->APB2ENR |= 1 << 3;   // 使能PORTB时钟
     GPIOB->CRH &= 0XFF00FFFF; // 清零相应位
     GPIOB->CRH |= 0X00730000; //
     GPIOB->ODR = 0X00003000;
+#else
+    i2c_init(HANDLE_I2C_EEPROM);
 #endif
+#endif 
 }
 ///////////IIC初始化//////////////
 
@@ -435,12 +454,12 @@ bool EEPROM_I2C_WaitAck(void) // 返回为:=1有ACK,=0无ACK
     {
         EEPROM_SCL_L;
         EEPROM_Delay_1us(1);
-        return false;
+        return FALSE;
     }
 
     EEPROM_SCL_L;
     EEPROM_Delay_1us(1);
-    return true;
+    return TRUE;
 }
 
 //**************************************
@@ -503,25 +522,25 @@ bool EEPROM_Single_WriteI2C(uint8_t Slave_Address, uint8_t REG_Address, uint8_t 
     if (!EEPROM_I2C_WaitAck())
     {
         EEPROM_I2C_Stop();
-        return false;
+        return FALSE;
     }
 
     EEPROM_I2C_SendByte(REG_Address); // 内部寄存器地址，
     if (!EEPROM_I2C_WaitAck())
     {
         EEPROM_I2C_Stop();
-        return false;
+        return FALSE;
     }
 
     EEPROM_I2C_SendByte(REG_data); // 内部寄存器数据，
     if (!EEPROM_I2C_WaitAck())
     {
         EEPROM_I2C_Stop();
-        return false;
+        return FALSE;
     }
 
     EEPROM_I2C_Stop(); // 发送停止信号
-    return true;
+    return TRUE;
 }
 //**************************************
 // 从IIC设备读取一个字节数据
@@ -535,14 +554,14 @@ uint8_t EEPROM_Single_ReadI2C(uint8_t Slave_Address, uint8_t REG_Address)
     if (!EEPROM_I2C_WaitAck())
     {
         EEPROM_I2C_Stop();
-        return false;
+        return FALSE;
     }
 
     EEPROM_I2C_SendByte(REG_Address); // 发送存储单元地址，从0开始
     if (!EEPROM_I2C_WaitAck())
     {
         EEPROM_I2C_Stop();
-        return false;
+        return FALSE;
     }
 
     EEPROM_I2C_Start(); // 起始信号
@@ -551,7 +570,7 @@ uint8_t EEPROM_Single_ReadI2C(uint8_t Slave_Address, uint8_t REG_Address)
     if (!EEPROM_I2C_WaitAck())
     {
         EEPROM_I2C_Stop();
-        return false;
+        return FALSE;
     }
 
     REG_data = EEPROM_I2C_RecvByte(); // 读出寄存器数据
@@ -730,6 +749,7 @@ uint8_t AT24CXX_write_Page(uint8_t *buf, uint16_t addr, size_t n)
         EEPROM_I2C_Stop(); // 产生一个停止条件
         delay_ms(5);       // 数据手册写5ms操作时间，5ms之内不响应
     }
+    return 0;
 }
 /*
 连续读取:

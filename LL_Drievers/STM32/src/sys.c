@@ -35,7 +35,7 @@ void MY_NVIC_SetVectorTable(u32 NVIC_VectTab, u32 Offset)
 // NVIC_Group:NVIC分组 0~4 总共5组
 // CHECK OK
 // 091209
-void MY_NVIC_PriorityGroupConfig(u8 NVIC_Group)
+void MY_NVIC_PriorityGroupConfig(uint8_t NVIC_Group)
 {
     u32 temp, temp1;
     temp1 = (~NVIC_Group) & 0x07; // 取后三位
@@ -61,11 +61,11 @@ void MY_NVIC_PriorityGroupConfig(u8 NVIC_Group)
 // NVIC_SubPriority和NVIC_PreemptionPriority的原则是,数值越小,越优先
 // CHECK OK
 // 100329
-void MY_NVIC_Init(u8 NVIC_PreemptionPriority, u8 NVIC_SubPriority, u8 NVIC_Channel, u8 NVIC_Group)
+void MY_NVIC_Init(uint8_t NVIC_PreemptionPriority, uint8_t NVIC_SubPriority, uint8_t NVIC_Channel, uint8_t NVIC_Group)
 {
     u32 temp;
-    u8 IPRADDR = NVIC_Channel / 4;           // 每组只能存4个,得到组地址
-    u8 IPROFFSET = NVIC_Channel % 4;         // 在组内的偏移
+    uint8_t IPRADDR = NVIC_Channel / 4;           // 每组只能存4个,得到组地址
+    uint8_t IPROFFSET = NVIC_Channel % 4;         // 在组内的偏移
     IPROFFSET = IPROFFSET * 8 + 4;           // 得到偏移的确切位置
     MY_NVIC_PriorityGroupConfig(NVIC_Group); // 设置分组
     temp = NVIC_PreemptionPriority << (4 - NVIC_Group);
@@ -85,10 +85,10 @@ void MY_NVIC_Init(u8 NVIC_PreemptionPriority, u8 NVIC_SubPriority, u8 NVIC_Chann
 // 该函数一次只能配置1个IO口,多个IO口,需多次调用
 // 该函数会自动开启对应中断,以及屏蔽线
 // 待测试...
-void Ex_NVIC_Config(u8 GPIOx, u8 BITx, u8 TRIM)
+void Ex_NVIC_Config(uint8_t GPIOx, uint8_t BITx, uint8_t TRIM)
 {
-    u8 EXTADDR;
-    u8 EXTOFFSET;
+    uint8_t EXTADDR;
+    uint8_t EXTOFFSET;
     EXTADDR = BITx / 4; // 得到中断寄存器组的编号
     EXTOFFSET = (BITx % 4) * 4;
 
@@ -156,7 +156,7 @@ void MYRCC_DeInit(void)
 // reg:要写入的数值
 ////check ok
 ////091202
-// void BKP_Write(u8 reg,u16 dat)
+// void BKP_Write(uint8_t reg,u16 dat)
 //{
 //   RCC->APB1ENR|=1<<28;     //使能电源时钟
 //	RCC->APB1ENR|=1<<27;     //使能备份时钟
@@ -207,7 +207,7 @@ void Sys_Soft_Reset(void)
 // mode:jtag,swd模式设置;00,全使能;01,使能SWD;10,全关闭;
 // CHECK OK
 // 100818
-void JTAG_Set(u8 mode)
+void JTAG_Set(uint8_t mode)
 {
     u32 temp;
     temp = mode;
@@ -220,7 +220,7 @@ void JTAG_Set(u8 mode)
 // pll:选择的倍频数，从2开始，最大值为16
 // CHECK OK
 // 091209
-void Stm32_Clock_Init(u8 PLL)
+void Stm32_Clock_Init(uint8_t PLL)
 {
     unsigned char temp = 0;
     MYRCC_DeInit();        // 复位并配置向量表

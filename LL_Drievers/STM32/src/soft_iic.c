@@ -1,10 +1,12 @@
 #ifdef STM32F10X_MD
 #include "stm32f10x.h"
 #include "stm32f10x_conf.h"
+#include "delay.h"
+#else
+#include "timer.h"
 #endif
 #include "stdint.h"
 #include "math.h"
-#include "delay.h"
 #include "soft_iic.h"
 
 extern uint8_t exchange_num[11];

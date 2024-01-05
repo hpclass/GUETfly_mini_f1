@@ -9,7 +9,6 @@
 #include "config.h"
 #include "def.h"
 #include "stddef.h"
-#define bool uint8_t
 
 // #define E2END STM32_FLASH_BASE+1024*STM32_FLASH_SIZE  //末尾地址
 void eeprom_read_block(void *buf, void *addr, size_t n); // 读取由指定地址开始的指定长度的EEPROM数据
