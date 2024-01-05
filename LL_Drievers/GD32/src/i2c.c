@@ -30,7 +30,7 @@ static void i2c_delay_us(uint16_t delays)
         __ASM volatile ("nop");
     }
 }
-void i2c_init(type_i2c_handle handle)
+void LL_i2c_init(type_i2c_handle handle)
 {
     switch(handle)
     {
@@ -186,7 +186,7 @@ static uint8_t i2c_read_byte(type_i2c_handle handle)
     }
     return data;
 }
-uint8_t  test_i2c(type_i2c_handle handle,uint8_t addr)
+uint8_t  LL_test_i2c(type_i2c_handle handle,uint8_t addr)
 {
     i2c_start(handle);//开始传输
 
@@ -199,7 +199,7 @@ uint8_t  test_i2c(type_i2c_handle handle,uint8_t addr)
 		i2c_stop(handle);//结束传输
 		return 0;
 	}
-uint8_t i2c_read_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t *data)//单字读取
+uint8_t LL_i2c_read_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t *data)//单字读取
 {
     //S->send addr W->wait ACK->send REG ->wait ACK ->S->send addr R ->Read byte ->Send NACK ->STOP
     i2c_start(handle);//开始传输
@@ -231,7 +231,7 @@ uint8_t i2c_read_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t *da
     i2c_stop(handle);//结束传输
     return 0;
 }
-uint8_t i2c_write_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t	data)//单字写入
+uint8_t LL_i2c_write_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t	data)//单字写入
 {
     //S->Send addr W->wait ACK->send reg->wait ack->send data ->wait ACK ->stop
     i2c_start(handle);//开始传输
@@ -258,7 +258,7 @@ uint8_t i2c_write_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t	da
     return 0;
 }
 
-uint8_t i2c_read_buff(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t * buff,uint16_t size)//连续读取
+uint8_t LL_i2c_read_buff(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t * buff,uint16_t size)//连续读取
 {
 //S->send addr W ->wait ACK ->send REG ->wait ACK->S->send addr R->read data->send ACK->...->send NACK ->STOP
     if(!size||!buff)
@@ -296,7 +296,7 @@ uint8_t i2c_read_buff(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t * 
     i2c_stop(handle);//结束传输
     return 0;
 }
-uint8_t i2c_write_buff(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t * buff,uint16_t size)//连续写入
+uint8_t LL_i2c_write_buff(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t * buff,uint16_t size)//连续写入
 {
 //S->addr W ->wait ACK->send REG ->wait ACK->send data->wait ACK ->...->wait ack->stop
     i2c_start(handle);//开始传输

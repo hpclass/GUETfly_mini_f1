@@ -45,4 +45,9 @@ void msleep(uint32_t sleep);
 void usleep(uint32_t sleep);
 void init_capture_RX(void);
 void servos_output(uint16_t *buff);
+
+void Capture();
+
+#define delay(X) HAL_delay(X)
+#define delay_ms(X) HAL_delay(X)
 #endif

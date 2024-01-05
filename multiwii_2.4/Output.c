@@ -216,13 +216,17 @@ void initOutput()
     uint8_t axis = 0;
     for (axis = 0; axis < RC_CHANS; axis++)
         rcData[axis] = 1500;
+#ifdef STM32F10X_MD
     // TIM8_PWM_Init(19999,72-1);//高级定时器 PC6、7、8、9 400Hz,如果需要50Hz修改72为720-1
     // TIM2_PWM_Init(1999,720);//PA0,1,2,3
     TIM3_PWM_Init(19999, 72 - 1); // 400Hz (0-2000) PA6,7,PB0,1
     TIM4_PWM_Init(19999, 72 - 1); // PD12,13,14,15
     /****************            mark all PWM pins as Output             ******************/
     // TIM3_PWM_Init(999,143); //、、初始化PWM
-
+#else
+    init_timer2(1999, 84);
+    soft_pwm_init(9, 84);
+#endif
     /********  special version of MultiWii to calibrate all attached ESCs ************/
 #if defined(ESC_CALIB_CANNOT_FLY)
     writeAllMotors(ESC_CALIB_HIGH);

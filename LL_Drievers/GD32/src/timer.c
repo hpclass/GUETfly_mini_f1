@@ -20,6 +20,8 @@ limitations under the License.
 static uint16_t sys_tick_base_div=0;
 int16_t tmp_buff[256];
 uint8_t tmp_flag=0;
+uint16_t Cap_CH[13];
+uint8_t SBUS_FLAG_;
 void systick_config(void)//嘀嗒时钟
 {
     sys_tick_base_div=(SystemCoreClock/ 1000U/ 1000U);
@@ -440,5 +442,10 @@ void TIMER14_IRQHandler()
 void HAL_delay(uint32_t time)
 {
     msleep(time);
+
+}
+
+void Capture()
+{
 
 }

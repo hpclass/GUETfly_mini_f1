@@ -5,6 +5,8 @@
 #endif
 #if defined(GD32F330)
 #include "gd32f3x0.h"
+#include "guetfly_data_types.h"
+#include "timer.h"
 #endif
 #include "math.h"
 #include "config.h"
@@ -92,27 +94,12 @@ static uint32_t neutralizeTime = 0;
 
 void i2c_init(void)
 {
+#ifdef STM32F10X_MD
     I2C_GPIO_Config();
+#endif
     i2c_errors_count = 0;
 }
-
-/*
-void __attribute__ ((noinline)) waitTransmissionI2C(uint8_t twcr) {
-  TWCR = twcr;
-  uint8_t count = 255;
-  while (!(TWCR & (1<<TWINT))) {
-    count--;
-    if (count==0) {              //we are in a blocking state => we don't insist
-      TWCR = 0;                  //and we force a reset on TWINT register
-      #if defined(WMP)
-      neutralizeTime = micros(); //we take a timestamp here to neutralize the value during a short delay
-      #endif
-      i2c_errors_count++;
-      break;
-    }
-  }
-}
-*/
+#ifdef STM32F10X_MD
 #if defined(USE_STM32_I2C1)
 void i2c_rep_start(uint8_t address)
 {
@@ -537,6 +524,7 @@ uint8_t i2c_readReg(uint8_t add, uint8_t reg)
     i2c_read_reg_to_buf(add, reg, &val, 1);
     return val;
 }
+#endif
 void i2c_getSixRawADC(uint8_t add, uint8_t reg)
 {
     // while(1)
@@ -546,6 +534,23 @@ void i2c_getSixRawADC(uint8_t add, uint8_t reg)
     // i2c_read_reg_to_buf(0x68, 0x43, rawADC, 6);
     // delay(50);
     // }
+}
+#else
+void i2c_writeReg(uint8_t add, uint8_t reg, uint8_t val)
+{
+    if (!LL_i2c_write_reg(HANDLE_I2C_MPU,add << 1, reg, val))
+        i2c_errors_count++;
+}
+
+uint8_t i2c_readReg(uint8_t add, uint8_t reg)
+{
+    uint8_t val;
+    LL_i2c_read_buff(HANDLE_I2C_MPU,add, reg, &val, 1);
+    return val;
+}
+void i2c_getSixRawADC(uint8_t add, uint8_t reg)
+{
+    LL_i2c_read_buff(HANDLE_I2C_MPU,add, reg, rawADC, 6);
 }
 #endif
 // ****************

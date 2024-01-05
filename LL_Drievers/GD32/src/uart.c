@@ -88,8 +88,7 @@ void USART0_IRQHandler(void)//串口接收中断
 		 usart_interrupt_flag_clear(USART0, USART_INT_FLAG_ERR_ORERR); 
     if(RESET != usart_interrupt_flag_get(USART0, USART_INT_FLAG_RBNE)) {
         /* clear IDLE flag */
-        protocl_rx_data(HANDLE_usart_gps,usart_data_receive(USART0));//数据暂时传入队列保存
-
+        store_uart_in_buf(usart_data_receive(USART0), HANDLE_usart_gps);
     }
 }
 
@@ -98,7 +97,7 @@ void USART1_IRQHandler(void)//串口接收中断
 	usart_interrupt_flag_clear(USART1, USART_INT_FLAG_ERR_ORERR); 
     if(RESET != usart_interrupt_flag_get(USART1, USART_INT_FLAG_RBNE)) {
         /* clear IDLE flag */
-        protocl_rx_data(HANDLE_usart_radio,usart_data_receive(USART1));//数据暂时传入队列保存
+        store_uart_in_buf(usart_data_receive(USART1), HANDLE_usart_radio);
     }
 }
 //底层串口输出函数

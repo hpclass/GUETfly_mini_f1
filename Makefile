@@ -64,7 +64,6 @@ MultiWii_SOURCES = \
     ./multiwii_2.4/GPS.c \
     ./multiwii_2.4/MultiWii.c \
     ./multiwii_2.4/RX.c \
-    ./multiwii_2.4/init_c.c \
 
 HAL_SOURCES = \
     ./USER/AltHold.c \
@@ -116,6 +115,7 @@ SOURCES_STM32_LIBS := \
     ./Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_wwdg.c \
 
 SOURCES_GD32_LIBS := \
+	./Libraries/CMSIS/GD32F3x0/Source/system_gd32f3x0.c \
 	./LL_Drievers/GD32/src/i2c.c \
 	./LL_Drievers/GD32/src/spi.c   \
 	./LL_Drievers/GD32/src/uart.c \

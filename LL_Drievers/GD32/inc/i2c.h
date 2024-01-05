@@ -56,9 +56,11 @@ limitations under the License.
 #define I2C_SDA2_MODE_IN			gpio_mode_set(I2C_SDA2_Port, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP,I2C_SDA2_Pin)
 
 
-void i2c_init(type_i2c_handle handle);
-uint8_t i2c_read_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t *data);
-uint8_t i2c_write_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t	data);
-uint8_t i2c_read_buff(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t * buff,uint16_t size);
-uint8_t i2c_write_buff(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t * buff,uint16_t size);
+void LL_i2c_init(type_i2c_handle handle);
+uint8_t LL_i2c_read_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t *data);
+uint8_t LL_i2c_write_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t	data);
+uint8_t LL_i2c_read_buff(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t * buff,uint16_t size);
+uint8_t LL_i2c_write_buff(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t * buff,uint16_t size);
+
+#define I2C_Start 
 #endif
