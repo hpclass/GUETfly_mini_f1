@@ -3,3 +3,7 @@
 MDK-ARM/Project.uvguix.*
 *.orig
 MDK-ARM/Obj
+*.bin
+*.elf
+*.hex
+*.map

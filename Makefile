@@ -177,7 +177,7 @@ FLAGS_CXX := $(SPECS) $(FLAGS_MCU) $(OPT) -c -g -gdwarf-2 -mthumb \
              $(DEFS)
 FLAGS_LD  := $(SPECS) $(FLAGS_MCU) $(OPT) -lm -g -gdwarf-2 -mthumb \
              -nostartfiles -Xlinker --gc-sections -T$(LINK_SCRIPT) \
-             -Wl,-Map=$(PROJECT).map,--cref,--no-warn-mismatch
+             -Wl,-Map=$(TARGET).map,--cref,--no-warn-mismatch
 
 			 
 OBJECTS    := $(filter %.o, $(ASM_FILES:.s=.o)) $(filter %.o, $(SOURCES:.c=.o))
