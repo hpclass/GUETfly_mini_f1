@@ -13,6 +13,7 @@
 #include "Ano_OF.h"
 #include "ov7670_Dir.h"
 #include "optic_.h"
+#include "timer.h"
 /************************************** MultiWii Serial Protocol *******************************************************/
 // Multiwii Serial Protocol 0
 #define MSP_VERSION 0

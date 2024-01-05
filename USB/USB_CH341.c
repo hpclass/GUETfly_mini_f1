@@ -1,5 +1,6 @@
 #include "USB_CH341.H"
 #include "usb_lib.h"
+#include "Serial.h"
 
 void delay_ms(u16 nms);
 void delay_us(u32 nus);

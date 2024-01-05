@@ -6,6 +6,8 @@
 #include "stm32f10x_flash.h"
 #endif
 #include "EEPROM.h"
+#include "timer.h"
+#include "delay.h"
 
 #if !defined(USE_EX_EEPROM) // 不使用外置EEPROM而使用STM32的flash
 volatile FLASH_Status FLASHStatus;
