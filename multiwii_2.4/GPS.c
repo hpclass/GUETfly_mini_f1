@@ -1925,7 +1925,7 @@ void FW_NAV()
 
         // Limit outputs
         // GPS_angle[PITCH] = constrain(altDiff/10,-GPS_MAXCLIMB*10,GPS_MAXDIVE*10) + ALT_deltaSum; //GPS_MAXDIVE=20   GPS_MAXCLIMB=30
-        int16_t temp_angle_pitch; // 升力补偿
+        int16_t temp_angle_pitch = 0; // 升力补偿
         if (!f.CLIMBOUT_FW)
         {
             temp_angle_pitch = constrain(ABS(att.angle[ROLL]) * (0.6), 0, 220); // #define ELEVATORCOMPENSATION   100 升力补偿

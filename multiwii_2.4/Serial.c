@@ -124,20 +124,20 @@ void UartSendData(uint8_t port)
         break;
 #else
     case 0:
-        while (serialHeadTX[5] != serialTailTX[5])
+        while (serialHeadTX[port] != serialTailTX[port])
         {
-            if (++serialTailTX[5] >= TX_BUFFER_SIZE)
-                serialTailTX[5] = 0;
-            res = (uint8_t)serialBufferTX[5][serialTailTX[5]];
+            if (++serialTailTX[port] >= TX_BUFFER_SIZE)
+                serialTailTX[port] = 0;
+            res = (uint8_t)serialBufferTX[port][serialTailTX[port]];
             uart_send_buff(HANDLE_usart_gps, res);
         }
         break;
     case 1:
-        while (serialHeadTX[5] != serialTailTX[5])
+        while (serialHeadTX[port] != serialTailTX[port])
         {
-            if (++serialTailTX[5] >= TX_BUFFER_SIZE)
-                serialTailTX[5] = 0;
-            res = (uint8_t)serialBufferTX[5][serialTailTX[5]];
+            if (++serialTailTX[port] >= TX_BUFFER_SIZE)
+                serialTailTX[port] = 0;
+            res = (uint8_t)serialBufferTX[port][serialTailTX[port]];
             uart_send_buff(HANDLE_usart_radio, res);
         }
         break;
