@@ -113,6 +113,7 @@ void I2c_End() // 关闭I2C
 }
 bool Single_WriteI2C(uint8_t Slave_Address, uint8_t REG_Address, uint8_t REG_data)
 {
+    return FALSE;
 }
 void I2C1_EV_IRQHandler()
 { // 事件中断
@@ -249,7 +250,7 @@ void I2C_SendACK(uint8_t i)
 //**************************************
 bool I2C_WaitAck(void) // 返回为:=1有ACK,=0无ACK
 {
-    unsigned int i;
+    unsigned int i = 0;
     SDA_H;
     Delay_1us(1);
     SCL_H;
