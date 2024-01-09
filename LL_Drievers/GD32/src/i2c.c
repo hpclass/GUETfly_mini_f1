@@ -231,7 +231,7 @@ uint8_t LL_i2c_read_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t 
     i2c_stop(handle);//结束传输
     return 0;
 }
-uint8_t LL_i2c_write_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t	data)//单字写入
+uint8_t LL_i2c_write_reg(type_i2c_handle handle, uint8_t addr, uint8_t reg, uint8_t data) // 单字写入
 {
     //S->Send addr W->wait ACK->send reg->wait ack->send data ->wait ACK ->stop
     i2c_start(handle);//开始传输
@@ -321,4 +321,15 @@ uint8_t LL_i2c_write_buff(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_
     }
     i2c_stop(handle);//结束传输
     return 0;
+}
+uint8_t Single_ReadI2C(uint8_t Slave_Address, uint8_t REG_Address)
+{
+    uint8_t value = 0xff;
+    LL_i2c_read_reg(HANDLE_I2C_MPU, Slave_Address, REG_Address, &value);
+    return value;
+}
+
+bool Single_WriteI2C(uint8_t Slave_Address, uint8_t REG_Address, uint8_t REG_data)
+{
+    LL_i2c_write_reg(HANDLE_I2C_MPU, Slave_Address, REG_Address, REG_data);
 }

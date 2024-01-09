@@ -36,6 +36,7 @@ March  2015     V2.4
 #include "timer.h"
 #include "math.h"
 #include "oled.h"
+#include "sys.h"
 
 
 #define FCLK 72000000 // 系统时钟72mhz
