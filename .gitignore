@@ -7,3 +7,4 @@ MDK-ARM/Obj
 *.elf
 *.hex
 *.map
+MDK-ARM/startup_stm32f10x_hd.lst
