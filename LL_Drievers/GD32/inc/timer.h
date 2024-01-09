@@ -47,7 +47,7 @@ void init_capture_RX(void);
 void servos_output(uint16_t *buff);
 
 void Capture();
-
+void cover_sbus_buff_to_ch(uint8_t *buff);
 #define delay(X) HAL_delay(X)
 #define delay_ms(X) HAL_delay(X)
 #endif
