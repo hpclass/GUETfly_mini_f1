@@ -362,10 +362,6 @@ void TIM1_CC_IRQHandler(void)
 #endif
 void TIM2_Cap_Init(uint16_t arr, uint16_t psc)
 {
-    TIM_ICInitTypeDef TIM2_ICInitStructure;
-    GPIO_InitTypeDef GPIO_InitStructure;
-    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
     RCC->APB1ENR |= 1 << 0; // 使能定时器2，TIM2
     RCC->APB2ENR |= 1 << 2; // 使能PORTA时钟
 
@@ -386,22 +382,4 @@ void TIM2_Cap_Init(uint16_t arr, uint16_t psc)
     TIM2->DIER |= 1 << 2; // 允许捕获中断CC2IE=1
     TIM2->DIER |= 1 << 0; // 允许更新中断UIE=1
     TIM2->CR1 |= 0x01;    // 使能定时器2
-    // 初始化TIM2输入捕获参数
-    //    TIM2_ICInitStructure.TIM_Channel = TIM_Channel_2; //CC1S=01 	选择输入端 IC1映射到TI1上
-    //    TIM2_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//上升沿捕获
-    //    TIM2_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //映射到TI1上
-    //    TIM2_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //配置输入分频,不分频
-    //    TIM2_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 配置输入滤波器 不滤波
-    //    TIM_ICInit(TIM2, &TIM2_ICInitStructure);
-
-    //    //中断分组初始化
-    //    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;  //TIM1中断
-    //    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;  //先占优先级2级
-    //    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;  //从优先级0级
-    //    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道被使能
-    //    NVIC_Init(&NVIC_InitStructure);  //根据NVIC_InitStruct中指定的参数初始化外设NVIC寄存器
-
-    //    TIM_ITConfig(TIM2,TIM_IT_Update|TIM_IT_CC2,ENABLE);//允许更新中断 ,允许CC1IE捕获中断
-
-    //    TIM_Cmd(TIM2,ENABLE ); 	//使能定时器1
 }
