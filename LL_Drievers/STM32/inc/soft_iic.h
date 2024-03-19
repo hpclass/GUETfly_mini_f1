@@ -6,8 +6,6 @@
 #include "stdint.h"
 /* Includes ------------------------------------------------------------------*/
 
-typedef unsigned short int uint;
-
 /* Exported macro ------------------------------------------------------------*/
 #define ADDR_24CXX 0x78
 // #define ADDR_24CXX        0xD0

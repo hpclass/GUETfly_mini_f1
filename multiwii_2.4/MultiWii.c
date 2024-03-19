@@ -2022,7 +2022,7 @@ void LED_init(uint8_t x)
         LED2_OFF;
         delay_ms(100);
     }
-#elif define(GUET_FLY_V1)
+#elif defined(GUET_FLY_V1)
 #define This_LED_H 0x003E
 #define This_LED_L 0xFFC1
     uint8_t i;

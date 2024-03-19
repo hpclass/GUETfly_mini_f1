@@ -30,7 +30,7 @@ int32_t histZPosition[HIST_Z_POINTS];
 bool calculateZ_INS()
 {
 
-    static timer_t calculateZ_INSTimer;
+    static multiwii_timer_t calculateZ_INSTimer;
     static bool isActivated = FALSE;
     float dt;
     if (updateTimer(&calculateZ_INSTimer, HZ2US(INS_UPDATE_RATE)))
@@ -220,7 +220,7 @@ int32_t histXYPosition[2][HIST_XY_POINTS];
 bool calculateXY_INS()
 {
 
-    static timer_t calculateXY_INSTimer;
+    static multiwii_timer_t calculateXY_INSTimer;
 
     if (updateTimer(&calculateXY_INSTimer, HZ2US(INS_UPDATE_RATE)))
     {

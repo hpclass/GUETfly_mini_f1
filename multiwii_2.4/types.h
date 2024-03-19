@@ -109,7 +109,7 @@ typedef struct
 {
     uint32_t lastTime;
     uint32_t dTime;
-} timer_t;
+} multiwii_timer_t;
 typedef struct
 {
     int16_t accSmooth[3];
@@ -127,9 +127,9 @@ typedef struct
     float accelEF_Horizontal;  // earth averaged horizontal acceleration in cm/s^2
     float velocityEF[3];       // ins earth velocity in cm/s
     float positionEF[3];       // ins position in cm
-    float accCorrection[3];    //===ï¿½ï¿½ï¿½======
-    float lastAcceleration[3]; //===ï¿½ï¿½ï¿½======
-    float acceleration[3];     //===ï¿½ï¿½ï¿½======
+    float accCorrection[3];    //===???======
+    float lastAcceleration[3]; //===???======
+    float acceleration[3];     //===???======
 } ins_t;
 typedef struct
 {
@@ -193,7 +193,7 @@ typedef struct
     uint8_t GPS_head_set : 1;  // it is 1 if the navigation engine got commands to control heading (SET_POI or SET_HEAD) CLEAR_HEAD will zero it
     uint8_t LAND_COMPLETED : 1;
     uint8_t LAND_IN_PROGRESS : 1;
-    uint8_t TAKEOFF_COMPLETED : 1; // è‡ªåŠ¨èµ·é£
+    uint8_t TAKEOFF_COMPLETED : 1; // ×Ô¶¯Æğ·É
     uint8_t TAKEOFF_IN_PROGRESS : 1;
     uint8_t TAKEOFF : 1;
     uint8_t MOTORS_STOPPED : 1;
@@ -369,7 +369,7 @@ typedef struct
     uint8_t flag;       // flags the last wp and other fancy things that are not yet defined
     uint8_t checksum;   // this must be at the last position
 #if !defined(USE_EX_EEPROM)
-    uint8_t checksum_; // å­—ç¬¦å¡«å……
+    uint8_t checksum_; // ×Ö·ûÌî³ä
 #endif
 } mission_step_struct;
 
@@ -378,7 +378,7 @@ typedef struct
     // Don't forget to change the reply size in GUI when change this struct;
 
     // on/off flags
-    //	uint8_t filtering1 : 1;//å†…å­˜å¯¹é½
+    //	uint8_t filtering1 : 1;//ÄÚ´æ¶ÔÆë
     //	uint8_t filtering2 : 1;
     //	uint8_t filtering3 : 1;
     //	uint8_t filtering4 : 1;
@@ -408,10 +408,10 @@ typedef struct
     uint8_t min_nav_vario;     // in cm/s
     uint16_t fence;            // fence control in meters
     uint8_t max_wp_number;
-    int16_t dorp_delay_ms;      // æŠ•æ”¾æœºæ„å»¶è¿Ÿï¼Œæ­£æ•°å¢åŠ ï¼Œè´Ÿæ•°å‡å°
-    uint16_t dorp_servor_open;  // æŠ•æ”¾èˆµæœºèˆµé‡
-    uint16_t dorp_servor_close; // æŠ•æ”¾èˆµæœºèˆµé‡
-    //		uint16_t cadc_pan[2];						//é”å®šäº‘å°
+    int16_t dorp_delay_ms;      // Í¶·Å»ú¹¹ÑÓ³Ù£¬ÕıÊıÔö¼Ó£¬¸ºÊı¼õĞ¡
+    uint16_t dorp_servor_open;  // Í¶·Å¶æ»ú¶æÁ¿
+    uint16_t dorp_servor_close; // Í¶·Å¶æ»ú¶æÁ¿
+    //		uint16_t cadc_pan[2];						//Ëø¶¨ÔÆÌ¨
     uint8_t checksum;
 } gps_conf_struct;
 typedef struct
@@ -422,12 +422,12 @@ typedef struct
 //////////////
 typedef struct
 {
-    int16_t master_speed; // GPSé€Ÿåº¦
-    int32_t GPS_[2];      // GPSä¿¡æ¯
-    int16_t GPS_ALT;      // ç¼–é˜Ÿé«˜åº¦
-    int16_t distance;     // ç¼–é˜Ÿè·ç¦»
-    int16_t faction;      // ç¼–é˜Ÿæ¨¡å¼
-    uint8_t flag;         // æ•°æ®å¸§æ ‡å¿—
+    int16_t master_speed; // GPSËÙ¶È
+    int32_t GPS_[2];      // GPSĞÅÏ¢
+    int16_t GPS_ALT;      // ±à¶Ó¸ß¶È
+    int16_t distance;     // ±à¶Ó¾àÀë
+    int16_t faction;      // ±à¶ÓÄ£Ê½
+    uint8_t flag;         // Êı¾İÖ¡±êÖ¾
 } mission_flow_;
 
 #endif /* TYPES_H_ */

@@ -20,7 +20,7 @@ DEFS  := $(DDEFS) -DRUN_FROM_FLASH=1 -DHSE_VALUE=8000000 -DUSE_STDPERIPH_DRIVER
 
 
 
-OPT   += -Os
+OPT   += -Os -std=c99
 OPT   += -fsingle-precision-constant
 OPT   += -fno-common
 OPT   += -ffunction-sections

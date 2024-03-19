@@ -238,8 +238,8 @@ void go_disarm(void);
 void setup(void);
 void loop(void);
 
-uint8_t updateTimer(timer_t *timer, uint32_t interval);
-void resetTimer(timer_t *timer);
+uint8_t updateTimer(multiwii_timer_t *timer, uint32_t interval);
+void resetTimer(multiwii_timer_t *timer);
 void mission_time_conut_to_land();
 void landing();
 void mission_led(uint8_t c);

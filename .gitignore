@@ -8,3 +8,4 @@ MDK-ARM/Obj
 *.hex
 *.map
 MDK-ARM/startup_stm32f10x_hd.lst
+MDK-ARM/startup_gd32f3x0.lst
