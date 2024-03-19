@@ -167,7 +167,7 @@ void writeServos()
     TIM3->CCR3 = servo[0]; // 投弹通道1
     TIM3->CCR4 = servo[1]; // 投弹通道2    TIM_SetCompare1(TIM3, motor[0]);
 #else
-   servos_output(servo);
+    servos_output((uint16_t *)servo);
 #endif
 #else
     TIM4->CCR4 = servo[2]; // PD12

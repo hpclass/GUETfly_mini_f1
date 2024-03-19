@@ -8,6 +8,7 @@
 #include "gd32f3x0.h"
 #include "guetfly_data_types.h"
 #include "timer.h"
+#include "i2c.h"
 #endif
 #include "math.h"
 #include "config.h"

@@ -7,6 +7,7 @@
 #endif
 #if defined(GD32F330)
 #include "gd32f3x0.h"
+#include "i2c.h"
 #endif
 #include "SPL06_001.h"
 // #include "i2c.h"
