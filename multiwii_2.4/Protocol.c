@@ -323,7 +323,7 @@ void serialCom()
             else
             { // if
 #if defined(GPS_SERIAL)
-                static uint32_t GPS_last_frame_seen; // Last gps frame seen at this time, used to detect stalled gps communication
+                // static uint32_t GPS_last_frame_seen; // Last gps frame seen at this time, used to detect stalled gps communication
 
                 // #if 1
                 if (GPS_SERIAL == port)
@@ -411,7 +411,7 @@ void serialCom()
         uint32_t tmp = 0;
         uint8_t i;
         uint8_t wp_no;
-        uint8_t temp;
+        // uint8_t temp;
 
         // return ;
 
@@ -892,7 +892,7 @@ void serialCom()
             { // Special case - during stable poshold we allow change the hold position
                 mission_step.number = wp_no;
                 mission_step.action = MISSION_HOLD_UNLIM;
-                temp = read8();
+                mission_step.flag = read8(); //避免编译警告提前占位
                 mission_step.pos[LAT] = read32();
                 mission_step.pos[LON] = read32();
                 mission_step.altitude = read32();
@@ -979,7 +979,7 @@ void serialCom()
         case MSP_BOXIDS:
             headSerialReply(CHECKBOXITEMS);
             for (i = 0; i < CHECKBOXITEMS; i++)
-                serialize8(pgm_read_byte(&(boxids[i])));
+                serialize8(pgm_read_byte((PGM_P) & (boxids[i])));
             tailSerialReply();
             break;
         case MSP_MOTOR_PINS:
