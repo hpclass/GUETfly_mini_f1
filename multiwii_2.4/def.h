@@ -155,7 +155,6 @@
 /**************************************************************************************/
 /***************             motor and servo numbers               ********************/
 /**************************************************************************************/
-#define SERVO_RATES      {30,30,100,100,100,100,100,100}
 
 #if defined (AIRPLANE) || defined(FLYING_WING) || defined(FLYING_WING_D) || defined(FLYING_WING_J10)
 #define FIXEDWING
@@ -2257,8 +2256,4 @@
 #define MIN(x,y) ((x)<(y)?(x) : (y))
 #define MAX(x,y) ((x)>(y)?(x) : (y))
 #define sq(x)((x)*(x))
-
-#define STABLEPIN_ON
-#define STABLEPIN_OFF
-#define PORWERPIN_OFF
 

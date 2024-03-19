@@ -186,7 +186,6 @@ size_t strlen_P(PGM_P src)
 static void serializeNames(PGM_P s)
 { // add stm32
     PGM_P c = s;
-    uint16_t tmp;
     headSerialReply(strlen_P(s));
     for (; pgm_read_byte_near(c) != 0; c++)
         serialize8(pgm_read_byte_near(c));
@@ -311,7 +310,7 @@ void serialCom()
                         }
                         else
                         {
-                            1 == 1;
+                            // 1 == 1;
                         }
                         state = IDLE;
                         cc = 0; // no more than one MSP per port and per cycle

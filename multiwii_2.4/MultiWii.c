@@ -956,10 +956,10 @@ void loop()
 {
     static uint8_t rcDelayCommand; // this indicates the number of time (multiple of RC measurement at 50Hz) the sticks must be maintained to run or switch off motors
     static uint8_t rcSticks;       // this hold sticks position for command combos
-    uint8_t axis, i;
-    int16_t error, errorAngle;
-    int16_t delta;
-    int16_t PTerm = 0, ITerm = 0, DTerm, PTermACC, ITermACC;
+    uint8_t axis = 0, i = 0;
+    int16_t error = 0, errorAngle = 0;
+    int16_t delta = 0;
+    int16_t PTerm = 0, ITerm = 0, DTerm = 0, PTermACC = 0, ITermACC = 0;
     static int16_t lastGyro[2] = {0, 0};
     static int16_t errorAngleI[2] = {0, 0};
 #if PID_CONTROLLER == 1
@@ -970,18 +970,18 @@ void loop()
     static int16_t delta1[3], delta2[3];
     static int32_t errorGyroI[3] = {0, 0, 0};
     static int16_t lastError[3] = {0, 0, 0};
-    int16_t deltaSum;
-    int16_t AngleRateTmp, RateError;
+    int16_t deltaSum = 0;
+    int16_t AngleRateTmp = 0, RateError = 0;
 #endif
     static uint16_t rcTime = 0;
 
-    int16_t rc;
+    int16_t rc = 0;
     int32_t prop = 0;
-    uint16_t auxState;
+    uint16_t auxState = 0;
     uint8_t stTmp = 0;
-    int16_t limit;
-    float sin_yaw_y;
-    float cos_yaw_x;
+    int16_t limit = 0;
+    float sin_yaw_y = 0;
+    float cos_yaw_x = 0;
     uint8_t gps_modes_check;
     // serialCom();
 #if defined(SERIAL_RX)

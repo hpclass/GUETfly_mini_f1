@@ -1613,7 +1613,9 @@ uint8_t Mag_getADC()
 { // return 1 when news values are available, 0 otherwise
     static uint32_t t, tCal = 0;
     static int16_t magZeroTempMin[3], magZeroTempMax[3];
+#if defined(SENSORS_TILT_45DEG_LEFT) || defined(SENSORS_TILT_45DEG_RIGHT)
     int16_t temp;
+#endif
     uint8_t axis;
 
     if (currentTime < t)

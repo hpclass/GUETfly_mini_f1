@@ -245,6 +245,8 @@ void landing();
 void mission_led(uint8_t c);
 void USER_OPEN_DORP();
 void USER_LOCK_DROP();  // 锁定投弹
+
+void LED_init(uint8_t x);
 #if defined(A_airspeed) // 模拟空速计
 #include "stm32f10x_adc.h"
 u16 Get_Adc(u8 ch);

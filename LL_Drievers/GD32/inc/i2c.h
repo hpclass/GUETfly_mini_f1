@@ -61,6 +61,6 @@ uint8_t LL_i2c_read_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t 
 uint8_t LL_i2c_write_reg(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t	data);
 uint8_t LL_i2c_read_buff(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t * buff,uint16_t size);
 uint8_t LL_i2c_write_buff(type_i2c_handle handle,uint8_t addr,uint8_t reg,uint8_t * buff,uint16_t size);
-
+uint8_t Single_ReadI2C(uint8_t , uint8_t );
 #define I2C_Start 
 #endif

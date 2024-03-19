@@ -73,11 +73,11 @@
 //****************************************
 
 void I2C_GPIO_Config(void);
-static void I2C_Mode_Config(void);
 void I2C_SendByte(uint8_t dat);
 void I2C_Start(void);
 void I2C_Stop(void);
 void I2C_SendACK(uint8_t i);
 bool I2C_WaitAck(void);
 uint8_t I2C_RecvByte(void);
+uint8_t Single_ReadI2C(uint8_t , uint8_t );
 #endif

@@ -2,6 +2,12 @@
 #include "stm32f10x_conf.h"
 #include "sys.h"
 #include "config.h"
+#include "USB_CH341.H"
+#include "gy_86.h"
+#include "EEPROM.h"
+#include "delay.h"
+#include "usart.h"
+#include "MultiWii.h"
 //////////////////////////////////////////////////////////////////////////////////
 // 本程序只供学习使用，未经作者许可，不得用于其它任何用途
 // Mini STM32开发板

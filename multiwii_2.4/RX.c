@@ -16,6 +16,8 @@
 /***************             Global RX related variables           ********************/
 /**************************************************************************************/
 extern int16_t rcData[RC_CHANS]; // stm32 add
+extern long map(long x, long in_min, long in_max, long out_min, long out_max);
+
 #if defined(SPEKTRUM)
 #include <wiring.c> //Auto-included by the Arduino core... but we need it sooner.
 #endif
@@ -434,7 +436,7 @@ void computeRC()
         }
         else
         {
-            1 == 1;
+            // 1 == 1;
         }
     }
 #endif

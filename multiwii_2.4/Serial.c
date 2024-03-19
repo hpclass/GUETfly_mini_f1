@@ -59,10 +59,10 @@ void UartSendData(uint8_t port)
                 serialTailTX[0] = serialHeadTX[0];
             }
             else
-            {                                                                                          // 头在尾后面，发两次
+            {                                                                                               // 头在尾后面，发两次
                 USB_send((uint8_t *)&serialBufferTX[0][serialTailTX[0]], TX_BUFFER_SIZE - serialTailTX[0]); // 尾到数组结尾
                 USB_send((uint8_t *)&serialBufferTX[0][0], serialHeadTX[0]);                                // 数组头到头
-                serialTailTX[0] = serialHeadTX[0];                                                     // 发送完成
+                serialTailTX[0] = serialHeadTX[0];                                                          // 发送完成
             }
         }
         break;
@@ -99,6 +99,8 @@ void UartSendData(uint8_t port)
             USART3->DR = res;
         }
         break;
+
+#if UART_NUMBER >= 3
     case 4:
         while (serialHeadTX[4] != serialTailTX[4])
         {
@@ -111,6 +113,8 @@ void UartSendData(uint8_t port)
         }
 
         break;
+#endif
+#if UART_NUMBER >= 4
     case 5:
         while (serialHeadTX[5] != serialTailTX[5])
         {
@@ -122,6 +126,7 @@ void UartSendData(uint8_t port)
             UART5->DR = res;
         }
         break;
+#endif
 #else
     case 0:
         while (serialHeadTX[port] != serialTailTX[port])
