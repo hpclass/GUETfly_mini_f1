@@ -1,4 +1,7 @@
 
+#include <math.h>
+#include <ctype.h>
+#include <stdlib.h>
 #ifdef STM32F10X_MD
 #include "stm32f10x.h"
 #include "delay.h"
@@ -13,21 +16,20 @@
 #include "Sensors.h"
 #include "MultiWii.h"
 #include "EEPROM.h"
-#include <math.h>
 #include "timer.h"
-#include <ctype.h>
+#include "math_.h"
 
 #if GPS
 static int16_t Current_Heading = 0; // Store current bearing
 extern int16_t rcData[RC_CHANS];    // stm32 add
-static int32_t GPS_prev_R[2];       // 过航点记录，用于计算半径
+// static int32_t GPS_prev_R[2];       // 过航点记录，用于计算半径
 user_mission_dorp_ user_mission_dorp;
 // Function prototypes for other GPS functions
 // These perhaps could go to the gps.h file, however these are local to the gps.cpp
 static void GPS_bearing(int32_t *lat1, int32_t *lon1, int32_t *lat2, int32_t *lon2, int32_t *bearing);
 static void GPS_distance_cm(int32_t *lat1, int32_t *lon1, int32_t *lat2, int32_t *lon2, uint32_t *dist);
 static void GPS_calc_velocity(void);
-static void GPS_calc_location_error(int32_t *target_lat, int32_t *target_lng, int32_t *gps_lat, int32_t *gps_lng);
+//static void GPS_calc_location_error(int32_t *target_lat, int32_t *target_lng, int32_t *gps_lat, int32_t *gps_lng);
 static void GPS_calc_poshold(void);
 static uint16_t GPS_calc_desired_speed(uint16_t max_speed, bool _slow);
 static void GPS_calc_nav_rate(uint16_t max_speed);
@@ -155,8 +157,8 @@ void reset_PID(struct PID_ *pid)
     pid->lastderivative = 0;
 }
 
-#define _X 1
-#define _Y 0
+#define MWC_X 1
+#define MWC_Y 0
 
 #define RADX100 0.000174532925f
 
@@ -972,7 +974,7 @@ void GPS_distance_cm(int32_t *lat1, int32_t *lon1, int32_t *lat2, int32_t *lon2,
 {
     float dLat = (float)(*lat2 - *lat1);                    // difference of latitude in 1/10 000 000 degrees
     float dLon = (float)(*lon2 - *lon1) * GPS_scaleLonDown; // x
-    *dist = sqrt(sq(dLat) + sq(dLon)) * 1.11318845f;        //   πr/180=111.319491
+    *dist = (uint32_t)sqrt(sq(dLat) + sq(dLon)) * 1.11318845f;        //   πr/180=111.319491
 }
 
 //*******************************************************************************************************
@@ -994,17 +996,17 @@ static void GPS_calc_velocity(void)
     if (init)
     {
         float tmp = 1.0 / dTnav;
-        actual_speed[_X] = (float)(GPS_coord[LON] - last[LON]) * GPS_scaleLonDown * tmp;
-        actual_speed[_Y] = (float)(GPS_coord[LAT] - last[LAT]) * tmp;
+        actual_speed[MWC_X] = (float)(GPS_coord[LON] - last[LON]) * GPS_scaleLonDown * tmp;
+        actual_speed[MWC_Y] = (float)(GPS_coord[LAT] - last[LAT]) * tmp;
 
         // TODO: Check unrealistic speed changes and signal navigation about posibble gps signal degradation
         if (!GPS_conf.lead_filter)
         {
-            actual_speed[_X] = (actual_speed[_X] + speed_old[_X]) / 2;
-            actual_speed[_Y] = (actual_speed[_Y] + speed_old[_Y]) / 2;
+            actual_speed[MWC_X] = (actual_speed[MWC_X] + speed_old[MWC_X]) / 2;
+            actual_speed[MWC_Y] = (actual_speed[MWC_Y] + speed_old[MWC_Y]) / 2;
 
-            speed_old[_X] = actual_speed[_X];
-            speed_old[_Y] = actual_speed[_Y];
+            speed_old[MWC_X] = actual_speed[MWC_X];
+            speed_old[MWC_Y] = actual_speed[MWC_Y];
         }
     }
     init = 1;
@@ -1015,11 +1017,11 @@ static void GPS_calc_velocity(void)
     if (GPS_conf.lead_filter)
     {
 
-        // GPS_coord_lead[LON] = xLeadFilter.get_position(GPS_coord[LON], actual_speed[_X], GPS_LAG);  //推导GPS_LAG延时后的经纬度
-        // GPS_coord_lead[LAT] = yLeadFilter.get_position2(GPS_coord[LAT], actual_speed[_Y], GPS_LAG);
+        // GPS_coord_lead[LON] = xLeadFilter.get_position(GPS_coord[LON], actual_speed[MWC_X], GPS_LAG);  //推导GPS_LAG延时后的经纬度
+        // GPS_coord_lead[LAT] = yLeadFilter.get_position2(GPS_coord[LAT], actual_speed[MWC_Y], GPS_LAG);
 
-        GPS_coord_lead[LON] = get_position(1, GPS_coord[LON], actual_speed[_X], GPS_LAG); // 推导GPS_LAG延时后的经纬度
-        GPS_coord_lead[LAT] = get_position(2, GPS_coord[LAT], actual_speed[_Y], GPS_LAG);
+        GPS_coord_lead[LON] = get_position(1, GPS_coord[LON], actual_speed[MWC_X], GPS_LAG); // 推导GPS_LAG延时后的经纬度
+        GPS_coord_lead[LAT] = get_position(2, GPS_coord[LAT], actual_speed[MWC_Y], GPS_LAG);
     }
 }
 
@@ -1032,11 +1034,11 @@ static void GPS_calc_velocity(void)
 //  3000  = 33m
 // 10000  = 111m
 //
-static void GPS_calc_location_error(int32_t *target_lat, int32_t *target_lng, int32_t *gps_lat, int32_t *gps_lng)
-{
-    error[LON] = (float)(target_lng[0] - gps_lng[0]) * GPS_scaleLonDown; // X Error
-    error[LAT] = target_lat[0] - gps_lat[0];                             // Y Error
-}
+// static void GPS_calc_location_error(int32_t *target_lat, int32_t *target_lng, int32_t *gps_lat, int32_t *gps_lng)
+// {
+//     error[LON] = (float)(target_lng[0] - gps_lng[0]) * GPS_scaleLonDown; // X Error
+//     error[LAT] = target_lat[0] - gps_lat[0];                             // Y Error
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Calculate nav_lat and nav_lon from the x and y error and the speed
@@ -1080,7 +1082,6 @@ static void GPS_calc_nav_rate(uint16_t max_speed)
 {
     float trig[2];
     int32_t target_speed[2];
-    int32_t tilt;
     uint8_t axis;
     int16_t cross_speed;
     float temp;
@@ -1090,11 +1091,11 @@ static void GPS_calc_nav_rate(uint16_t max_speed)
     cross_speed = -cross_speed;
 
     temp = (9000l - target_bearing) * RADX100; // temp是什么角度???
-    trig[_X] = cos(temp);
-    trig[_Y] = sin(temp);
+    trig[MWC_X] = cos(temp);
+    trig[MWC_Y] = sin(temp);
 
-    target_speed[_X] = max_speed * trig[_X] - cross_speed * trig[_Y];
-    target_speed[_Y] = cross_speed * trig[_X] + max_speed * trig[_Y];
+    target_speed[MWC_X] = max_speed * trig[MWC_X] - cross_speed * trig[MWC_Y];
+    target_speed[MWC_Y] = cross_speed * trig[MWC_X] + max_speed * trig[MWC_Y];
 
     for (axis = 0; axis < 2; axis++)
     {
@@ -1696,7 +1697,7 @@ void FW_NAV()
     int16_t GPS_Heading = GPS_ground_course; // Store current bearing
 
     int16_t altDiff = 0, AlterrorP = 0;
-    int16_t RTH_Alt = GPS_conf.rth_altitude; //==========应该已经设置好了!!!？？？？？？======================
+    //int16_t RTH_Alt = GPS_conf.rth_altitude; //==========应该已经设置好了!!!？？？？？？======================
     int16_t delta[2] = {0, 0};               // D-Term
     int16_t TX_Thro = rcData[THROTTLE];      // Read and store Throttle pos.
     int16_t navDiff = 0;
@@ -2131,7 +2132,7 @@ void CradleControl(int16_t altitude)
 { // 高度差h 单位cm
 
     int temp_error_tb_otb = nav_bearing - Current_Heading * 100;
-    int32_t wp_distancelast = 999, TargetDistance = 0;
+    uint32_t wp_distancelast = 999, TargetDistance = 0;
     int32_t nav_bearinglast;
     static uint8_t passflag = 0;
 
