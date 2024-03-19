@@ -205,7 +205,7 @@ void I2C_Start(void)
     SDA_H;
     SCL_H;
     Delay_1us(1);
-    if (!SDA_read)
+    if (!(SDA_read))
         return; // SDA线为低电平则总线忙,退出
     SDA_L;
     Delay_1us(1);

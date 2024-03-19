@@ -36,7 +36,7 @@ int I2c_Soft_Start()
 	SDA_H;
 	SCL_H;
 	I2c_Soft_delay();
-	if (!SDA_read)
+	if (!(SDA_read))
 		return 0; // SDA线为低电平则总线忙,退出
 	SDA_L;
 	I2c_Soft_delay();

@@ -67,7 +67,7 @@ uint8_t TWI_Start()
     SDAH;
     SCLH;
     TWI_delay();
-    if (!SDAread)
+    if (!(SDAread))
         return TWI_BUS_BUSY; // SDA线为低电平则总线忙,退出
     SDAL;
     TWI_delay();
@@ -194,7 +194,6 @@ uint8_t TWI_ReceiveByte(void) // 数据从高位到低位//
 uint8_t TWI_WriteByte(uint8_t WriteAddress, uint8_t SendByte)
 {
     uint8_t i;
-    uint16_t j;
     i = TWI_Start();
     if (i)
         return i;
@@ -251,7 +250,7 @@ uint8_t TWI_ReadByte(uint8_t ReadAddress)
 
 uint8_t Single_WriteI2C2(uint8_t Slave_Address, uint8_t REG_Address, uint8_t REG_data)
 {
-    uint8_t i, temp;
+    uint8_t i;
     i = TWI_Start();
     if (i)
         return 0; // 起始信号

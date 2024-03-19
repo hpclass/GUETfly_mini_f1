@@ -331,7 +331,6 @@ extern uint16_t ppm_rx[12];
 uint16_t readRawRC(uint8_t chan)
 {
     uint16_t data;
-    extern uint16_t ppm_rx[12];
 #if defined(SPEKTRUM) || defined(SBUS) || defined(SUMD)
     if (chan < RC_CHANS)
     {

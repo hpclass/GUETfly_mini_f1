@@ -1,5 +1,6 @@
-#include "stdint.h"
-// #include "math.h"
+#include <stdint.h>
+#include <stdlib.h>
+#include <math.h>
 #include "math_.h"
 #include "types.h"
 
@@ -73,15 +74,30 @@ int16_t _atan2_v2(int32_t y, int32_t x)
     }
     return a;
 }
-
-// 1/sqrt(x)
+/*
+实现一种快速的浮点数平方根算法，即著名的"fast inverse square root"算法，也称为"牛顿迭代法"。
+请注意，这段代码虽然可以快速计算平方根，但它使用了一种有争议的技术，即对浮点数进行位级别操作，
+这可能导致未定义的行为，并且这种技术在不同的编译器和硬件平台上可能会产生不同的结果。
+此外，这段代码的效率和精度可能不如使用标准库中的 sqrt() 函数。因此，在实际应用中，应该谨慎使用这种技术。
+*/
 float isqrt(float y)
 {
+    // Initial guess for square root
     float x2 = y * 0.5f;
-    long i = *(long *)&y;      // evil floating point bit level hacking
-    i = 0x5f3759df - (i >> 1); // what the fuck?
+
+    // Bit-level manipulation to treat the floating-point number as an integer
+    // This is an unsafe technique and could lead to undefined behavior
+    long i = *(long *)&y;
+
+    // Magic constant and bit shifting to approximate the inverse square root
+    i = 0x5f3759df - (i >> 1);
+
+    // Convert the integer back to floating point
     y = *(float *)&i;
+
+    // One iteration of Newton's method to refine the estimate
     y = y * (1.5f - (x2 * y * y));
+
     return y;
 }
 

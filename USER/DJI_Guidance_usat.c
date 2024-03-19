@@ -105,12 +105,10 @@ void DJI_Analysis_obstacle_distance() // 解析障碍距离
 void DJI_Guidance_uart_protocl(uint8_t c)
 {
     static uint16_t size_len = 0, step_flag = 0, CRC16 = 0xffff; // 最大字节可达1007
-    static uint32_t CRC32 = 0xffffffff;
     static uint8_t cmd_id;           //	e_image: 0x00; e_imu: 0x01; e_ultrasonic: 0x02; e_velocity: 0x03; e_obstacle_distance: 0x04
     if (step_flag == 0 && c == 0xaa) // 协议头
     {
         CRC16 = CRC_INIT; // 初始值
-        CRC32 = 0xffffffff;
         CRC16 = CRC16_(CRC16, c); // 计算CRC
         size_len = 0;
         step_flag++;
@@ -192,8 +190,6 @@ void DJI_Guidance_uart_protocl(uint8_t c)
             // 计算得到数据长度，开始拷贝数据到缓存区
             if (size_len > step_flag - 14)
                 DJI_UART_temp_buf[step_flag - 14] = c; // 将需要的数据放入缓存中
-            else
-                1 == 1;
         }
         step_flag++;
     }

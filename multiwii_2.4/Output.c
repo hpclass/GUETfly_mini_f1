@@ -256,7 +256,7 @@ void initOutput()
 /**************************************************************************************/
 void initializeServo()
 {
-    uint8_t i = 0;
+    // uint8_t i = 0;
 
 #if defined(SERVO_RFR_300HZ)
 

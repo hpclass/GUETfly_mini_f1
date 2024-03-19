@@ -297,7 +297,7 @@ void STMFLASH_Write(u32 WriteAddr, uint16_t *pBuffer, int32_t NumToWrite)
     };
     FLASH_Lock(); // 上锁
 }
-void eeprom_write_block(void *buf, void *addr, size_t n)
+void eeprom_write_block(void *buf, uint16_t addr, size_t n)
 {
     u32 addr_ = (u32)addr;
     if ((u32)addr_ % 2 != 0)
@@ -307,7 +307,7 @@ void eeprom_write_block(void *buf, void *addr, size_t n)
     STMFLASH_Write(FLASH_EEPROM_BASS_ADDR + (u32)addr_, (uint16_t *)buf, n);
     LED1_OFF
 }
-void eeprom_read_block(void *buf, void *addr, size_t n) // 读取由指定地址开始的指定长度的EEPROM数据
+void eeprom_read_block(void *buf, uint16_t addr, size_t n) // 读取由指定地址开始的指定长度的EEPROM数据
 {
     u32 addr_ = (u32)addr;
     if ((u32)addr_ % 2 != 0) // 补齐偶数地址
@@ -394,7 +394,7 @@ void EEPROM_I2C_Start(void)
     EEPROM_SDA_H;
     EEPROM_SCL_H;
     EEPROM_Delay_1us(1);
-    if (!EEPROM_SDA_read)
+    if (!(EEPROM_SDA_read))
         return; // SDA线为低电平则总线忙,退出
     EEPROM_SDA_L;
     EEPROM_Delay_1us(1);
@@ -439,7 +439,7 @@ void EEPROM_I2C_SendACK(uint8_t i)
 //**************************************
 bool EEPROM_I2C_WaitAck(void) // 返回为:=1有ACK,=0无ACK
 {
-    unsigned int i;
+    unsigned int i = 0;
     EEPROM_SDA_H;
     EEPROM_Delay_1us(1);
     EEPROM_SCL_H;
@@ -630,7 +630,7 @@ void AT24CXX_WriteOneByte(uint16_t WriteAddr, uint8_t DataToWrite)
 }
 uint8_t AT24CXX_Check(void)
 {
-    static uint8_t temp = 0, i;
+    static uint8_t temp = 0 ;
     temp = AT24CXX_ReadOneByte(E2END); // 避免每次开机都写AT24CXX
     if (temp == 0XA3)
         return 0;
@@ -647,10 +647,9 @@ uint8_t AT24CXX_write_Page(uint8_t *buf, uint16_t addr, size_t n)
 {
     // http://ww1.microchip.com/downloads/en/devicedoc/21081G.pdf
     // 24C08的页读写只要2ms的等待时间，16字节一页
-    uint16_t i, j, k, h, p1, p2, last_n;
+    uint16_t i, k, h, p2 ;
     k = 0;
     p2 = 0;
-    p1 = addr / E2PAGESIZE; // 前面经过的页数
     h = addr % E2PAGESIZE;  // 最后一页残缺
     if (h != 0)             // 不满足一页
     {
@@ -685,7 +684,6 @@ uint8_t AT24CXX_write_Page(uint8_t *buf, uint16_t addr, size_t n)
             delay_ms(5);
         }
     }
-    last_n = n;
     n = n - p2; // 写入完成减去
     if (n > 1000)
         n = n;
@@ -797,10 +795,10 @@ void eeprom_Continuous_reading(uint8_t *buf, uint16_t addr, size_t n) // 连续�
     // EEPROM_Delay_1us(1);
 }
 // uint8_t temp_wp[4096]=0;
-void eeprom_write_block(void *buf, void *addr, size_t n)
+void eeprom_write_block(void *buf, uint16_t addr, size_t n)
 {
     LED1_ON
-    AT24CXX_write_Page((uint8_t *)buf, (uint16_t)addr, n);
+    AT24CXX_write_Page((uint8_t *)buf, addr, n);
     LED1_OFF
     //		uint16_t i;
     //	uint8_t *temp=(uint8_t*)buf;
@@ -813,10 +811,10 @@ void eeprom_write_block(void *buf, void *addr, size_t n)
     //	}
     //		LED1_OFF
 }
-void eeprom_read_block(void *buf, void *addr, size_t n) // 读取由指定地址开始的指定长度的EEPROM数据
+void eeprom_read_block(void *buf, uint16_t addr, size_t n) // 读取由指定地址开始的指定长度的EEPROM数据
 {
     LED2_ON
-    eeprom_Continuous_reading((uint8_t *)buf, (uint16_t)addr, n); // 连续读取
+    eeprom_Continuous_reading((uint8_t *)buf, addr, n); // 连续读取
     LED2_OFF
     //		uint16_t i;
     //		uint8_t *temp=(uint8_t*)buf;

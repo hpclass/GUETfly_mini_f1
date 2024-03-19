@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #if defined(STM32F10X_MD)
 #include "soft_iic.h"
 #include "delay.h"
@@ -18,7 +19,7 @@
 #include "IMU.h"
 #include "LCD.h"
 #include "Sensors.h"
-// static void Baro_init();
+void Baro_init();
 #if MAG
 static void Mag_init();
 static void Device_Mag_getADC();
@@ -560,8 +561,9 @@ void GYRO_Common()
 {
     static int16_t previousGyroADC[3] = {0, 0, 0};
     static int32_t g[3];
-    uint8_t axis, tilt = 0;
-    int16_t temp;
+    uint8_t axis = 0;
+    // uint8_t tilt = 0;
+    // int16_t temp;
 #if defined MMGYRO
     // Moving Average Gyros by Magnetron1
     //---------------------------------------------------

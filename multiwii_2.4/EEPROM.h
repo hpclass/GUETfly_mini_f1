@@ -11,8 +11,8 @@
 #include "stddef.h"
 
 // #define E2END STM32_FLASH_BASE+1024*STM32_FLASH_SIZE  //末尾地址
-void eeprom_read_block(void *buf, void *addr, size_t n); // 读取由指定地址开始的指定长度的EEPROM数据
-void eeprom_write_block(void *buf, void *addr, size_t n);
+void eeprom_read_block(void *buf, uint16_t addr, size_t n); // 读取由指定地址开始的指定长度的EEPROM数据
+void eeprom_write_block(void *buf, uint16_t addr, size_t n);
 void readGlobalSet();
 bool readEEPROM();
 void update_constants();

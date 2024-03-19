@@ -1,5 +1,13 @@
 #ifndef SPL06_01_C
 #define SPL06_01_C
+#if defined(STM32F10X_MD)
+#include "soft_iic.h"
+#include "delay.h"
+#include "gy_86.h"
+#endif
+#if defined(GD32F330)
+#include "gd32f3x0.h"
+#endif
 #include "SPL06_001.h"
 // #include "i2c.h"
 #include "types.h"

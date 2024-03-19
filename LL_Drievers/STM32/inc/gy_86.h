@@ -80,4 +80,5 @@ void I2C_SendACK(uint8_t i);
 bool I2C_WaitAck(void);
 uint8_t I2C_RecvByte(void);
 uint8_t Single_ReadI2C(uint8_t , uint8_t );
+bool Single_WriteI2C(uint8_t , uint8_t , uint8_t );
 #endif

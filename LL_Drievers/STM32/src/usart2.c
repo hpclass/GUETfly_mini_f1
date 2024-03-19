@@ -3,29 +3,27 @@
 #include "usart.h"
 #include "def.h"
 #include "Serial.h"
-#if 1
-#pragma import(__use_no_semihosting)
-struct __FILE
-{
-    int handle;
-    /* Whatever you require here. If the only file you are using is */
-    /* standard output using printf() for debugging, no file handling */
-    /* is required. */
-};
-/* FILE is typedef�� d in stdio.h. */
-FILE __stdout;
-int _sys_exit(int x)
-{
-    x = x;
-}
-int fputc(int ch, FILE *f)
-{
-    while ((USART1->SR & 0X40) == 0)
-        ; // ѭ������,ֱ���������
-    USART1->DR = (u8)ch;
-    return ch;
-}
-#endif
+// struct __FILE
+// {
+//     int handle;
+//     /* Whatever you require here. If the only file you are using is */
+//     /* standard output using printf() for debugging, no file handling */
+//     /* is required. */
+// };
+// /* FILE is typedef  in stdio.h. */
+// FILE __stdout;
+// int _sys_exit(int x)
+// {
+//     x = x;
+// }
+// int fputc(int ch, FILE *f)
+// {
+//     while ((USART1->SR & 0X40) == 0)
+//         ; 
+//     USART1->DR = (u8)ch;
+//     return ch;
+// }
+// #endif
 // end
 //////////////////////////////////////////////////////////////////
 // 串口1中断服务程序
@@ -62,7 +60,6 @@ void USART3_IRQHandler(void)
     }
 }
 #else
-static uint8_t num_cap = 0;
 u16 SBUSBuf[30] = {0};
 uint8_t SBUS_FLAG_ = 0;
 void USART3_IRQHandler(void)
@@ -199,7 +196,6 @@ void uart_init(u32 pclk2, u32 bound)
     MY_NVIC_Init(3, 3, USART1_IRQn, 2); // 组2，最低优先级
 
 #elif defined(GUET_FLY_MINI_V1)
-    GPIO_InitTypeDef GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
     RCC->APB2ENR |= 1 << 2;  // 使能PORTA口时钟
     RCC->APB2ENR |= 1 << 14; // 使能串口时钟

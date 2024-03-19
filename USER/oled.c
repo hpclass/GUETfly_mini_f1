@@ -45,6 +45,7 @@
 #include "stm32f10x_i2c.h"
 #include "stm32f10x_rcc.h"
 #include "soft_iic.h"
+#include "gy_86.h"
 #else
 #include "gd32f3x0.h"
 #include "timer.h"

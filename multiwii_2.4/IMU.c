@@ -26,7 +26,7 @@ void getEstimatedAttitude();
 void computeIMU()
 {
     uint8_t axis;
-    uint8_t t;
+    // uint8_t t;
     static int16_t gyroADCprevious[3] = {0, 0, 0};
     static int16_t gyroADCinter[3];
 
@@ -43,9 +43,7 @@ void computeIMU()
         gyroADCinter[axis] = imu.gyroADC[axis];
     timeInterleave = micros();
     annexCode(); // 解析串口程序
-    t = 0;
-    while ((int16_t)(micros() - timeInterleave) < 650)
-        t = 1; // empirical, interleaving delay between 2 consecutive reads
+    while ((int16_t)(micros() - timeInterleave) < 650); // empirical, interleaving delay between 2 consecutive reads
 #ifdef LCD_TELEMETRY
     if (!t)
         annex650_overrun_count++;
@@ -242,7 +240,7 @@ void getEstimatedAttitude()
     float scale;
     int16_t deltaGyroAngle16[3];
     int32_t sqGX_sqGZ;
-    static t_int32_t_vector EstG = {0, 0, (int32_t)ACC_1G << 16};
+    static t_int32_t_vector EstG = {{0, 0, (int32_t)ACC_1G << 16}};
 #if MAG
     static t_int32_t_vector EstM;
 #else

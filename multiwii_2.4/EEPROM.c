@@ -24,15 +24,11 @@ uint8_t calculate_sum(uint8_t *cb, uint8_t siz)
         sum += *(cb++); // calculate checksum (without checksum byte)
     return sum;
 }
-/*  extern void eeprom_read_block (void *buf, const void *addr, size_t n);//读取由指定地址开始的指定长度的EEPROM数据
-    extern void eeprom_write_byte (uint8_t *addr, uint8_t val);//向指定地址写入一个字节8bit的EEPROM数据
-    extern void eeprom_write_word (uint16_t *addr, uint16_t val);//向指定地址写入一个字16bit的EEPROM数据
-        extern void eeprom_write_block (const void *buf, void *addr, size_t n);
-*/
+
 // stm32 注意！sizeof(global_conf)-1，-1必要，否则将失败
 void readGlobalSet()
 {
-    eeprom_read_block((void *)&global_conf, (void *)0, sizeof(global_conf));
+    eeprom_read_block((void *)&global_conf, 0, sizeof(global_conf));
     if (calculate_sum((uint8_t *)&global_conf, sizeof(global_conf) - 1) != global_conf.checksum)
     {
         global_conf.currentSet = 0;
@@ -52,7 +48,7 @@ bool readEEPROM()
 #else
     global_conf.currentSet = 0;
 #endif
-    eeprom_read_block((void *)&conf, (void *)(global_conf.currentSet * sizeof(conf) + sizeof(global_conf)), sizeof(conf));
+    eeprom_read_block((void *)&conf, (global_conf.currentSet * sizeof(conf) + sizeof(global_conf)), sizeof(conf));
     if (calculate_sum((uint8_t *)&conf, sizeof(conf) - 1) != conf.checksum)
     {
         blinkLED(6, 100, 3);
@@ -90,7 +86,7 @@ bool readEEPROM()
 void writeGlobalSet(uint8_t b)
 {
     global_conf.checksum = calculate_sum((uint8_t *)&global_conf, sizeof(global_conf) - 1);
-    eeprom_write_block((void *)&global_conf, (void *)0, sizeof(global_conf));
+    eeprom_write_block((void *)&global_conf, 0, sizeof(global_conf));
     if (b == 1)
         blinkLED(15, 20, 1);
     SET_ALARM_BUZZER(ALRM_FAC_CONFIRM, ALRM_LVL_CONFIRM_1);
@@ -105,7 +101,7 @@ void writeParams(uint8_t b)
     global_conf.currentSet = 0;
 #endif
     conf.checksum = calculate_sum((uint8_t *)&conf, sizeof(conf) - 1);
-    eeprom_write_block((void *)&conf, (void *)(global_conf.currentSet * sizeof(conf) + sizeof(global_conf)), sizeof(conf));
+    eeprom_write_block((void *)&conf, (global_conf.currentSet * sizeof(conf) + sizeof(global_conf)), sizeof(conf));
 
 #if GPS
     writeGPSconf();  // Write GPS parameters
@@ -298,7 +294,7 @@ void readPLog(void)
 void writePLog(void)
 {
     plog.checksum = calculate_sum((uint8_t *)&plog, sizeof(plog));
-    eeprom_write_block((const void *)&plog, (void *)(E2END - 4 - sizeof(plog)), sizeof(plog));
+    eeprom_write_block((const void *)&plog, (E2END - 4 - sizeof(plog)), sizeof(plog));
 }
 #endif
 
@@ -321,13 +317,13 @@ void writePLog(void)
 void writeGPSconf(void)
 {
     GPS_conf.checksum = calculate_sum((uint8_t *)&GPS_conf, sizeof(GPS_conf) - 1);
-    eeprom_write_block((void *)&GPS_conf, (void *)(PROFILES * sizeof(conf) + sizeof(global_conf)), sizeof(GPS_conf));
+    eeprom_write_block((void *)&GPS_conf, (PROFILES * sizeof(conf) + sizeof(global_conf)), sizeof(GPS_conf));
 }
 
 // Recall gps_configuration
 bool recallGPSconf(void)
 {
-    eeprom_read_block((void *)&GPS_conf, (void *)(PROFILES * sizeof(conf) + sizeof(global_conf)), sizeof(GPS_conf));
+    eeprom_read_block((void *)&GPS_conf, (PROFILES * sizeof(conf) + sizeof(global_conf)), sizeof(GPS_conf));
     if (calculate_sum((uint8_t *)&GPS_conf, sizeof(GPS_conf) - 1) != GPS_conf.checksum)
     {
         loadGPSdefaults();
@@ -443,16 +439,16 @@ bool recallWP(uint8_t wp_number)
     if (msp_wp_buff_num) // 节点数不为0在内存中有读数
     {
 
-        buff_read_block((void *)&mission_step, (void *)(sizeof(mission_step) * (wp_number - 1)), sizeof(mission_step));
+        buff_read_block((void *)&mission_step, (sizeof(mission_step) * (wp_number - 1)), sizeof(mission_step));
         if (mission_step.flag == 0xa5) // 最后一个节点，写入FLASH中
         {
-            eeprom_write_block((void *)msp_wp_buff, (void *)1024, sizeof(mission_step) * (msp_wp_buff_num));
+            eeprom_write_block((void *)msp_wp_buff, 1024, sizeof(mission_step) * (msp_wp_buff_num));
             msp_wp_buff_num = 0;
         }
     }
     else
     {
-        eeprom_read_block((void *)&mission_step, (void *)(1024 + (sizeof(mission_step) * (wp_number - 1))), sizeof(mission_step));
+        eeprom_read_block((void *)&mission_step, (1024 + (sizeof(mission_step) * (wp_number - 1))), sizeof(mission_step));
     }
     c = calculate_sum((uint8_t *)&mission_step, sizeof(mission_step) - 3); // 由于STM32的内存4字节对齐，该结构体会多出三个字节
     if (c != mission_step.checksum)
@@ -512,11 +508,11 @@ void storeWP()
         return;
     msp_wp_buff_num = mission_step.number;
     mission_step.checksum = calculate_sum((uint8_t *)&mission_step, sizeof(mission_step) - 3); // 由于STM32的内存4字节对齐，该结构体会多出三个字节
-    buff_write_block((void *)&mission_step, (void *)(sizeof(mission_step) * (mission_step.number - 1)), sizeof(mission_step));
+    buff_write_block((void *)&mission_step, (sizeof(mission_step) * (mission_step.number - 1)), sizeof(mission_step));
     // 最后一个节点，写入堆栈中
     if (mission_step.flag == 0xa5) // 最后一个节点，写入FLASH中
     {
-        eeprom_write_block((void *)msp_wp_buff, (void *)(PROFILES * sizeof(conf) + sizeof(global_conf) + sizeof(GPS_conf)), sizeof(mission_step) * (msp_wp_buff_num));
+        eeprom_write_block((void *)msp_wp_buff, (PROFILES * sizeof(conf) + sizeof(global_conf) + sizeof(GPS_conf)), sizeof(mission_step) * (msp_wp_buff_num));
         msp_wp_buff_num = 0;
     }
 }
@@ -567,7 +563,7 @@ void storeWP()
     if (mission_step.number > 254)
         return;
     mission_step.checksum = calculate_sum((uint8_t *)&mission_step, sizeof(mission_step) - 3); // 由于STM32的内存4字节对齐，该结构体会多出三个字节
-    eeprom_write_block((void *)&mission_step, (void *)(WP_ADDR_START + (sizeof(mission_step) * (mission_step.number - 1))), sizeof(mission_step));
+    eeprom_write_block((void *)&mission_step, (WP_ADDR_START + (sizeof(mission_step) * (mission_step.number - 1))), sizeof(mission_step));
 }
 
 // Read the given number of WP from the eeprom, supposedly we can use this during flight.
@@ -577,7 +573,7 @@ bool recallWP(uint8_t wp_number)
 {
     if (wp_number > 254)
         return FALSE;
-    eeprom_read_block((void *)&mission_step, (void *)(WP_ADDR_START + (sizeof(mission_step) * (wp_number - 1))), sizeof(mission_step));
+    eeprom_read_block((void *)&mission_step, (WP_ADDR_START + (sizeof(mission_step) * (wp_number - 1))), sizeof(mission_step));
     // c=calculate_sum((uint8_t*)&mission_step, sizeof(mission_step)-3); //由于STM32的内存4字节对齐，该结构体会多出三个字节
     if (mission_step.checksum != calculate_sum((uint8_t *)&mission_step, sizeof(mission_step) - 3))
         return FALSE;
