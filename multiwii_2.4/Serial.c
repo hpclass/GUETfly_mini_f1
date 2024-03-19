@@ -39,8 +39,6 @@ void test_Uart()
         serialBufferTX[j][i] = i;
     }
     UartSendData(j);
-
-    1 == 1;
 }
 
 void UartSendData(uint8_t port)
@@ -50,6 +48,7 @@ void UartSendData(uint8_t port)
     switch (port)
     {
 #ifdef STM32F10X_MD
+#if UART_NUMBER > 0
     case 0:
         if (serialHeadTX[0] != serialTailTX[0])
         {
@@ -66,6 +65,8 @@ void UartSendData(uint8_t port)
             }
         }
         break;
+#endif
+#if UART_NUMBER > 1
     case 1:
         while (serialHeadTX[1] != serialTailTX[1])
         {
@@ -77,6 +78,8 @@ void UartSendData(uint8_t port)
             USART1->DR = res;
         }
         break;
+#endif
+#if UART_NUMBER > 2
     case 2:
         while (serialHeadTX[2] != serialTailTX[2])
         {
@@ -88,6 +91,9 @@ void UartSendData(uint8_t port)
             USART2->DR = res;
         }
         break;
+
+#endif
+#if UART_NUMBER > 3
     case 3:
         while (serialHeadTX[3] != serialTailTX[3])
         {
@@ -99,8 +105,8 @@ void UartSendData(uint8_t port)
             USART3->DR = res;
         }
         break;
-
-#if UART_NUMBER >= 3
+#endif
+#if UART_NUMBER > 4
     case 4:
         while (serialHeadTX[4] != serialTailTX[4])
         {
@@ -114,7 +120,7 @@ void UartSendData(uint8_t port)
 
         break;
 #endif
-#if UART_NUMBER >= 4
+#if UART_NUMBER > 5
     case 5:
         while (serialHeadTX[5] != serialTailTX[5])
         {
@@ -128,6 +134,7 @@ void UartSendData(uint8_t port)
         break;
 #endif
 #else
+#if UART_NUMBER > 0
     case 0:
         while (serialHeadTX[port] != serialTailTX[port])
         {
@@ -137,6 +144,8 @@ void UartSendData(uint8_t port)
             uart_send_buff(HANDLE_usart_gps, res);
         }
         break;
+#endif
+#if UART_NUMBER > 1
     case 1:
         while (serialHeadTX[port] != serialTailTX[port])
         {
@@ -146,6 +155,8 @@ void UartSendData(uint8_t port)
             uart_send_buff(HANDLE_usart_radio, res);
         }
         break;
+        
+#endif
 #endif
     }
 }
