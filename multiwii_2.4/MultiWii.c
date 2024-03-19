@@ -950,22 +950,28 @@ void go_disarm()
 #endif
     }
 }
+#if BARO
 static int16_t initialThrottleHold;
+#endif
 // ******** Main Loop *********
 void loop()
 {
     static uint8_t rcDelayCommand; // this indicates the number of time (multiple of RC measurement at 50Hz) the sticks must be maintained to run or switch off motors
     static uint8_t rcSticks;       // this hold sticks position for command combos
     uint8_t axis = 0, i = 0;
-    int16_t error = 0, errorAngle = 0;
+    int16_t errorAngle = 0;
     int16_t delta = 0;
-    int16_t PTerm = 0, ITerm = 0, DTerm = 0, PTermACC = 0, ITermACC = 0;
-    static int16_t lastGyro[2] = {0, 0};
+    int16_t PTerm = 0, ITerm = 0, DTerm = 0;
+#if !defined(FIXEDWING)
     static int16_t errorAngleI[2] = {0, 0};
+#endif
 #if PID_CONTROLLER == 1
     static int32_t errorGyroI_YAW;
     static int16_t delta1[2], delta2[2];
     static int16_t errorGyroI[2] = {0, 0};
+    int16_t error = 0, rc = 0, limit = 0, ITermACC = 0;
+    static int16_t lastGyro[2] = {0, 0};
+    int32_t prop = 0;
 #elif PID_CONTROLLER == 2
     static int16_t delta1[3], delta2[3];
     static int32_t errorGyroI[3] = {0, 0, 0};
@@ -975,14 +981,12 @@ void loop()
 #endif
     static uint16_t rcTime = 0;
 
-    int16_t rc = 0;
-    int32_t prop = 0;
     uint16_t auxState = 0;
     uint8_t stTmp = 0;
-    int16_t limit = 0;
+#if !defined(FIXEDWING)
     float sin_yaw_y = 0;
     float cos_yaw_x = 0;
-    uint8_t gps_modes_check;
+#endif
     // serialCom();
 #if defined(SERIAL_RX)
     if (spekFrameFlags == 0x01)
@@ -1261,8 +1265,10 @@ void loop()
             // bumpless transfer to Level mode
             if (!f.ANGLE_MODE)
             {
+#if !defined(FIXEDWING)
                 errorAngleI[ROLL] = 0;
                 errorAngleI[PITCH] = 0;
+#endif
                 f.ANGLE_MODE = 1;
             }
         }
@@ -1280,8 +1286,10 @@ void loop()
             f.ANGLE_MODE = 0;
             if (!f.HORIZON_MODE)
             {
+#if !defined(FIXEDWING)
                 errorAngleI[ROLL] = 0;
                 errorAngleI[PITCH] = 0;
+#endif
                 f.HORIZON_MODE = 1;
             }
         }
@@ -1912,7 +1920,7 @@ void loop()
 #elif PID_CONTROLLER == 2 // alexK
 #define GYRO_I_MAX 256
 #define ACC_I_MAX 256
-    prop = MIN(MAX(ABS(rcCommand[PITCH]), ABS(rcCommand[ROLL])), 500); // range [0;500]
+    // prop = MIN(MAX(ABS(rcCommand[PITCH]), ABS(rcCommand[ROLL])), 500); // range [0;500]
 
     //----------PID controller----------
     for (axis = 0; axis < 3; axis++)
