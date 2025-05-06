@@ -31,9 +31,9 @@ jobs:
       with:
         name: gd32-firmware
         path: |
-          multiwii_GD32.hex
-          multiwii_GD32.bin
-          multiwii_GD32.elf
+          ./out/gd32/multiwii_GD32.hex
+          ./out/gd32/multiwii_GD32.bin
+          ./out/gd32/multiwii_GD32.elf
 
   build-stm32:
     name: Build STM32 Firmware
@@ -57,6 +57,6 @@ jobs:
       with:
         name: stm32-firmware
         path: |
-          multiwii_STM32.hex
-          multiwii_STM32.bin
-          multiwii_STM32.elf
+          ./out/stm32/multiwii_STM32.hex
+          ./out/stm32/multiwii_STM32.bin
+          ./out/stm32/multiwii_STM32.elf
