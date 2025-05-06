@@ -24,16 +24,16 @@ jobs:
     - name: Build GD32 Project
       run: |
         make clean
-        make TARGET=GD32 all
+        make GD32
 
     - name: Upload GD32 Build Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: gd32-firmware
         path: |
-          out/gd32/multiwii_GD32.hex
-          out/gd32/multiwii_GD32.bin
-          out/gd32/multiwii_GD32.elf
+          multiwii_GD32.hex
+          multiwii_GD32.bin
+          multiwii_GD32.elf
 
   build-stm32:
     name: Build STM32 Firmware
@@ -50,13 +50,13 @@ jobs:
     - name: Build STM32 Project
       run: |
         make clean
-        make TARGET=STM32 all
+        make STM32
 
     - name: Upload STM32 Build Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: stm32-firmware
         path: |
-          out/stm32/multiwii_STM32.hex
-          out/stm32/multiwii_STM32.bin
-          out/stm32/multiwii_STM32.elf
+          multiwii_STM32.hex
+          multiwii_STM32.bin
+          multiwii_STM32.elf
