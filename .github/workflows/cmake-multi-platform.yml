@@ -27,7 +27,7 @@ jobs:
         make TARGET=GD32 all
 
     - name: Upload GD32 Build Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: gd32-firmware
         path: |
@@ -53,7 +53,7 @@ jobs:
         make TARGET=STM32 all
 
     - name: Upload STM32 Build Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: stm32-firmware
         path: |
