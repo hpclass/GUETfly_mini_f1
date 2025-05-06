@@ -184,8 +184,7 @@ OBJECTS    := $(filter %.o, $(ASM_FILES:.s=.o)) $(filter %.o, $(SOURCES:.c=.o))
 
 .PHONY: all GD32 STM32 clean help
 
-all: $(PROJECT).elf $(PROJECT).hex $(PROJECT).bin
-	$(SIZE) $(PROJECT).elf -A
+all: help
 
 GD32: $(TARGET).elf $(TARGET).hex $(TARGET).bin
 	$(SIZE) $(TARGET).elf -A
@@ -211,4 +210,16 @@ clean:
 	rm -f $(filter-out $(ASM_FILES), $(OBJECTS) $(TARGET))
 
 help: 
-	echo "usage : make "
+	@echo "GUETfly_mini_f1 编译帮助信息"
+	@echo "================================"
+	@echo "可用命令："
+	@echo "  make STM32    - 编译 STM32 版本"
+	@echo "  make GD32     - 编译 GD32 版本"
+	@echo "  make clean    - 清理编译文件"
+	@echo "  make help     - 显示此帮助信息"
+	@echo ""
+	@echo "注意："
+	@echo "1. 请确保已正确设置交叉编译工具链 (CROSS_COMPILE)"
+	@echo "2. STM32 版本使用 cortex-m3 内核"
+	@echo "3. GD32 版本使用 cortex-m4 内核"
+	@echo "================================"
