@@ -1,0 +1,62 @@
+# This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
+# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
+name: Flight Controller Build
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-gd32:
+    name: Build GD32 Firmware
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install ARM GCC Toolchain
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-arm-none-eabi
+
+    - name: Build GD32 Project
+      run: |
+        make clean
+        make TARGET=GD32 all
+
+    - name: Upload GD32 Build Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: gd32-firmware
+        path: |
+          multiwii_GD32.hex
+          multiwii_GD32.bin
+          multiwii_GD32.elf
+
+  build-stm32:
+    name: Build STM32 Firmware
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install ARM GCC Toolchain
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-arm-none-eabi
+
+    - name: Build STM32 Project
+      run: |
+        make clean
+        make TARGET=STM32 all
+
+    - name: Upload STM32 Build Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: stm32-firmware
+        path: |
+          multiwii_STM32.hex
+          multiwii_STM32.bin
+          multiwii_STM32.elf
