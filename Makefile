@@ -1,5 +1,21 @@
 # Makefile for multiwii project
 PROJECT := multiwii
+
+# 设置默认的交叉编译工具链
+CROSS_COMPILE ?= arm-none-eabi-
+
+# 输出目录设置
+ifeq ($(MAKECMDGOALS),GD32)
+    OUT_DIR := out/gd32
+else ifeq ($(MAKECMDGOALS),STM32)
+    OUT_DIR := out/stm32
+else
+    OUT_DIR := out/stm32
+endif
+
+# 确保输出目录存在
+$(shell mkdir -p $(OUT_DIR))
+
 # Toolchain
 CC = ${CROSS_COMPILE}gcc
 AS = ${CROSS_COMPILE}as
@@ -148,7 +164,7 @@ ifeq ($(MAKECMDGOALS),GD32)
 # Source files
 	ASM_FILES = ./Libraries/CMSIS/GD32F3x0/Source/GNU/startup_gd32f3x0.s
 	SOURCES := $(SOURCES_GD32_LIBS) $(HAL_SOURCES) $(MultiWii_SOURCES) $(USB_SOURCES)
-	TARGET := $(PROJECT)_GD32
+	TARGET := $(OUT_DIR)/$(PROJECT)_GD32
 	INC_DIRS += $(INC_GD32_LIB)
 	DEFS += -DGD32F330
 	MCU   := cortex-m4
@@ -158,7 +174,7 @@ else
 	ASM_FILES = ./Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/gcc_ride7/startup_stm32f10x_hd.s
 	CMSIS_FILES = $(CMSIS_DIR)/core_cm3.c
 	SOURCES := $(SOURCES_STM32_LIBS) $(HAL_SOURCES) $(MultiWii_SOURCES) $(USB_SOURCES)
-	TARGET := $(PROJECT)_STM32
+	TARGET := $(OUT_DIR)/$(PROJECT)_STM32
 	INC_DIRS += $(INC_STM32_LIB)
 	DEFS += -DSTM32F10X_MD
 	MCU   := cortex-m3
@@ -180,11 +196,17 @@ FLAGS_LD  := $(SPECS) $(FLAGS_MCU) $(OPT) -lm -g -gdwarf-2 -mthumb \
              -Wl,-Map=$(TARGET).map,--cref,--no-warn-mismatch
 
 			 
-OBJECTS    := $(filter %.o, $(ASM_FILES:.s=.o)) $(filter %.o, $(SOURCES:.c=.o))
+OBJECTS    := $(patsubst %.s,$(OUT_DIR)/%.o,$(ASM_FILES)) \
+             $(patsubst %.c,$(OUT_DIR)/%.o,$(SOURCES))
 
 .PHONY: all GD32 STM32 clean help
 
-all: help
+all: STM32 GD32
+	@echo "================================"
+	@echo "编译完成！"
+	@echo "STM32 版本位于: out/stm32/"
+	@echo "GD32 版本位于: out/gd32/"
+	@echo "================================"
 
 GD32: $(TARGET).elf $(TARGET).hex $(TARGET).bin
 	$(SIZE) $(TARGET).elf -A
@@ -195,10 +217,12 @@ STM32:$(TARGET).elf $(TARGET).hex $(TARGET).bin
 $(TARGET).elf: $(OBJECTS) 
 	$(CC) $(OBJECTS) $(FLAGS_LD) -o $@
 
-%.o: %.c
+$(OUT_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
 	$(CC) $(INC_DIRS) $(FLAGS_C) -c -o $@ $<
 
-%.o: %.s
+$(OUT_DIR)/%.o: %.s
+	@mkdir -p $(dir $@)
 	$(AS) $(FLAGS_AS) $< -o $@
 %.hex: %.elf
 	$(HEX) $< $@
@@ -207,19 +231,25 @@ $(TARGET).elf: $(OBJECTS)
 	$(BIN) $< $@
 
 clean:
-	rm -f $(filter-out $(ASM_FILES), $(OBJECTS) $(TARGET))
+	rm -rf out/
 
 help: 
 	@echo "GUETfly_mini_f1 编译帮助信息"
 	@echo "================================"
 	@echo "可用命令："
-	@echo "  make STM32    - 编译 STM32 版本"
-	@echo "  make GD32     - 编译 GD32 版本"
-	@echo "  make clean    - 清理编译文件"
-	@echo "  make help     - 显示此帮助信息"
+	@echo "  make all     - 同时编译 STM32 和 GD32 版本"
+	@echo "  make STM32   - 仅编译 STM32 版本"
+	@echo "  make GD32    - 仅编译 GD32 版本"
+	@echo "  make clean   - 清理编译文件"
+	@echo "  make help    - 显示此帮助信息"
 	@echo ""
 	@echo "注意："
-	@echo "1. 请确保已正确设置交叉编译工具链 (CROSS_COMPILE)"
+	@echo "1. 交叉编译工具链 (CROSS_COMPILE) 默认设置为 arm-none-eabi-"
+	@echo "   如需使用其他工具链，请设置 CROSS_COMPILE 环境变量"
+	@echo "   例如: CROSS_COMPILE=arm-linux-gnueabi- make STM32"
 	@echo "2. STM32 版本使用 cortex-m3 内核"
 	@echo "3. GD32 版本使用 cortex-m4 内核"
+	@echo "4. 编译输出文件位于 out 目录下"
+	@echo "   - STM32 版本: out/stm32/"
+	@echo "   - GD32 版本: out/gd32/"
 	@echo "================================"
