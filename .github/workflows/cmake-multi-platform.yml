@@ -16,7 +16,17 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Cache ARM GCC Toolchain
+      uses: actions/cache@v3
+      id: cache-gcc
+      with:
+        path: /usr/bin/arm-none-eabi-*
+        key: ${{ runner.os }}-gcc-arm-none-eabi
+        restore-keys: |
+          ${{ runner.os }}-gcc-arm-none-eabi-
+
     - name: Install ARM GCC Toolchain
+      if: steps.cache-gcc.outputs.cache-hit != 'true'
       run: |
         sudo apt-get update
         sudo apt-get install -y gcc-arm-none-eabi
@@ -31,9 +41,9 @@ jobs:
       with:
         name: gd32-firmware
         path: |
-          multiwii_GD32.hex
-          multiwii_GD32.bin
-          multiwii_GD32.elf
+          out/gd32/multiwii_GD32.hex
+          out/gd32/multiwii_GD32.bin
+          out/gd32/multiwii_GD32.elf
 
   build-stm32:
     name: Build STM32 Firmware
@@ -42,7 +52,17 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Cache ARM GCC Toolchain
+      uses: actions/cache@v3
+      id: cache-gcc
+      with:
+        path: /usr/bin/arm-none-eabi-*
+        key: ${{ runner.os }}-gcc-arm-none-eabi
+        restore-keys: |
+          ${{ runner.os }}-gcc-arm-none-eabi-
+
     - name: Install ARM GCC Toolchain
+      if: steps.cache-gcc.outputs.cache-hit != 'true'
       run: |
         sudo apt-get update
         sudo apt-get install -y gcc-arm-none-eabi
@@ -57,6 +77,6 @@ jobs:
       with:
         name: stm32-firmware
         path: |
-          multiwii_STM32.hex
-          multiwii_STM32.bin
-          multiwii_STM32.elf
+          out/stm32/multiwii_STM32.hex
+          out/stm32/multiwii_STM32.bin
+          out/stm32/multiwii_STM32.elf
